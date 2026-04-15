@@ -122,15 +122,17 @@ export default async function Page() {
     historialTotal: quotes.length,
   }
 
-  const cotizaciones: Cotizacion[] = quotes.map((quote, index) => ({
-    id: quote.id,
-    numero: index + 1,
-    nombre: quote.title,
-    descripcion: quote.description ?? undefined,
-    fecha: formatShortDate(quote.createdAt),
-    monto: quote.total,
-    estado: mapQuoteStatusToDashboardStatus(quote.status),
-  }))
+      const cotizaciones: Cotizacion[] = quotes.map(
+      (quote: (typeof quotes)[number], index: number) => ({
+        id: quote.id,
+        numero: index + 1,
+        nombre: quote.title,
+        descripcion: quote.description ?? undefined,
+        fecha: formatShortDate(quote.createdAt),
+        monto: quote.total,
+        estado: mapQuoteStatusToDashboardStatus(quote.status),
+      })
+    )
 
   const plantillasDisponibles: Plantilla[] = templates.map((template) => ({
     id: template.id,

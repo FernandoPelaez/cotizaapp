@@ -22,12 +22,12 @@ function formatShortDate(value: Date) {
 }
 
 function mapQuoteStatusToDashboardStatus(
-  status: "DRAFT" | "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED"
+  status: "DRAFT" | "SENT" | "PENDING" | "ACCEPTED" | "REJECTED" | "EXPIRED"
 ): DashboardQuoteStatus {
   switch (status) {
     case "DRAFT":
       return "borrador"
-    case "PENDING":
+    case "SENT":
       return "pendiente"
     case "ACCEPTED":
       return "aprobada"

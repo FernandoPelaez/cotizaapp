@@ -134,15 +134,17 @@ export default async function Page() {
       })
     )
 
-  const plantillasDisponibles: Plantilla[] = templates.map((template) => ({
-    id: template.id,
-    nombre: template.name,
-    color: "#1B3D7A",
-    accentColor: "#1B3D7A",
-    activa: user?.profile?.defaultTemplateId === template.id,
-    tipo: template.isPremium ? "pro" : "basica",
-    preview: template.previewUrl ?? undefined,
-  }))
+      const plantillasDisponibles: Plantilla[] = templates.map(
+        (template: (typeof templates)[number]) => ({
+          id: template.id,
+          nombre: template.name,
+          color: "#1B3D7A",
+          accentColor: "#1B3D7A",
+          activa: user?.profile?.defaultTemplateId === template.id,
+          tipo: template.isPremium ? "pro" : "basica",
+          preview: template.previewUrl ?? undefined,
+        })
+      )
 
   return (
     <Dashboard

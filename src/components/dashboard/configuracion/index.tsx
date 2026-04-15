@@ -1,0 +1,878 @@
+"use client";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { getErrorMessage } from "@/lib/errors";
+import { fetchWithAuth } from "@/lib/fetcher";
+
+interface Usage {
+  quotesUsed: number;
+  maxQuotes: number;
+  remaining: number;
+}
+
+interface Plan {
+  name: string;
+}
+
+interface UserMeta {
+  updatedAt: string;
+  activeSessions: number;
+}
+
+interface MeResponse {
+  user: UserMeta;
+  plan: Plan | null;
+  usage: Usage;
+  activeSessions: number;
+}
+
+export default function Configuracion() {
+  const { data: session, status, update } = useSession();
+  const router = useRouter();
+
+  const isHandlingSession = useRef(false);
+
+  const handleInvalidSession = async () => {
+    if (isHandlingSession.current) return;
+    isHandlingSession.current = true;
+    setPageLoading (false);
+    await signOut({ redirect: false });
+    router.replace("/auth/signin");
+  };
+
+  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "warning" } | null>(null);
+  const [usage, setUsage] = useState<Usage | null>(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [pageLoading, setPageLoading] = useState(true);
+  const [userMeta, setUserMeta] = useState<UserMeta | null>(null);
+  const [activeSessions, setActiveSessions] = useState<number | null>(null);
+
+      const refreshUserData = async () => {
+      try {
+        const data = await fetchWithAuth<MeResponse>(
+          "/api/user/me",
+          {},
+          handleInvalidSession
+        );
+
+        if (!data) return;
+
+        setUserMeta(data.user);
+        setPlan(data.plan);
+        setUsage(data.usage);
+        setActiveSessions(data.activeSessions);
+
+      } catch (err: any) {
+        if (err?.error === "USER_NOT_FOUND") {
+          await signOut({ redirect: false });
+          router.replace("/auth/register");
+          showToast("Tu cuenta fue eliminada. Regístrate nuevamente.", "error");
+          return;
+        }
+
+        showToast(getErrorMessage(err?.error), "error");
+      }
+    };
+
+  useEffect(() => {
+    if (status !== "authenticated") {
+      if (status !== "loading") setPageLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+
+      const fetchData = async () => {
+      try {
+        const data = await fetchWithAuth<MeResponse>(
+          "/api/user/me",
+          {},
+          handleInvalidSession
+        );
+
+        if (!data) return;
+
+        if (!isMounted) return;
+
+        setUserMeta(data.user);
+        setPlan(data.plan);
+        setUsage(data.usage);
+        setActiveSessions(data.activeSessions);
+
+      } catch (err: any) {
+        if (!isMounted) return;
+        if (err?.error === "USER_NOT_FOUND") {
+          await signOut({ redirect: false });
+          router.replace("/auth/register");
+          showToast("Tu cuenta fue eliminada. Regístrate nuevamente.", "error");
+          return;
+        }
+
+        showToast(getErrorMessage(err?.error), "error");
+
+      } finally {
+        if (isMounted) setPageLoading(false);
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [status]);
+
+  const formatRelativeTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "Sin datos";
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (diffDays === 0) return "hoy";
+    if (diffDays === 1) return "hace 1 día";
+    if (diffDays < 30) return `hace ${diffDays} días`;
+    const diffMonths = Math.floor(diffDays / 30);
+    if (diffMonths === 1) return "hace 1 mes";
+    if (diffMonths < 12) return `hace ${diffMonths} meses`;
+    const diffYears = Math.floor(diffMonths / 12);
+    return diffYears === 1 ? "hace 1 año" : `hace ${diffYears} años`;
+  };
+
+  const showToast = (msg: string, type: "success" | "error" | "warning" = "success") => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const changePassword = () => router.push("/auth/forgot-password");
+
+  const logoutAll = async () => {
+    try {
+      await signOut({ callbackUrl: "/auth/signin" });
+    } catch {
+      showToast("Error al cerrar sesiones", "error");
+    }
+  };
+
+  const deleteAccount = async () => {
+    if (deleteConfirmText !== "ELIMINAR") {
+      showToast('Debes escribir "ELIMINAR" para confirmar', "warning");
+      return;
+    }
+
+    setDeleteLoading(true);
+    try {
+      const res = await fetch("/api/user/delete", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmText: deleteConfirmText }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(getErrorMessage(data.error), "error");
+        return;
+      }
+
+      showToast("Cuenta eliminada correctamente");
+      await signOut({ callbackUrl: "/auth/signin" });
+    } catch {
+      showToast("Error de conexión al eliminar", "error");
+    } finally {
+      setDeleteLoading(false);
+      setShowDeleteModal(false);
+      setDeleteConfirmText("");
+    }
+  };
+
+  const handleUpdateEmail = async () => {
+    if (loading) return;
+    const email = newEmail.trim().toLowerCase();
+    if (!email) { showToast("El correo es requerido", "warning"); return; }
+    if (!email.includes("@") || !email.includes(".")) { showToast("Formato de correo inválido", "warning"); return; }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) { showToast("Correo inválido, verifica el formato", "warning"); return; }
+    if (email === session?.user?.email?.toLowerCase()) { showToast("Ese ya es tu correo actual", "warning"); return; }
+
+    setLoading(true);
+    try {
+      const res = await fetch("/api/user/update-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEmail: email }),
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(getErrorMessage(data.error), "error");
+        return;
+      }
+
+      await update({ email });
+      await refreshUserData();
+      showToast("Correo actualizado correctamente");
+      setIsEditingEmail(false);
+      setNewEmail("");
+    } catch {
+      showToast("Error de conexión al actualizar correo", "error");
+    } finally {
+       setLoading(false); 
+    }
+  };
+
+  const usedPct = usage && usage.maxQuotes > 0
+    ? Math.min((usage.quotesUsed / usage.maxQuotes) * 100, 100)
+    : 0;
+
+  const isGoogleUser = !!session?.user?.image?.includes("googleusercontent");
+
+  const toastColors: Record<string, { bg: string; shadow: string }> = {
+    success: { bg: "#1B3D7A", shadow: "rgba(27,61,122,0.35)" },
+    error:   { bg: "#DC2626", shadow: "rgba(220,38,38,0.35)" },
+    warning: { bg: "#D97706", shadow: "rgba(217,119,6,0.35)" },
+  };
+
+  return (
+    <>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideUp {
+          from { opacity: 0; transform: translateY(14px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes toastIn {
+          from { opacity: 0; transform: translate(-50%, -60%); }
+          to   { opacity: 1; transform: translate(-50%, -50%); }
+        }
+        @keyframes modalIn {
+          from { opacity: 0; transform: scale(0.92) translateY(12px); }
+          to   { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shimmer {
+          0%   { background-position: -600px 0; }
+          100% { background-position: 600px 0; }
+        }
+
+        .sk {
+          background: linear-gradient(90deg, #ECEEF2 25%, #F5F6F8 50%, #ECEEF2 75%);
+          background-size: 600px 100%;
+          animation: shimmer 1.4s infinite linear;
+          border-radius: 8px;
+        }
+
+        .cfg-wrap {
+          font-family: 'Segoe UI', system-ui, sans-serif;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 1.25rem;
+          align-items: start;
+          max-width: 860px;
+        }
+        @media (max-width: 860px) {
+          .cfg-wrap { grid-template-columns: 1fr; max-width: 480px; }
+        }
+
+        .cfg-card {
+          background: #fff;
+          border: 1.5px solid #E4E7EF;
+          border-radius: 18px;
+          overflow: hidden;
+          box-shadow: 0 2px 12px rgba(0,0,0,0.055);
+          display: flex;
+          flex-direction: column;
+          animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .cfg-card:nth-child(2) { animation-delay: 0.07s; }
+
+        .cfg-head {
+          padding: 15px 22px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          background: #1B3D7A;
+        }
+        .cfg-head-icon {
+          width: 32px; height: 32px;
+          border-radius: 9px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+          background: rgba(255,255,255,0.15);
+        }
+        .cfg-head-title {
+          font-size: 11px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: #fff;
+          margin: 0;
+        }
+
+        .cfg-body { flex: 1; display: flex; flex-direction: column; }
+
+        .cfg-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 16px 22px;
+          border-bottom: 1px solid #F1F3F8;
+          gap: 1rem;
+          transition: background 0.15s;
+        }
+        .cfg-row:last-child { border-bottom: none; }
+        .cfg-row:hover { background: #FAFBFD; }
+
+        .cfg-label {
+          font-size: 13px;
+          font-weight: 600;
+          color: #1F2937;
+          margin: 0 0 2px;
+          line-height: 1;
+        }
+        .cfg-hint {
+          font-size: 11.5px;
+          color: #A0AAB8;
+          margin: 0;
+          line-height: 1.4;
+        }
+
+        .cfg-btn {
+          height: 33px;
+          padding: 0 14px;
+          border-radius: 8px;
+          font-size: 12px;
+          font-weight: 600;
+          cursor: pointer;
+          white-space: nowrap;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          font-family: inherit;
+          transition: transform 0.12s, opacity 0.12s, box-shadow 0.12s;
+          border: none;
+          outline: none;
+        }
+        .cfg-btn:hover   { transform: translateY(-1px); opacity: 0.9; }
+        .cfg-btn:active  { transform: translateY(0px); }
+        .cfg-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+        .btn-outline { background: #fff; border: 1.5px solid #D4D8E2; color: #374151; }
+        .btn-outline:hover { border-color: #1B3D7A; color: #1B3D7A; box-shadow: 0 0 0 3px rgba(27,61,122,0.08); }
+
+        .btn-primary { background: #1B3D7A; color: #fff; box-shadow: 0 2px 6px rgba(27,61,122,0.25); }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(27,61,122,0.3); }
+
+        .btn-green { background: #16A34A; color: #fff; box-shadow: 0 2px 6px rgba(22,163,74,0.25); }
+        .btn-green:hover { box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+
+        .btn-danger-soft { background: #FEF2F2; border: 1.5px solid #FECACA; color: #DC2626; }
+        .btn-danger-soft:hover { background: #FEE2E2; }
+
+        .cfg-input {
+          width: 100%;
+          height: 38px;
+          padding: 0 12px;
+          border: 1.5px solid #E2E5EC;
+          border-radius: 9px;
+          font-size: 13px;
+          color: #111827;
+          outline: none;
+          background: #fff;
+          font-family: inherit;
+          box-sizing: border-box;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .cfg-input:focus {
+          border-color: #1B3D7A;
+          box-shadow: 0 0 0 3px rgba(27,61,122,0.1);
+        }
+        .cfg-input.danger { border-color: #FECACA; }
+        .cfg-input.danger:focus {
+          border-color: #DC2626;
+          box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+        }
+
+        .email-panel {
+          background: #F5F7FB;
+          border: 1.5px solid #E2E6F0;
+          border-radius: 12px;
+          padding: 14px 16px;
+          margin-top: 12px;
+          animation: slideUp 0.22s cubic-bezier(0.16,1,0.3,1);
+        }
+        .email-panel-label {
+          font-size: 10px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.09em;
+          color: #A0AAB8;
+          margin: 0 0 8px;
+        }
+        .email-panel-actions {
+          display: flex;
+          gap: 8px;
+          margin-top: 10px;
+        }
+
+        .danger-zone {
+          margin: 0 22px;
+          border-top: 1px dashed #FECACA;
+        }
+        .danger-row {
+          background: #FFFAFA;
+          padding: 16px 22px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+        .danger-row:hover { background: #FFF5F5; }
+
+        .progress-track {
+          height: 6px;
+          background: #EEF0F5;
+          border-radius: 99px;
+          overflow: hidden;
+        }
+        .progress-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
+        }
+
+        .badge {
+          font-size: 11px;
+          font-weight: 600;
+          padding: 3px 10px;
+          border-radius: 20px;
+          white-space: nowrap;
+        }
+
+        .pro-feature {
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          padding: 7px 0;
+        }
+        .pro-feature-check {
+          width: 20px; height: 20px;
+          border-radius: 50%;
+          background: #ECFDF5;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .pro-feature-text {
+          font-size: 13px;
+          color: #374151;
+          font-weight: 500;
+        }
+
+        .cfg-footer {
+          padding: 16px 22px;
+          border-top: 1px solid #F1F3F8;
+        }
+
+        .confirm-box {
+          background: #FFF5F5;
+          border: 1.5px solid #FECACA;
+          border-radius: 10px;
+          padding: 12px 14px;
+          margin-top: 14px;
+        }
+        .confirm-label {
+          font-size: 10px;
+          font-weight: 700;
+          color: #DC2626;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          margin: 0 0 8px;
+        }
+      `}</style>
+
+      {/* ── Toast ── */}
+      {toast && (
+        <div style={{
+          position: "fixed",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 1000,
+          background: toastColors[toast.type].bg,
+          color: "#fff",
+          padding: "13px 22px",
+          borderRadius: 14,
+          fontSize: 13,
+          fontWeight: 600,
+          boxShadow: `0 8px 32px ${toastColors[toast.type].shadow}`,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          animation: "toastIn 0.3s cubic-bezier(0.16,1,0.3,1)",
+          fontFamily: "'Segoe UI', system-ui, sans-serif",
+          whiteSpace: "nowrap",
+          pointerEvents: "none",
+        }}>
+          <span style={{
+            width: 22, height: 22, borderRadius: "50%",
+            background: "rgba(255,255,255,0.2)",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            {toast.type === "success" && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+            {toast.type === "error"   && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>}
+            {toast.type === "warning" && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>}
+          </span>
+          {toast.msg}
+        </div>
+      )}
+
+      {/* ── Modal eliminar ── */}
+      {showDeleteModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) { setShowDeleteModal(false); setDeleteConfirmText(""); } }}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 9999,
+            background: "rgba(10,18,35,0.65)",
+            backdropFilter: "blur(6px)",
+            WebkitBackdropFilter: "blur(6px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#fff",
+              borderRadius: 22,
+              padding: "2.25rem",
+              width: "90%",
+              maxWidth: 420,
+              boxShadow: "0 32px 80px rgba(0,0,0,0.25)",
+              animation: "modalIn 0.28s cubic-bezier(0.16,1,0.3,1)",
+            }}
+          >
+            <div style={{
+              width: 56, height: 56, borderRadius: 16,
+              background: "linear-gradient(135deg,#FEF2F2,#FFE4E4)",
+              border: "1.5px solid #FECACA",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              marginBottom: "1.25rem",
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.8">
+                <polyline points="3 6 5 6 21 6"/>
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                <path d="M10 11v6M14 11v6"/>
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              </svg>
+            </div>
+
+            <h3 style={{ fontSize: 18, fontWeight: 800, color: "#111827", margin: "0 0 0.45rem", letterSpacing: "-0.02em" }}>
+              ¿Eliminar tu cuenta?
+            </h3>
+            <p style={{ fontSize: 13.5, color: "#6B7280", lineHeight: 1.65, margin: 0 }}>
+              Esta acción es <strong style={{ color: "#DC2626" }}>permanente e irreversible</strong>. Se eliminarán todos tus datos, cotizaciones y configuraciones.
+            </p>
+
+            <div className="confirm-box">
+              <p className="confirm-label">Escribe ELIMINAR para confirmar</p>
+              <input
+                className="cfg-input danger"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="ELIMINAR"
+                autoFocus
+              />
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
+              <button
+                onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(""); }}
+                className="cfg-btn btn-outline"
+                style={{ flex: 1, justifyContent: "center", height: 42, borderRadius: 11, fontSize: 13 }}
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={deleteAccount}
+                disabled={deleteLoading || deleteConfirmText !== "ELIMINAR"}
+                style={{
+                  flex: 1, height: 42, borderRadius: 11,
+                  border: "none",
+                  background: deleteConfirmText === "ELIMINAR" ? "#DC2626" : "#FECACA",
+                  fontSize: 13, fontWeight: 700, color: "#fff",
+                  cursor: (deleteLoading || deleteConfirmText !== "ELIMINAR") ? "not-allowed" : "pointer",
+                  opacity: deleteLoading ? 0.7 : 1,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  fontFamily: "inherit",
+                  boxShadow: deleteConfirmText === "ELIMINAR" ? "0 4px 14px rgba(220,38,38,0.3)" : "none",
+                  transition: "all 0.2s",
+                }}
+              >
+                {deleteLoading ? (
+                  <>
+                    <svg style={{ animation: "spin 0.8s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                      <path d="M12 2a10 10 0 0 1 10 10"/>
+                    </svg>
+                    Eliminando...
+                  </>
+                ) : (
+                  <>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2">
+                      <polyline points="3 6 5 6 21 6"/>
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    </svg>
+                    Sí, eliminar cuenta
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Skeleton ── */}
+      {pageLoading ? (
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", maxWidth: 860, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+          {[0, 1].map((i) => (
+            <div key={i} style={{ background: "#fff", border: "1.5px solid #E4E7EF", borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+              <div style={{ padding: "15px 22px", background: "#1B3D7A", display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(255,255,255,0.2)" }} />
+                <div style={{ width: 120, height: 12, borderRadius: 6, background: "rgba(255,255,255,0.2)" }} />
+              </div>
+              {[1, 2, 3].map((j) => (
+                <div key={j} style={{ padding: "18px 22px", borderBottom: "1px solid #F1F3F8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <div className="sk" style={{ width: 110 + j * 20, height: 12, marginBottom: 7 }} />
+                    <div className="sk" style={{ width: 80 + j * 10, height: 10 }} />
+                  </div>
+                  <div className="sk" style={{ width: 80, height: 33, borderRadius: 8 }} />
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="cfg-wrap">
+
+          {/* ══ CARD 1 — Cuenta y seguridad ══ */}
+          <div className="cfg-card">
+            <div className="cfg-head">
+              <div className="cfg-head-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <p className="cfg-head-title">Cuenta y seguridad</p>
+            </div>
+
+            <div className="cfg-body">
+              {/* Email */}
+              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p className="cfg-label">Correo electrónico</p>
+                    <p className="cfg-hint">{session?.user?.email || "Sin correo"}</p>
+                  </div>
+                  {!isEditingEmail && (
+                    <button className="cfg-btn btn-outline" onClick={() => { setIsEditingEmail(true); setNewEmail(session?.user?.email || ""); }}>
+                      Cambiar
+                    </button>
+                  )}
+                </div>
+                {isEditingEmail && (
+                  <div className="email-panel">
+                    <p className="email-panel-label">Nuevo correo electrónico</p>
+                    <input
+                      className="cfg-input"
+                      value={newEmail}
+                      onChange={(e) => setNewEmail(e.target.value)}
+                      placeholder="correo@ejemplo.com"
+                      type="email"
+                      autoFocus
+                    />
+                    <div className="email-panel-actions">
+                      <button className="cfg-btn btn-primary" onClick={handleUpdateEmail} disabled={loading} style={{ flex: 1, justifyContent: "center" }}>
+                        {loading ? (
+                          <>
+                            <svg style={{ animation: "spin 0.8s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                              <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
+                              <path d="M12 2a10 10 0 0 1 10 10"/>
+                            </svg>
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                              <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            Guardar cambio
+                          </>
+                        )}
+                      </button>
+                      <button className="cfg-btn btn-outline" onClick={() => { setIsEditingEmail(false); setNewEmail(""); }} style={{ flex: 1, justifyContent: "center" }}>
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Contraseña */}
+              <div className="cfg-row">
+                <div>
+                  <p className="cfg-label">Contraseña</p>
+                  <p className="cfg-hint">
+                    {userMeta?.updatedAt
+                      ? `Última actualización ${formatRelativeTime(userMeta.updatedAt)}`
+                      : "Sin datos"}
+                  </p>
+                </div>
+                <button className="cfg-btn btn-outline" onClick={changePassword}>
+                  Cambiar
+                </button>
+              </div>
+
+              {/* Sesiones */}
+              <div className="cfg-row">
+                <div>
+                  <p className="cfg-label">Sesiones activas</p>
+                  <p className="cfg-hint">
+                    {isGoogleUser
+                      ? "Sesión activa vía Google"
+                      : activeSessions !== null
+                        ? activeSessions === 1
+                          ? "1 dispositivo conectado"
+                          : `${activeSessions} dispositivos conectados`
+                        : "Sin datos"}
+                  </p>
+                </div>
+                <button className="cfg-btn btn-outline" onClick={logoutAll}>
+                  Cerrar sesiones
+                </button>
+              </div>
+
+              <div style={{ flex: 1 }} />
+
+              <div className="danger-zone" />
+              <div className="danger-row">
+                <div>
+                  <p className="cfg-label" style={{ color: "#DC2626" }}>Eliminar cuenta</p>
+                  <p className="cfg-hint">Acción permanente e irreversible</p>
+                </div>
+                <button className="cfg-btn btn-danger-soft" onClick={() => setShowDeleteModal(true)}>
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                    <polyline points="3 6 5 6 21 6"/>
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+                  </svg>
+                  Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* ══ CARD 2 — Plan y uso ══ */}
+          <div className="cfg-card">
+            <div className="cfg-head">
+              <div className="cfg-head-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                </svg>
+              </div>
+              <p className="cfg-head-title">Plan y uso</p>
+            </div>
+
+            <div className="cfg-body">
+              <div className="cfg-row">
+                <div>
+                  <p className="cfg-label">Plan actual</p>
+                  <span style={{
+                    display: "inline-block", marginTop: 5,
+                    fontSize: 10.5, fontWeight: 700, padding: "2px 10px",
+                    borderRadius: 20, background: "#F3F4F6", color: "#6B7280",
+                    letterSpacing: "0.07em", border: "1px solid #E5E7EB",
+                  }}>
+                    {plan?.name ?? "FREE"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <div>
+                    <p className="cfg-label">Cotizaciones usadas</p>
+                    <p className="cfg-hint">
+                      {usage ? `${usage.quotesUsed} de ${usage.maxQuotes} utilizadas` : "Sin datos"}
+                    </p>
+                  </div>
+                  {usage && (
+                    <span className="badge" style={{
+                      color: usage.quotesUsed >= usage.maxQuotes ? "#DC2626" : "#16A34A",
+                      background: usage.quotesUsed >= usage.maxQuotes ? "#FEF2F2" : "#ECFDF5",
+                      border: `1px solid ${usage.quotesUsed >= usage.maxQuotes ? "#FECACA" : "#BBF7D0"}`,
+                    }}>
+                      {usage.quotesUsed >= usage.maxQuotes
+                        ? "Límite alcanzado"
+                        : `${usage.remaining} disponible${usage.remaining !== 1 ? "s" : ""}`}
+                    </span>
+                  )}
+                </div>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{
+                    width: `${usedPct}%`,
+                    background: usedPct >= 100 ? "#DC2626" : usedPct >= 66 ? "#D97706" : "#16A34A",
+                  }} />
+                </div>
+              </div>
+
+              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}>
+                <p style={{ fontSize: 11.5, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>
+                  Incluido en Pro
+                </p>
+                {["Cotizaciones ilimitadas", "Plantillas premium exclusivas", "PDF con tu marca personalizada", "Soporte prioritario 24/7"].map((text) => (
+                  <div key={text} className="pro-feature">
+                    <div className="pro-feature-check">
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    </div>
+                    <span className="pro-feature-text">{text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="cfg-footer">
+              <button
+                className="cfg-btn btn-green"
+                onClick={() => router.push("/planes")}
+                style={{ width: "100%", justifyContent: "center", height: 40, borderRadius: 10, fontSize: 13 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                  <polyline points="17 6 23 6 23 12"/>
+                </svg>
+                Mejorar a Pro — Ver planes
+              </button>
+            </div>
+          </div>
+
+        </div>
+      )}
+    </>
+  );
+}

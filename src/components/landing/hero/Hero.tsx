@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 const plantillas = [
   {
@@ -65,54 +65,252 @@ const plantillas = [
 const WORDS = ["profesionales", "modernas", "elegantes", "claras", "formales"]
 
 function TemplateMiniPreview({
-  color, acento, cliente, numero, items, total,
+  color,
+  acento,
+  cliente,
+  numero,
+  items,
+  total,
 }: {
-  color: string; acento: string; cliente: string; numero: string
-  items: { desc: string; qty: number; precio: string }[]; total: string
+  color: string
+  acento: string
+  cliente: string
+  numero: string
+  items: { desc: string; qty: number; precio: string }[]
+  total: string
 }) {
   return (
-    <div style={{ background: "#f8fafc", borderRadius: "10px 10px 0 0", overflow: "hidden", height: 200, flexShrink: 0 }}>
-      <div style={{ background: color, padding: "9px 11px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+    <div
+      style={{
+        background: "#f8fafc",
+        borderRadius: "10px 10px 0 0",
+        overflow: "hidden",
+        height: 200,
+        flexShrink: 0,
+      }}
+    >
+      <div
+        style={{
+          background: color,
+          padding: "9px 11px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
         <div>
-          <div style={{ fontSize: 6.5, color: "rgba(255,255,255,0.95)", fontWeight: 700, letterSpacing: 0.4 }}>MI EMPRESA S.A. DE C.V.</div>
-          <div style={{ fontSize: 5.5, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>RFC: MEP123456ABC · Tel: (667) 123-4567</div>
+          <div
+            style={{
+              fontSize: 6.5,
+              color: "rgba(255,255,255,0.95)",
+              fontWeight: 700,
+              letterSpacing: 0.4,
+            }}
+          >
+            MI EMPRESA S.A. DE C.V.
+          </div>
+          <div
+            style={{
+              fontSize: 5.5,
+              color: "rgba(255,255,255,0.6)",
+              marginTop: 2,
+            }}
+          >
+            RFC: MEP123456ABC · Tel: (667) 123-4567
+          </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 5, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.5 }}>Cotización</div>
-          <div style={{ fontSize: 6.5, color: "rgba(255,255,255,0.95)", fontWeight: 700, marginTop: 1 }}>{numero}</div>
-          <div style={{ fontSize: 5, color: "rgba(255,255,255,0.5)", marginTop: 1 }}>12/04/2026</div>
+          <div
+            style={{
+              fontSize: 5,
+              color: "rgba(255,255,255,0.55)",
+              textTransform: "uppercase",
+              letterSpacing: 0.5,
+            }}
+          >
+            Cotización
+          </div>
+          <div
+            style={{
+              fontSize: 6.5,
+              color: "rgba(255,255,255,0.95)",
+              fontWeight: 700,
+              marginTop: 1,
+            }}
+          >
+            {numero}
+          </div>
+          <div
+            style={{
+              fontSize: 5,
+              color: "rgba(255,255,255,0.5)",
+              marginTop: 1,
+            }}
+          >
+            12/04/2026
+          </div>
         </div>
       </div>
 
-      <div style={{ padding: "6px 11px", background: acento, display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `1px solid ${color}22` }}>
+      <div
+        style={{
+          padding: "6px 11px",
+          background: acento,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          borderBottom: `1px solid ${color}22`,
+        }}
+      >
         <div>
-          <div style={{ fontSize: 5, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 2 }}>Cliente:</div>
-          <div style={{ fontSize: 6.5, color: color, fontWeight: 700 }}>{cliente}</div>
-          <div style={{ fontSize: 5, color: "#64748b", marginTop: 1 }}>RFC: CLI987654XYZ</div>
+          <div
+            style={{
+              fontSize: 5,
+              color: "#64748b",
+              textTransform: "uppercase",
+              letterSpacing: 0.4,
+              marginBottom: 2,
+            }}
+          >
+            Cliente:
+          </div>
+          <div
+            style={{
+              fontSize: 6.5,
+              color: color,
+              fontWeight: 700,
+            }}
+          >
+            {cliente}
+          </div>
+          <div
+            style={{
+              fontSize: 5,
+              color: "#64748b",
+              marginTop: 1,
+            }}
+          >
+            RFC: CLI987654XYZ
+          </div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: 5, color: "#64748b" }}>Vigencia:</div>
-          <div style={{ fontSize: 6, color: "#374151", fontWeight: 600, marginTop: 1 }}>15 días</div>
+          <div
+            style={{
+              fontSize: 6,
+              color: "#374151",
+              fontWeight: 600,
+              marginTop: 1,
+            }}
+          >
+            15 días
+          </div>
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 20px 48px", padding: "4px 11px 3px", background: color, gap: 3 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 20px 48px",
+          padding: "4px 11px 3px",
+          background: color,
+          gap: 3,
+        }}
+      >
         {["Descripción", "Qty", "Precio"].map((h) => (
-          <div key={h} style={{ fontSize: 5, color: "rgba(255,255,255,0.75)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4 }}>{h}</div>
+          <div
+            key={h}
+            style={{
+              fontSize: 5,
+              color: "rgba(255,255,255,0.75)",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: 0.4,
+            }}
+          >
+            {h}
+          </div>
         ))}
       </div>
 
       {items.map((item, i) => (
-        <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 20px 48px", padding: "4px 11px", gap: 3, background: i % 2 === 0 ? "#fff" : "#f8fafc", borderBottom: `1px solid ${acento}` }}>
-          <div style={{ fontSize: 5.5, color: "#374151", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>{item.desc}</div>
-          <div style={{ fontSize: 5.5, color: "#64748b", textAlign: "center" }}>{item.qty}</div>
-          <div style={{ fontSize: 5.5, color: "#374151", fontWeight: 600, textAlign: "right" }}>{item.precio}</div>
+        <div
+          key={i}
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 20px 48px",
+            padding: "4px 11px",
+            gap: 3,
+            background: i % 2 === 0 ? "#fff" : "#f8fafc",
+            borderBottom: `1px solid ${acento}`,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 5.5,
+              color: "#374151",
+              overflow: "hidden",
+              whiteSpace: "nowrap",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {item.desc}
+          </div>
+          <div
+            style={{
+              fontSize: 5.5,
+              color: "#64748b",
+              textAlign: "center",
+            }}
+          >
+            {item.qty}
+          </div>
+          <div
+            style={{
+              fontSize: 5.5,
+              color: "#374151",
+              fontWeight: 600,
+              textAlign: "right",
+            }}
+          >
+            {item.precio}
+          </div>
         </div>
       ))}
 
-      <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", padding: "6px 11px", gap: 6, borderTop: `2px solid ${acento}`, background: "#fff" }}>
-        <div style={{ fontSize: 5.5, color: "#64748b", fontWeight: 600, letterSpacing: 0.3 }}>TOTAL:</div>
-        <div style={{ fontSize: 9, fontWeight: 700, color: "#fff", background: color, padding: "2px 8px", borderRadius: 4 }}>{total}</div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+          padding: "6px 11px",
+          gap: 6,
+          borderTop: `2px solid ${acento}`,
+          background: "#fff",
+        }}
+      >
+        <div
+          style={{
+            fontSize: 5.5,
+            color: "#64748b",
+            fontWeight: 600,
+            letterSpacing: 0.3,
+          }}
+        >
+          TOTAL:
+        </div>
+        <div
+          style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#fff",
+            background: color,
+            padding: "2px 8px",
+            borderRadius: 4,
+          }}
+        >
+          {total}
+        </div>
       </div>
     </div>
   )
@@ -128,44 +326,56 @@ function Typewriter({ canStart }: { canStart: boolean }) {
 
   useEffect(() => {
     if (!canStart || startedRef.current) return
+
     startedRef.current = true
+
     const tick = () => {
       const currentWord = WORDS[wordIndexRef.current]
+
       if (!isDeletingRef.current) {
         charIndexRef.current += 1
         setDisplayed(currentWord.slice(0, charIndexRef.current))
+
         if (charIndexRef.current === currentWord.length) {
-          timerRef.current = setTimeout(() => { isDeletingRef.current = true; tick() }, 2500)
+          timerRef.current = setTimeout(() => {
+            isDeletingRef.current = true
+            tick()
+          }, 2500)
           return
         }
+
         timerRef.current = setTimeout(tick, 80)
       } else {
         charIndexRef.current -= 1
         setDisplayed(currentWord.slice(0, charIndexRef.current))
+
         if (charIndexRef.current === 0) {
           isDeletingRef.current = false
           wordIndexRef.current = (wordIndexRef.current + 1) % WORDS.length
           timerRef.current = setTimeout(tick, 400)
           return
         }
+
         timerRef.current = setTimeout(tick, 45)
       }
     }
+
     timerRef.current = setTimeout(tick, 80)
-    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
+
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
   }, [canStart])
 
   return (
     <span className="typewriter-word">
       {displayed}
-      <span className="typewriter-cursor" style={{ opacity: canStart ? undefined : 0 }} />
+      <span
+        className="typewriter-cursor"
+        style={{ opacity: canStart ? undefined : 0 }}
+      />
     </span>
   )
-}
-
-function scrollToSection(id: string) {
-  const el = document.getElementById(id)
-  if (el) el.scrollIntoView({ behavior: "smooth", block: "start" })
 }
 
 export default function Hero() {
@@ -177,104 +387,17 @@ export default function Hero() {
     const t1 = setTimeout(() => setLeftVisible(true), 150)
     const t2 = setTimeout(() => setRightVisible(true), 900)
     const t3 = setTimeout(() => setTypewriterActive(true), 1750)
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+
+    return () => {
+      clearTimeout(t1)
+      clearTimeout(t2)
+      clearTimeout(t3)
+    }
   }, [])
 
   return (
     <>
       <style>{`
-        .navbar {
-          position: fixed;
-          top: 0; left: 0; right: 0;
-          z-index: 100;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 32px;
-          height: 68px;
-          background: rgba(255, 255, 255, 0.97);
-          backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(0, 0, 0, 0.07);
-          box-shadow: 0 1px 12px rgba(0,0,0,0.06);
-        }
-        .navbar-inner {
-          max-width: 1200px;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .navbar-logo {
-          font-size: 1.2rem;
-          font-weight: 800;
-          color: #1B3D7A;
-          text-decoration: none;
-          letter-spacing: -0.4px;
-        }
-        .navbar-logo span { color: #3b82f6; }
-        .navbar-links {
-          display: flex;
-          align-items: center;
-          gap: 2px;
-        }
-        .navbar-link {
-          background: none;
-          border: none;
-          font-family: inherit;
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: #374151;
-          padding: 7px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: color 0.2s, background 0.2s;
-          text-decoration: none;
-        }
-        .navbar-link:hover {
-          color: #1B3D7A;
-          background: #EEF2FA;
-        }
-        .navbar-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-        .navbar-btn-ghost {
-          background: none;
-          border: none;
-          font-family: inherit;
-          font-size: 0.9rem;
-          font-weight: 500;
-          color: #374151;
-          padding: 8px 16px;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: color 0.2s, background 0.2s;
-          text-decoration: none;
-        }
-        .navbar-btn-ghost:hover {
-          color: #1B3D7A;
-          background: #EEF2FA;
-        }
-        .navbar-btn-solid {
-          background: #1B3D7A;
-          border: none;
-          font-family: inherit;
-          font-size: 0.9rem;
-          font-weight: 600;
-          color: #fff;
-          padding: 9px 22px;
-          border-radius: 22px;
-          cursor: pointer;
-          transition: background 0.2s, transform 0.15s;
-          text-decoration: none;
-          display: inline-block;
-        }
-        .navbar-btn-solid:hover {
-          background: #2a5298;
-          transform: translateY(-1px);
-        }
-
         .hero-section {
           width: 100%;
           min-height: 100vh;
@@ -287,25 +410,37 @@ export default function Hero() {
           overflow: hidden;
           box-sizing: border-box;
         }
+
         .hero-grid-bg {
-          position: absolute; inset: 0;
+          position: absolute;
+          inset: 0;
           background-image:
             linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
           background-size: 52px 52px;
           pointer-events: none;
         }
+
         .hero-glow-1 {
           position: absolute;
-          width: 560px; height: 560px; border-radius: 50%;
+          width: 560px;
+          height: 560px;
+          border-radius: 50%;
           background: radial-gradient(circle, rgba(42,82,152,0.4) 0%, transparent 70%);
-          top: -120px; right: -80px; pointer-events: none;
+          top: -120px;
+          right: -80px;
+          pointer-events: none;
         }
+
         .hero-glow-2 {
           position: absolute;
-          width: 380px; height: 380px; border-radius: 50%;
+          width: 380px;
+          height: 380px;
+          border-radius: 50%;
           background: radial-gradient(circle, rgba(55,48,163,0.18) 0%, transparent 70%);
-          bottom: -80px; left: 20%; pointer-events: none;
+          bottom: -80px;
+          left: 20%;
+          pointer-events: none;
         }
 
         .hero-inner {
@@ -320,19 +455,31 @@ export default function Hero() {
         }
 
         .hero-left {
-          display: flex; flex-direction: column; gap: 24px;
-          opacity: 0; transform: translateY(28px);
+          display: flex;
+          flex-direction: column;
+          gap: 24px;
+          opacity: 0;
+          transform: translateY(28px);
           transition: opacity 0.75s ease, transform 0.75s ease;
         }
-        .hero-left.visible { opacity: 1; transform: translateY(0); }
+
+        .hero-left.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
 
         .hero-right {
-          opacity: 0; transform: translateY(36px) scale(0.97);
+          opacity: 0;
+          transform: translateY(36px) scale(0.97);
           transition: opacity 0.85s ease, transform 0.85s ease;
           justify-self: end;
           width: 100%;
         }
-        .hero-right.visible { opacity: 1; transform: translateY(0) scale(1); }
+
+        .hero-right.visible {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
 
         .hero-title {
           font-size: clamp(2rem, 3vw, 2.9rem);
@@ -341,27 +488,34 @@ export default function Hero() {
           line-height: 1.18;
           letter-spacing: -1px;
         }
-        .hero-title-accent { color: #93c5fd; }
+
+        .hero-title-accent {
+          color: #93c5fd;
+        }
 
         .typewriter-placeholder {
           display: inline-block;
           min-width: 220px;
           vertical-align: bottom;
         }
+
         .typewriter-word {
           color: #93c5fd;
           display: inline-block;
           min-width: 2px;
         }
+
         .typewriter-cursor {
           display: inline-block;
-          width: 2px; height: 0.85em;
+          width: 2px;
+          height: 0.85em;
           background: #93c5fd;
           margin-left: 2px;
           vertical-align: middle;
           border-radius: 1px;
           animation: blink 0.75s step-end infinite;
         }
+
         @keyframes blink {
           0%, 100% { opacity: 1; }
           50% { opacity: 0; }
@@ -374,35 +528,135 @@ export default function Hero() {
           max-width: 380px;
           font-weight: 400;
         }
-        .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 6px; }
+
+        .hero-actions {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          padding-top: 6px;
+        }
 
         .btn-hero {
-          background: #fff;
+          --border_radius: 9999px;
+          --transition: 0.3s ease-in-out;
+
+          cursor: pointer;
           position: relative;
-          padding: 0;
+          isolation: isolate;
           display: inline-flex;
           align-items: center;
+          gap: 0.5rem;
+          transform-origin: center;
+          padding: 0 2rem;
+          height: 52px;
+          background-color: transparent;
+          border: none;
+          border-radius: var(--border_radius);
+          transform: scale(calc(1 + (var(--active, 0) * 0.06)));
+          transition: transform var(--transition);
+          text-decoration: none;
+          overflow: hidden;
+          animation: hero-pulse 2.5s ease-in-out infinite;
+        }
+
+        .btn-hero::before {
+          content: "";
+          position: absolute;
+          inset: 3px;
+          background: #ffffff;
+          border-radius: var(--border_radius);
+          box-shadow:
+            inset 0 0.5px rgba(255,255,255,0.96),
+            inset 0 -1px 2px rgba(15,38,84,0.14),
+            0 10px 18px -8px rgba(0,0,0,0.45),
+            0 0 0 calc(var(--active, 0) * 0.22rem) rgba(96,165,250,0.28);
+          transition: box-shadow var(--transition);
+          z-index: 2;
+        }
+
+        .btn-hero::after {
+          content: "";
+          position: absolute;
+          width: 40px;
+          height: 200%;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(0deg);
+          background: linear-gradient(
+            180deg,
+            transparent 0%,
+            #00f0ff 20%,
+            #ffffff 50%,
+            #00c6ff 80%,
+            transparent 100%
+          );
+          animation: hero-rotate 1.8s linear infinite;
+          z-index: 1;
+          opacity: 1;
+        }
+
+        .btn-hero:is(:hover, :focus-visible) {
+          --active: 1;
+          animation: none;
+          filter: drop-shadow(0 0 14px rgba(0,240,255,0.55));
+        }
+
+        .btn-hero:active {
+          transform: scale(1);
+        }
+
+        @keyframes hero-rotate {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes hero-pulse {
+          0%, 100% {
+            filter: drop-shadow(0 0 6px rgba(0,200,255,0.3));
+          }
+          50% {
+            filter: drop-shadow(0 0 18px rgba(0,200,255,0.7));
+          }
+        }
+
+        .btn-hero .sparkle {
+          position: relative;
+          z-index: 10;
+          width: 1.35rem;
+          height: 1.35rem;
+          flex-shrink: 0;
+        }
+
+        .btn-hero .sparkle .path {
+          fill: currentColor;
+          stroke: currentColor;
+          transform-origin: center;
+          color: #1B3D7A;
+        }
+
+        .btn-hero:is(:hover, :focus-visible) .sparkle .path {
+          animation: hero-path 1.5s linear 0.5s infinite;
+        }
+
+        .btn-hero .sparkle .path:nth-child(1) { --scale_path_1: 1.2; }
+        .btn-hero .sparkle .path:nth-child(2) { --scale_path_2: 1.2; }
+        .btn-hero .sparkle .path:nth-child(3) { --scale_path_3: 1.2; }
+
+        @keyframes hero-path {
+          0%, 34%, 71%, 100% { transform: scale(1); }
+          17% { transform: scale(var(--scale_path_1, 1)); }
+          49% { transform: scale(var(--scale_path_2, 1)); }
+          83% { transform: scale(var(--scale_path_3, 1)); }
+        }
+
+        .btn-hero .text-button {
+          position: relative;
+          z-index: 10;
           font-size: 1rem;
           font-weight: 700;
-          cursor: pointer;
-          border: 2px solid #fff;
-          border-radius: 30px;
-          outline: none;
-          overflow: hidden;
           color: #1B3D7A;
-          transition: color 0.3s 0.08s ease-out;
-          text-decoration: none;
-          font-family: inherit;
+          white-space: nowrap;
         }
-        .btn-hero > span { margin: 13px 28px; position: relative; z-index: 1; }
-        .btn-hero::before {
-          position: absolute; top: 0; left: -5em; right: 0; bottom: 0;
-          margin: auto; content: ''; border-radius: 50%; display: block;
-          width: 20em; height: 20em;
-          transition: box-shadow 0.5s ease-out; z-index: 0;
-        }
-        .btn-hero:hover { color: #fff; }
-        .btn-hero:hover::before { box-shadow: inset 0 0 0 10em #1B3D7A; }
 
         .plantillas-wrapper {
           background: linear-gradient(135deg, rgba(12,20,48,0.82) 0%, rgba(8,12,32,0.9) 100%);
@@ -415,87 +669,139 @@ export default function Hero() {
             inset 0 1px 0 rgba(255,255,255,0.07),
             inset 0 0 0 1px rgba(147,197,253,0.04);
         }
+
         .plantillas-header {
-          display: flex; align-items: flex-start; justify-content: space-between;
+          display: flex;
+          align-items: flex-start;
+          justify-content: space-between;
           margin-bottom: 14px;
         }
+
         .plantillas-title {
-          font-size: 0.95rem; font-weight: 700; color: #fff; letter-spacing: -0.2px;
+          font-size: 0.95rem;
+          font-weight: 700;
+          color: #fff;
+          letter-spacing: -0.2px;
         }
+
         .plantillas-sub {
-          font-size: 0.72rem; color: rgba(255,255,255,0.35); margin-top: 3px;
+          font-size: 0.72rem;
+          color: rgba(255,255,255,0.35);
+          margin-top: 3px;
         }
+
         .plantillas-count {
-          font-size: 0.68rem; color: rgba(147,197,253,0.75);
+          font-size: 0.68rem;
+          color: rgba(147,197,253,0.75);
           background: rgba(147,197,253,0.1);
           border: 1px solid rgba(147,197,253,0.22);
-          border-radius: 20px; padding: 3px 12px; letter-spacing: 0.02em;
+          border-radius: 20px;
+          padding: 3px 12px;
+          letter-spacing: 0.02em;
           white-space: nowrap;
         }
+
         .plantillas-grid {
           display: grid;
           grid-template-columns: repeat(4, 1fr);
           gap: 14px;
         }
+
         .plantilla-card {
-          background: #fff; border-radius: 13px; overflow: hidden;
-          border: 2px solid transparent; cursor: pointer;
+          background: #fff;
+          border-radius: 13px;
+          overflow: hidden;
+          border: 2px solid transparent;
+          cursor: pointer;
           transition: border-color 0.25s, transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s;
           position: relative;
         }
+
         .plantilla-card::after {
-          content: ''; position: absolute; inset: 0; border-radius: 13px;
+          content: '';
+          position: absolute;
+          inset: 0;
+          border-radius: 13px;
           background: linear-gradient(135deg, rgba(147,197,253,0.12) 0%, transparent 60%);
-          opacity: 0; transition: opacity 0.25s; pointer-events: none;
+          opacity: 0;
+          transition: opacity 0.25s;
+          pointer-events: none;
         }
+
         .plantilla-card:hover {
           border-color: #93c5fd;
           transform: translateY(-6px) scale(1.025);
           box-shadow: 0 18px 44px rgba(0,0,0,0.5), 0 0 0 1px rgba(147,197,253,0.3);
         }
-        .plantilla-card:hover::after { opacity: 1; }
-        .plantilla-card-body { padding: 8px 10px 10px; background: #fff; }
-        .plantilla-badge {
-          display: inline-block; font-size: 0.58rem; font-weight: 700;
-          padding: 2px 8px; border-radius: 20px;
-          background: #EEF2FA; color: #1B3D7A;
-          margin-bottom: 4px; letter-spacing: 0.06em;
+
+        .plantilla-card:hover::after {
+          opacity: 1;
         }
+
+        .plantilla-card-body {
+          padding: 8px 10px 10px;
+          background: #fff;
+        }
+
+        .plantilla-badge {
+          display: inline-block;
+          font-size: 0.58rem;
+          font-weight: 700;
+          padding: 2px 8px;
+          border-radius: 20px;
+          background: #EEF2FA;
+          color: #1B3D7A;
+          margin-bottom: 4px;
+          letter-spacing: 0.06em;
+        }
+
         .plantilla-type {
-          font-size: 0.58rem; color: #94a3b8; margin-top: 2px;
+          font-size: 0.58rem;
+          color: #94a3b8;
+          margin-top: 2px;
         }
 
         @media (max-width: 960px) {
-          .plantillas-grid { grid-template-columns: repeat(2, 1fr); }
+          .plantillas-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
         }
+
         @media (max-width: 860px) {
-          .hero-inner { grid-template-columns: 1fr; gap: 36px; }
-          .hero-right { width: 100%; }
-          .navbar-links { display: none; }
+          .hero-inner {
+            grid-template-columns: 1fr;
+            gap: 36px;
+          }
+
+          .hero-right {
+            width: 100%;
+          }
         }
+
         @media (max-width: 560px) {
-          .plantillas-grid { grid-template-columns: 1fr; }
-          .navbar-actions .navbar-btn-ghost { display: none; }
+          .plantillas-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .btn-hero {
+            padding: 0 1.35rem;
+            height: 48px;
+          }
+
+          .btn-hero .text-button {
+            font-size: 0.95rem;
+          }
+
+          .btn-hero .sparkle {
+            width: 1.15rem;
+            height: 1.15rem;
+          }
+
+          .btn-hero::after {
+            width: 32px;
+          }
         }
       `}</style>
-
-      <nav className="navbar">
-        <div className="navbar-inner">
-          <a href="/" className="navbar-logo">
-            Cotiza<span>App</span>
-          </a>
-          <div className="navbar-links">
-            <button className="navbar-link" onClick={() => scrollToSection("beneficios")}>Beneficios</button>
-            <button className="navbar-link" onClick={() => scrollToSection("como-funciona")}>Cómo funciona</button>
-            <button className="navbar-link" onClick={() => scrollToSection("planes")}>Planes</button>
-            <button className="navbar-link" onClick={() => scrollToSection("faq")}>FAQ</button>
-          </div>
-          <div className="navbar-actions">
-            <Link href="/auth/login" className="navbar-btn-ghost">Iniciar sesión</Link>
-            <Link href="/auth/register" className="navbar-btn-solid">Crear cuenta</Link>
-          </div>
-        </div>
-      </nav>
 
       <section className="hero-section" id="hero">
         <div className="hero-grid-bg" />
@@ -514,13 +820,33 @@ export default function Hero() {
             </h1>
 
             <p className="hero-sub">
-              Crea cotizaciones sin esfuerzo. Ahorra tiempo, evita errores y mejora la presentación de tus propuestas ante cada cliente.
+              Crea cotizaciones sin esfuerzo. Ahorra tiempo, evita errores y
+              mejora la presentación de tus propuestas ante cada cliente.
             </p>
 
             <div className="hero-actions">
               <Link href="/auth/register" className="btn-hero">
-               <span>Empezar gratis</span>
-             </Link>
+                <svg
+                  className="sparkle"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    className="path"
+                    d="M12 3l1.6 4.6L18 9.2l-4.4 1.6L12 15.4l-1.6-4.6L6 9.2l4.4-1.6L12 3z"
+                  />
+                  <path
+                    className="path"
+                    d="M19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"
+                  />
+                  <path
+                    className="path"
+                    d="M5 15l.9 2.6 2.6.9-2.6.9L5 22l-.9-2.6-2.6-.9 2.6-.9L5 15z"
+                  />
+                </svg>
+                <span className="text-button">Empezar gratis</span>
+              </Link>
             </div>
           </div>
 
@@ -529,10 +855,13 @@ export default function Hero() {
               <div className="plantillas-header">
                 <div>
                   <div className="plantillas-title">Plantillas</div>
-                  <div className="plantillas-sub">Las más modernas y premium</div>
+                  <div className="plantillas-sub">
+                    Las más modernas y premium
+                  </div>
                 </div>
                 <div className="plantillas-count">4 plantillas</div>
               </div>
+
               <div className="plantillas-grid">
                 {plantillas.map((p) => (
                   <div key={p.nombre} className="plantilla-card">
@@ -546,7 +875,9 @@ export default function Hero() {
                     />
                     <div className="plantilla-card-body">
                       <div className="plantilla-badge">{p.tipo}</div>
-                      <div className="plantilla-type">Plantilla estándar · {p.nombre}</div>
+                      <div className="plantilla-type">
+                        Plantilla estándar · {p.nombre}
+                      </div>
                     </div>
                   </div>
                 ))}

@@ -17,18 +17,34 @@ function normalizePhone(phone: string) {
   return digits
 }
 
+function isLocalhostUrl(value: string) {
+  return (
+    value.includes("localhost") ||
+    value.includes("127.0.0.1") ||
+    value.includes("0.0.0.0")
+  )
+}
+
 function getBaseUrl(request: Request) {
+  const requestUrl = new URL(request.url)
+  const requestOrigin = requestUrl.origin
+
   const envUrl =
+    process.env.APP_URL ||
     process.env.NEXT_PUBLIC_APP_URL ||
-    process.env.NEXTAUTH_URL ||
-    process.env.APP_URL
+    process.env.NEXTAUTH_URL
 
   if (envUrl) {
-    return envUrl.replace(/\/$/, "")
+    const normalizedEnvUrl = envUrl.replace(/\/$/, "")
+
+    if (isLocalhostUrl(normalizedEnvUrl) && !isLocalhostUrl(requestOrigin)) {
+      return requestOrigin.replace(/\/$/, "")
+    }
+
+    return normalizedEnvUrl
   }
 
-  const url = new URL(request.url)
-  return url.origin
+  return requestOrigin.replace(/\/$/, "")
 }
 
 async function generateUniqueResponseToken() {

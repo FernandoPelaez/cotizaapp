@@ -45,14 +45,10 @@ export default function CotizacionCard({
             {formatCurrency(Number(quote.total))}
           </p>
 
-          <p className="text-neutral-400">
-            Creada: {formatDate(quote.createdAt)}
-          </p>
+          <p className="text-neutral-400">Creada: {formatDate(quote.createdAt)}</p>
 
           {quote.sentAt && (
-            <p className="text-neutral-400">
-              Enviada: {formatDate(quote.sentAt)}
-            </p>
+            <p className="text-neutral-400">Enviada: {formatDate(quote.sentAt)}</p>
           )}
 
           {quote.responseExpiresAt && quote.status === "PENDING" && (

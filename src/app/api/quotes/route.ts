@@ -26,7 +26,7 @@ async function getUserIdFromSession() {
 async function expirePendingQuotes(userId: string) {
   const now = new Date()
 
-  await prisma.quote.updateMany({
+  const quotesToExpire = await prisma.quote.findMany({
     where: {
       userId,
       status: "PENDING",
@@ -36,10 +36,47 @@ async function expirePendingQuotes(userId: string) {
       },
       respondedAt: null,
     },
-    data: {
-      status: "EXPIRED",
+    select: {
+      id: true,
+      userId: true,
+      title: true,
+      clientName: true,
+      status: true,
     },
   })
+
+  if (quotesToExpire.length === 0) {
+    return
+  }
+
+  await prisma.$transaction([
+    ...quotesToExpire.map((quote) =>
+      prisma.quote.update({
+        where: {
+          id: quote.id,
+        },
+        data: {
+          status: "EXPIRED",
+        },
+      })
+    ),
+    ...quotesToExpire.map((quote) =>
+      prisma.quoteEvent.create({
+        data: {
+          quoteId: quote.id,
+          userId: quote.userId,
+          type: "QUOTE_EXPIRED",
+          title: "Cotización expirada",
+          message: `La cotización "${quote.title}" expiró sin respuesta del cliente.`,
+          metadata: {
+            clientName: quote.clientName,
+            previousStatus: quote.status,
+            expiredAt: now.toISOString(),
+          },
+        },
+      })
+    ),
+  ])
 }
 
 export async function GET() {

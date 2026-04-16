@@ -1,6 +1,7 @@
 type CotizacionesStatsProps = {
   summary: {
     drafts: number
+    sent: number
     pending: number
     accepted: number
     rejected: number
@@ -12,13 +13,22 @@ export default function CotizacionesStats({
   summary,
 }: CotizacionesStatsProps) {
   return (
-    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
       <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
         <p className="text-xs font-medium uppercase tracking-wide text-neutral-500">
           Borradores
         </p>
         <p className="mt-2 text-2xl font-bold text-neutral-900">
           {summary.drafts}
+        </p>
+      </div>
+
+      <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 shadow-sm">
+        <p className="text-xs font-medium uppercase tracking-wide text-blue-700">
+          Enviadas
+        </p>
+        <p className="mt-2 text-2xl font-bold text-blue-800">
+          {summary.sent}
         </p>
       </div>
 

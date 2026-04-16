@@ -326,16 +326,12 @@ function Typewriter({ canStart }: { canStart: boolean }) {
 
   useEffect(() => {
     if (!canStart || startedRef.current) return
-
     startedRef.current = true
-
     const tick = () => {
       const currentWord = WORDS[wordIndexRef.current]
-
       if (!isDeletingRef.current) {
         charIndexRef.current += 1
         setDisplayed(currentWord.slice(0, charIndexRef.current))
-
         if (charIndexRef.current === currentWord.length) {
           timerRef.current = setTimeout(() => {
             isDeletingRef.current = true
@@ -343,25 +339,20 @@ function Typewriter({ canStart }: { canStart: boolean }) {
           }, 2500)
           return
         }
-
         timerRef.current = setTimeout(tick, 80)
       } else {
         charIndexRef.current -= 1
         setDisplayed(currentWord.slice(0, charIndexRef.current))
-
         if (charIndexRef.current === 0) {
           isDeletingRef.current = false
           wordIndexRef.current = (wordIndexRef.current + 1) % WORDS.length
           timerRef.current = setTimeout(tick, 400)
           return
         }
-
         timerRef.current = setTimeout(tick, 45)
       }
     }
-
     timerRef.current = setTimeout(tick, 80)
-
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
     }
@@ -370,10 +361,7 @@ function Typewriter({ canStart }: { canStart: boolean }) {
   return (
     <span className="typewriter-word">
       {displayed}
-      <span
-        className="typewriter-cursor"
-        style={{ opacity: canStart ? undefined : 0 }}
-      />
+      <span className="typewriter-cursor" style={{ opacity: canStart ? undefined : 0 }} />
     </span>
   )
 }
@@ -387,7 +375,6 @@ export default function Hero() {
     const t1 = setTimeout(() => setLeftVisible(true), 150)
     const t2 = setTimeout(() => setRightVisible(true), 900)
     const t3 = setTimeout(() => setTypewriterActive(true), 1750)
-
     return () => {
       clearTimeout(t1)
       clearTimeout(t2)
@@ -537,86 +524,84 @@ export default function Hero() {
         }
 
         .btn-hero {
-          --border_radius: 9999px;
-          --transition: 0.3s ease-in-out;
-
           cursor: pointer;
           position: relative;
-          isolation: isolate;
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          transform-origin: center;
           padding: 0 2rem;
           height: 52px;
-          background-color: transparent;
+          background: #ffffff;
           border: none;
-          border-radius: var(--border_radius);
-          transform: scale(calc(1 + (var(--active, 0) * 0.06)));
-          transition: transform var(--transition);
+          border-radius: 9999px;
           text-decoration: none;
+          box-shadow:
+            0 0 0 0 rgba(99,179,255,0),
+            0 4px 24px rgba(0,0,0,0.25);
+          transition: transform 0.2s ease, box-shadow 0.2s ease;
+          animation: btn-shimmer-idle 3s ease-in-out infinite;
           overflow: hidden;
-          animation: hero-pulse 2.5s ease-in-out infinite;
         }
 
         .btn-hero::before {
           content: "";
           position: absolute;
-          inset: 3px;
-          background: #ffffff;
-          border-radius: var(--border_radius);
-          box-shadow:
-            inset 0 0.5px rgba(255,255,255,0.96),
-            inset 0 -1px 2px rgba(15,38,84,0.14),
-            0 10px 18px -8px rgba(0,0,0,0.45),
-            0 0 0 calc(var(--active, 0) * 0.22rem) rgba(96,165,250,0.28);
-          transition: box-shadow var(--transition);
-          z-index: 2;
+          inset: 0;
+          border-radius: 9999px;
+          background: linear-gradient(
+            120deg,
+            transparent 0%,
+            transparent 30%,
+            rgba(147,197,253,0.55) 50%,
+            transparent 70%,
+            transparent 100%
+          );
+          background-size: 250% 100%;
+          animation: btn-sweep 2.4s ease-in-out infinite;
         }
 
         .btn-hero::after {
           content: "";
           position: absolute;
-          width: 40px;
-          height: 200%;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%) rotate(0deg);
+          inset: -2px;
+          border-radius: 9999px;
           background: linear-gradient(
-            180deg,
-            transparent 0%,
-            #00f0ff 20%,
-            #ffffff 50%,
-            #00c6ff 80%,
-            transparent 100%
+            90deg,
+            #93c5fd,
+            #3b82f6,
+            #60a5fa,
+            #93c5fd
           );
-          animation: hero-rotate 1.8s linear infinite;
-          z-index: 1;
-          opacity: 1;
+          background-size: 300% 100%;
+          animation: btn-border-flow 2s linear infinite;
+          z-index: -1;
+          opacity: 0.9;
         }
 
-        .btn-hero:is(:hover, :focus-visible) {
-          --active: 1;
-          animation: none;
-          filter: drop-shadow(0 0 14px rgba(0,240,255,0.55));
+        .btn-hero:hover {
+          transform: translateY(-2px) scale(1.04);
+          box-shadow:
+            0 0 0 4px rgba(99,179,255,0.25),
+            0 8px 32px rgba(59,130,246,0.4);
         }
 
         .btn-hero:active {
-          transform: scale(1);
+          transform: scale(0.97);
         }
 
-        @keyframes hero-rotate {
-          from { transform: translate(-50%, -50%) rotate(0deg); }
-          to   { transform: translate(-50%, -50%) rotate(360deg); }
+        @keyframes btn-sweep {
+          0%   { background-position: 200% center; }
+          100% { background-position: -50% center; }
         }
 
-        @keyframes hero-pulse {
-          0%, 100% {
-            filter: drop-shadow(0 0 6px rgba(0,200,255,0.3));
-          }
-          50% {
-            filter: drop-shadow(0 0 18px rgba(0,200,255,0.7));
-          }
+        @keyframes btn-border-flow {
+          0%   { background-position: 0% center; }
+          100% { background-position: 300% center; }
+        }
+
+        @keyframes btn-shimmer-idle {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(99,179,255,0), 0 4px 24px rgba(0,0,0,0.25); }
+          50%       { box-shadow: 0 0 0 5px rgba(99,179,255,0.18), 0 4px 28px rgba(59,130,246,0.3); }
         }
 
         .btn-hero .sparkle {
@@ -772,7 +757,6 @@ export default function Hero() {
             grid-template-columns: 1fr;
             gap: 36px;
           }
-
           .hero-right {
             width: 100%;
           }
@@ -782,23 +766,16 @@ export default function Hero() {
           .plantillas-grid {
             grid-template-columns: 1fr;
           }
-
           .btn-hero {
             padding: 0 1.35rem;
             height: 48px;
           }
-
           .btn-hero .text-button {
             font-size: 0.95rem;
           }
-
           .btn-hero .sparkle {
             width: 1.15rem;
             height: 1.15rem;
-          }
-
-          .btn-hero::after {
-            width: 32px;
           }
         }
       `}</style>

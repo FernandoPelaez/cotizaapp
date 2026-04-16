@@ -114,18 +114,34 @@ export async function POST(
       sentAt.getTime() + RESPONSE_EXPIRATION_MINUTES * 60 * 1000
     )
 
-    await prisma.quote.update({
-      where: { id: quote.id },
-      data: {
-        status: "PENDING",
-        sendChannel: "WHATSAPP",
-        sentAt,
-        responseExpiresAt,
-        respondedAt: null,
-        responseToken,
-        responseChannel: "WHATSAPP",
-      },
-    })
+    await prisma.$transaction([
+      prisma.quote.update({
+        where: { id: quote.id },
+        data: {
+          status: "PENDING",
+          sendChannel: "WHATSAPP",
+          sentAt,
+          responseExpiresAt,
+          respondedAt: null,
+          responseToken,
+          responseChannel: "WHATSAPP",
+        },
+      }),
+      prisma.quoteEvent.create({
+        data: {
+          quoteId: quote.id,
+          userId,
+          type: "QUOTE_SENT",
+          title: "Cotización enviada",
+          message: `La cotización "${quote.title}" fue enviada a ${quote.clientName} por WhatsApp.`,
+          metadata: {
+            clientName: quote.clientName,
+            sendChannel: "WHATSAPP",
+            responseExpiresAt: responseExpiresAt.toISOString(),
+          },
+        },
+      }),
+    ])
 
     const baseUrl = getBaseUrl(request)
     const pdfUrl = `${baseUrl}/api/quotes/${quote.id}/pdf`

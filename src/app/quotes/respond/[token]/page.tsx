@@ -1,6 +1,7 @@
 import Link from "next/link"
-import { notFound, redirect } from "next/navigation"
-import { prisma } from "@/lib/prisma"
+import { notFound } from "next/navigation"
+import { handleQuoteResponseAction } from "./actions"
+import { expireQuoteIfNeeded } from "@/lib/quotes/response"
 
 type PageProps = {
   params: Promise<{
@@ -59,58 +60,6 @@ function getStatusClasses(status: string) {
   }
 }
 
-async function getQuoteByToken(token: string) {
-  return prisma.quote.findFirst({
-    where: {
-      responseToken: token,
-    },
-    include: {
-      items: true,
-      user: {
-        include: {
-          profile: true,
-        },
-      },
-      template: true,
-    },
-  })
-}
-
-async function expireQuoteIfNeeded(token: string) {
-  const quote = await getQuoteByToken(token)
-
-  if (!quote) return null
-
-  const now = new Date()
-  const shouldExpire =
-    quote.status === "PENDING" &&
-    !!quote.responseExpiresAt &&
-    quote.responseExpiresAt <= now &&
-    !quote.respondedAt
-
-  if (!shouldExpire) {
-    return quote
-  }
-
-  return prisma.quote.update({
-    where: {
-      id: quote.id,
-    },
-    data: {
-      status: "EXPIRED",
-    },
-    include: {
-      items: true,
-      user: {
-        include: {
-          profile: true,
-        },
-      },
-      template: true,
-    },
-  })
-}
-
 export default async function QuoteResponsePage({
   params,
   searchParams,
@@ -118,86 +67,6 @@ export default async function QuoteResponsePage({
   const { token } = await params
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const result = resolvedSearchParams?.result
-
-  async function handleResponse(formData: FormData) {
-    "use server"
-
-    const token = String(formData.get("token") || "")
-    const decision = String(formData.get("decision") || "")
-
-    if (!token || !["ACCEPTED", "REJECTED"].includes(decision)) {
-      redirect(`/quotes/respond/${token}?result=invalid`)
-    }
-
-    const quote = await prisma.quote.findFirst({
-      where: {
-        responseToken: token,
-      },
-      select: {
-        id: true,
-        status: true,
-        responseExpiresAt: true,
-        respondedAt: true,
-      },
-    })
-
-    if (!quote) {
-      redirect(`/quotes/respond/${token}?result=not-found`)
-    }
-
-    const now = new Date()
-
-    const isExpired =
-      quote.status === "PENDING" &&
-      !!quote.responseExpiresAt &&
-      quote.responseExpiresAt <= now &&
-      !quote.respondedAt
-
-    if (isExpired) {
-      await prisma.quote.update({
-        where: {
-          id: quote.id,
-        },
-        data: {
-          status: "EXPIRED",
-        },
-      })
-
-      redirect(`/quotes/respond/${token}?result=expired`)
-    }
-
-    if (quote.status === "ACCEPTED") {
-      redirect(`/quotes/respond/${token}?result=accepted`)
-    }
-
-    if (quote.status === "REJECTED") {
-      redirect(`/quotes/respond/${token}?result=rejected`)
-    }
-
-    if (quote.status === "EXPIRED") {
-      redirect(`/quotes/respond/${token}?result=expired`)
-    }
-
-    if (quote.status !== "PENDING") {
-      redirect(`/quotes/respond/${token}?result=invalid`)
-    }
-
-    await prisma.quote.update({
-      where: {
-        id: quote.id,
-      },
-      data: {
-        status: decision as "ACCEPTED" | "REJECTED",
-        respondedAt: now,
-      },
-    })
-
-    redirect(
-      `/quotes/respond/${token}?result=${
-        decision === "ACCEPTED" ? "accepted" : "rejected"
-      }`
-    )
-  }
 
   const quote = await expireQuoteIfNeeded(token)
 
@@ -403,7 +272,7 @@ export default async function QuoteResponsePage({
 
             {canRespond ? (
               <form
-                action={handleResponse}
+                action={handleQuoteResponseAction}
                 className="flex flex-col gap-3 sm:flex-row"
               >
                 <input type="hidden" name="token" value={token} />

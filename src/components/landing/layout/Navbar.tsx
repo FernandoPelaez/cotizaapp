@@ -3,86 +3,130 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 
+type NavItem = {
+  label: string
+  ids: string[]
+  hash: string
+}
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState("")
 
-  const links = [
-    { label: "Beneficios", href: "#beneficios", id: "beneficios" },
-    { label: "Cómo funciona", href: "#preview", id: "preview" },
-    { label: "Planes", href: "#planes", id: "planes" },
-    { label: "FAQ", href: "#faq", id: "faq" },
+  const links: NavItem[] = [
+    {
+      label: "Beneficios",
+      ids: ["beneficios"],
+      hash: "beneficios",
+    },
+    {
+      label: "Funcionalidades",
+      ids: ["funcionalidades"],
+      hash: "funcionalidades",
+    },
+    {
+      label: "Planes",
+      ids: ["planes"],
+      hash: "planes",
+    },
+    {
+      label: "Preguntas frecuentes",
+      ids: ["faq", "preguntas-frecuentes", "cta"],
+      hash: "faq",
+    },
   ]
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id)
-    if (!element) return
+  const getSectionElement = (ids: string[]) => {
+    for (const id of ids) {
+      const element = document.getElementById(id)
+      if (element) return { element, id }
+    }
+    return null
+  }
+
+  const scrollToSection = (item: NavItem) => {
+    const found = getSectionElement(item.ids)
+    if (!found) return
 
     const navbarOffset = 88
     const elementTop =
-      element.getBoundingClientRect().top + window.pageYOffset - navbarOffset
+      found.element.getBoundingClientRect().top + window.scrollY - navbarOffset
 
     window.scrollTo({
       top: elementTop,
       behavior: "smooth",
     })
 
-    window.history.pushState(null, "", `#${id}`)
-    setActiveSection(id)
+    window.history.pushState(null, "", `#${found.id}`)
+    setActiveSection(item.hash)
   }
 
   useEffect(() => {
     const updateActiveSection = () => {
-      const sections = links
-        .map((link) => document.getElementById(link.id))
-        .filter(Boolean) as HTMLElement[]
-
       const scrollPosition = window.scrollY + 140
-
       let currentSection = ""
 
-      for (const section of sections) {
-        const sectionTop = section.offsetTop
-        const sectionHeight = section.offsetHeight
+      for (const item of links) {
+        const found = getSectionElement(item.ids)
+        if (!found) continue
+
+        const sectionTop = found.element.offsetTop
+        const sectionHeight = found.element.offsetHeight
 
         if (
           scrollPosition >= sectionTop &&
           scrollPosition < sectionTop + sectionHeight
         ) {
-          currentSection = section.id
+          currentSection = item.hash
           break
         }
       }
 
-      setActiveSection(currentSection)
+      if (currentSection) {
+        setActiveSection(currentSection)
+      }
     }
 
     const handleInitialHash = () => {
       const hash = window.location.hash.replace("#", "")
-      if (!hash) return
+      if (!hash) {
+        updateActiveSection()
+        return
+      }
 
-      const target = document.getElementById(hash)
-      if (!target) return
+      const matchedItem = links.find((item) => item.ids.includes(hash))
+      if (!matchedItem) {
+        updateActiveSection()
+        return
+      }
+
+      const found = getSectionElement(matchedItem.ids)
+      if (!found) {
+        updateActiveSection()
+        return
+      }
 
       const navbarOffset = 88
       const elementTop =
-        target.getBoundingClientRect().top + window.pageYOffset - navbarOffset
+        found.element.getBoundingClientRect().top + window.scrollY - navbarOffset
 
       window.scrollTo({
         top: elementTop,
         behavior: "auto",
       })
 
-      setActiveSection(hash)
+      setActiveSection(matchedItem.hash)
     }
 
     handleInitialHash()
     updateActiveSection()
 
     window.addEventListener("scroll", updateActiveSection)
+    window.addEventListener("hashchange", handleInitialHash)
 
     return () => {
       window.removeEventListener("scroll", updateActiveSection)
+      window.removeEventListener("hashchange", handleInitialHash)
     }
   }, [])
 
@@ -178,6 +222,13 @@ export default function Navbar() {
         .login-btn-mobile:hover::before {
           width: 250%;
         }
+
+        .nav-link-btn {
+          border: none;
+          cursor: pointer;
+          font: inherit;
+          background: transparent;
+        }
       `}</style>
 
       <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-[var(--border)]">
@@ -189,27 +240,23 @@ export default function Navbar() {
             CotizaApp
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
             {links.map((link) => {
-              const isActive = activeSection === link.id
+              const isActive = activeSection === link.hash
 
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    scrollToSection(link.id)
-                  }}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition ${
+                <button
+                  key={link.hash}
+                  type="button"
+                  onClick={() => scrollToSection(link)}
+                  className={`nav-link-btn px-4 py-2 rounded-full text-sm font-medium transition ${
                     isActive
                       ? "bg-[var(--primary-soft)] text-[var(--primary)]"
                       : "text-[var(--primary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
                   }`}
                 >
                   {link.label}
-                </Link>
+                </button>
               )
             })}
           </nav>
@@ -222,7 +269,6 @@ export default function Navbar() {
               Iniciar sesión
             </Link>
 
-            {/* Mobile hamburger */}
             <button
               className="md:hidden flex flex-col gap-1.5 p-1"
               onClick={() => setMenuOpen(!menuOpen)}
@@ -247,29 +293,27 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
           <div className="md:hidden bg-white border-t border-[var(--border)] px-6 py-4 flex flex-col gap-2">
             {links.map((link) => {
-              const isActive = activeSection === link.id
+              const isActive = activeSection === link.hash
 
               return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault()
-                    scrollToSection(link.id)
+                <button
+                  key={link.hash}
+                  type="button"
+                  onClick={() => {
+                    scrollToSection(link)
                     setMenuOpen(false)
                   }}
-                  className={`px-4 py-2.5 rounded-xl text-sm font-medium transition ${
+                  className={`nav-link-btn text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
                     isActive
                       ? "bg-[var(--primary-soft)] text-[var(--primary)]"
                       : "text-[var(--primary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
                   }`}
                 >
                   {link.label}
-                </Link>
+                </button>
               )
             })}
 

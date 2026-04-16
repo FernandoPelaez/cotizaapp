@@ -65,10 +65,15 @@
   box-sizing: border-box;
 }
 
-html,
-body {
-  height: 100%;
+html {
+  scroll-behavior: smooth;
   overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar {
+  display: none;
 }
 
 body {
@@ -77,10 +82,13 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   transition: background 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-html {
-  scroll-behavior: smooth;
+body::-webkit-scrollbar {
+  display: none;
 }
 
 img,
@@ -96,6 +104,11 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+main {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 main::-webkit-scrollbar {

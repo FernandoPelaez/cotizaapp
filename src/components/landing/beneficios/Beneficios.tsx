@@ -148,8 +148,8 @@ export default function Beneficios() {
           font-weight: 600;
           letter-spacing: 0.14em;
           text-transform: uppercase;
-          color: var(--text-muted);
-          border: 1px solid var(--border);
+          color: #1b3d7a;
+          border: 1px solid #1b3d7a;
           border-radius: 999px;
           padding: 4px 16px;
           margin-bottom: 14px;
@@ -168,21 +168,24 @@ export default function Beneficios() {
       `}</style>
 
       <section
-        className="b-section w-full px-8 bg-[var(--background)] overflow-hidden"
+        className="b-section w-full px-8 bg-[var(--background)]"
         id="beneficios"
-        style={{ paddingTop: "80px", paddingBottom: "80px" }}
+        style={{ paddingTop: "120px", paddingBottom: "80px", marginTop: "-8px" }}
       >
         <div className="max-w-7xl mx-auto w-full">
 
           <div className="text-center mb-10">
             <span className="b-badge">Beneficios</span>
 
-            <h2 className="text-4xl md:text-5xl font-bold text-[var(--foreground)]">
+            <h2
+              className="text-4xl md:text-5xl font-bold"
+              style={{ color: "#0f172a" }}
+            >
               Todo lo que ganas al usar{" "}
-              <span className="text-[var(--text-muted)]">CotizaApp</span>
+              <span style={{ color: "#1b3d7a" }}>CotizaApp</span>
             </h2>
 
-            <p className="mt-4 text-[var(--text-muted)] max-w-xl mx-auto text-base leading-relaxed">
+            <p className="mt-4 max-w-xl mx-auto text-base leading-relaxed" style={{ color: "#64748b" }}>
               Más clientes cerrados, menos tiempo perdido y una imagen que habla por tu negocio.
             </p>
           </div>

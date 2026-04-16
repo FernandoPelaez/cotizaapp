@@ -99,54 +99,21 @@ function TemplateMiniPreview({
         }}
       >
         <div>
-          <div
-            style={{
-              fontSize: 6.5,
-              color: "rgba(255,255,255,0.95)",
-              fontWeight: 700,
-              letterSpacing: 0.4,
-            }}
-          >
+          <div style={{ fontSize: 6.5, color: "rgba(255,255,255,0.95)", fontWeight: 700, letterSpacing: 0.4 }}>
             MI EMPRESA S.A. DE C.V.
           </div>
-          <div
-            style={{
-              fontSize: 5.5,
-              color: "rgba(255,255,255,0.6)",
-              marginTop: 2,
-            }}
-          >
+          <div style={{ fontSize: 5.5, color: "rgba(255,255,255,0.6)", marginTop: 2 }}>
             RFC: MEP123456ABC · Tel: (667) 123-4567
           </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div
-            style={{
-              fontSize: 5,
-              color: "rgba(255,255,255,0.55)",
-              textTransform: "uppercase",
-              letterSpacing: 0.5,
-            }}
-          >
+          <div style={{ fontSize: 5, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.5 }}>
             Cotización
           </div>
-          <div
-            style={{
-              fontSize: 6.5,
-              color: "rgba(255,255,255,0.95)",
-              fontWeight: 700,
-              marginTop: 1,
-            }}
-          >
+          <div style={{ fontSize: 6.5, color: "rgba(255,255,255,0.95)", fontWeight: 700, marginTop: 1 }}>
             {numero}
           </div>
-          <div
-            style={{
-              fontSize: 5,
-              color: "rgba(255,255,255,0.5)",
-              marginTop: 1,
-            }}
-          >
+          <div style={{ fontSize: 5, color: "rgba(255,255,255,0.5)", marginTop: 1 }}>
             12/04/2026
           </div>
         </div>
@@ -163,48 +130,15 @@ function TemplateMiniPreview({
         }}
       >
         <div>
-          <div
-            style={{
-              fontSize: 5,
-              color: "#64748b",
-              textTransform: "uppercase",
-              letterSpacing: 0.4,
-              marginBottom: 2,
-            }}
-          >
+          <div style={{ fontSize: 5, color: "#64748b", textTransform: "uppercase", letterSpacing: 0.4, marginBottom: 2 }}>
             Cliente:
           </div>
-          <div
-            style={{
-              fontSize: 6.5,
-              color: color,
-              fontWeight: 700,
-            }}
-          >
-            {cliente}
-          </div>
-          <div
-            style={{
-              fontSize: 5,
-              color: "#64748b",
-              marginTop: 1,
-            }}
-          >
-            RFC: CLI987654XYZ
-          </div>
+          <div style={{ fontSize: 6.5, color: color, fontWeight: 700 }}>{cliente}</div>
+          <div style={{ fontSize: 5, color: "#64748b", marginTop: 1 }}>RFC: CLI987654XYZ</div>
         </div>
         <div style={{ textAlign: "right" }}>
           <div style={{ fontSize: 5, color: "#64748b" }}>Vigencia:</div>
-          <div
-            style={{
-              fontSize: 6,
-              color: "#374151",
-              fontWeight: 600,
-              marginTop: 1,
-            }}
-          >
-            15 días
-          </div>
+          <div style={{ fontSize: 6, color: "#374151", fontWeight: 600, marginTop: 1 }}>15 días</div>
         </div>
       </div>
 
@@ -218,16 +152,7 @@ function TemplateMiniPreview({
         }}
       >
         {["Descripción", "Qty", "Precio"].map((h) => (
-          <div
-            key={h}
-            style={{
-              fontSize: 5,
-              color: "rgba(255,255,255,0.75)",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: 0.4,
-            }}
-          >
+          <div key={h} style={{ fontSize: 5, color: "rgba(255,255,255,0.75)", fontWeight: 700, textTransform: "uppercase", letterSpacing: 0.4 }}>
             {h}
           </div>
         ))}
@@ -245,36 +170,11 @@ function TemplateMiniPreview({
             borderBottom: `1px solid ${acento}`,
           }}
         >
-          <div
-            style={{
-              fontSize: 5.5,
-              color: "#374151",
-              overflow: "hidden",
-              whiteSpace: "nowrap",
-              textOverflow: "ellipsis",
-            }}
-          >
+          <div style={{ fontSize: 5.5, color: "#374151", overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
             {item.desc}
           </div>
-          <div
-            style={{
-              fontSize: 5.5,
-              color: "#64748b",
-              textAlign: "center",
-            }}
-          >
-            {item.qty}
-          </div>
-          <div
-            style={{
-              fontSize: 5.5,
-              color: "#374151",
-              fontWeight: 600,
-              textAlign: "right",
-            }}
-          >
-            {item.precio}
-          </div>
+          <div style={{ fontSize: 5.5, color: "#64748b", textAlign: "center" }}>{item.qty}</div>
+          <div style={{ fontSize: 5.5, color: "#374151", fontWeight: 600, textAlign: "right" }}>{item.precio}</div>
         </div>
       ))}
 
@@ -289,26 +189,8 @@ function TemplateMiniPreview({
           background: "#fff",
         }}
       >
-        <div
-          style={{
-            fontSize: 5.5,
-            color: "#64748b",
-            fontWeight: 600,
-            letterSpacing: 0.3,
-          }}
-        >
-          TOTAL:
-        </div>
-        <div
-          style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "#fff",
-            background: color,
-            padding: "2px 8px",
-            borderRadius: 4,
-          }}
-        >
+        <div style={{ fontSize: 5.5, color: "#64748b", fontWeight: 600, letterSpacing: 0.3 }}>TOTAL:</div>
+        <div style={{ fontSize: 9, fontWeight: 700, color: "#fff", background: color, padding: "2px 8px", borderRadius: 4 }}>
           {total}
         </div>
       </div>
@@ -333,10 +215,7 @@ function Typewriter({ canStart }: { canStart: boolean }) {
         charIndexRef.current += 1
         setDisplayed(currentWord.slice(0, charIndexRef.current))
         if (charIndexRef.current === currentWord.length) {
-          timerRef.current = setTimeout(() => {
-            isDeletingRef.current = true
-            tick()
-          }, 2500)
+          timerRef.current = setTimeout(() => { isDeletingRef.current = true; tick() }, 2500)
           return
         }
         timerRef.current = setTimeout(tick, 80)
@@ -353,9 +232,7 @@ function Typewriter({ canStart }: { canStart: boolean }) {
       }
     }
     timerRef.current = setTimeout(tick, 80)
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current)
-    }
+    return () => { if (timerRef.current) clearTimeout(timerRef.current) }
   }, [canStart])
 
   return (
@@ -375,11 +252,7 @@ export default function Hero() {
     const t1 = setTimeout(() => setLeftVisible(true), 150)
     const t2 = setTimeout(() => setRightVisible(true), 900)
     const t3 = setTimeout(() => setTypewriterActive(true), 1750)
-    return () => {
-      clearTimeout(t1)
-      clearTimeout(t2)
-      clearTimeout(t3)
-    }
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
   }, [])
 
   return (
@@ -391,10 +264,10 @@ export default function Hero() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 68px 32px 60px;
+          padding: 68px 32px 0px;
           background: linear-gradient(160deg, #1B3D7A 0%, #0f2654 55%, #0a1a3a 100%);
           position: relative;
-          overflow: hidden;
+          overflow: clip;
           box-sizing: border-box;
         }
 
@@ -565,13 +438,7 @@ export default function Hero() {
           position: absolute;
           inset: -2px;
           border-radius: 9999px;
-          background: linear-gradient(
-            90deg,
-            #93c5fd,
-            #3b82f6,
-            #60a5fa,
-            #93c5fd
-          );
+          background: linear-gradient(90deg, #93c5fd, #3b82f6, #60a5fa, #93c5fd);
           background-size: 300% 100%;
           animation: btn-border-flow 2s linear infinite;
           z-index: -1;
@@ -803,24 +670,10 @@ export default function Hero() {
 
             <div className="hero-actions">
               <Link href="/auth/register" className="btn-hero">
-                <svg
-                  className="sparkle"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  aria-hidden="true"
-                >
-                  <path
-                    className="path"
-                    d="M12 3l1.6 4.6L18 9.2l-4.4 1.6L12 15.4l-1.6-4.6L6 9.2l4.4-1.6L12 3z"
-                  />
-                  <path
-                    className="path"
-                    d="M19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"
-                  />
-                  <path
-                    className="path"
-                    d="M5 15l.9 2.6 2.6.9-2.6.9L5 22l-.9-2.6-2.6-.9 2.6-.9L5 15z"
-                  />
+                <svg className="sparkle" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <path className="path" d="M12 3l1.6 4.6L18 9.2l-4.4 1.6L12 15.4l-1.6-4.6L6 9.2l4.4-1.6L12 3z" />
+                  <path className="path" d="M19 14l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z" />
+                  <path className="path" d="M5 15l.9 2.6 2.6.9-2.6.9L5 22l-.9-2.6-2.6-.9 2.6-.9L5 15z" />
                 </svg>
                 <span className="text-button">Empezar gratis</span>
               </Link>
@@ -832,9 +685,7 @@ export default function Hero() {
               <div className="plantillas-header">
                 <div>
                   <div className="plantillas-title">Plantillas</div>
-                  <div className="plantillas-sub">
-                    Las más modernas y premium
-                  </div>
+                  <div className="plantillas-sub">Las más modernas y premium</div>
                 </div>
                 <div className="plantillas-count">4 plantillas</div>
               </div>
@@ -852,9 +703,7 @@ export default function Hero() {
                     />
                     <div className="plantilla-card-body">
                       <div className="plantilla-badge">{p.tipo}</div>
-                      <div className="plantilla-type">
-                        Plantilla estándar · {p.nombre}
-                      </div>
+                      <div className="plantilla-type">Plantilla estándar · {p.nombre}</div>
                     </div>
                   </div>
                 ))}

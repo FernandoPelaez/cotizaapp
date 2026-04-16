@@ -13,13 +13,11 @@ export default function Home() {
       <Navbar />
       <Hero />
       <Beneficios />
-      <Preview />
+      <div id="funcionalidades"><Preview /></div>
       <Planes />
       <Segmentacion />
-      <CTA />
-      <Footer/>
+      <div id="faq"><CTA /></div>
+      <Footer />
     </>
   )
 }
-
-

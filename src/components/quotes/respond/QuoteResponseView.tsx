@@ -63,52 +63,54 @@ export function QuoteResponseView({
   const resultMessage = getResultMessage(result)
 
   return (
-    <main className="min-h-screen bg-[var(--background)] px-4 py-0 sm:px-6">
-      <div className="mx-auto max-w-6xl pb-10">
-        <QuoteResponseHeader
-          title={quote.title}
-          status={quote.status}
-          createdAt={quote.createdAt}
-          responseExpiresAt={quote.responseExpiresAt}
-        />
-
-        <div className="space-y-6 px-0 py-6 sm:px-0 sm:py-8">
-          {resultMessage && (
-            <div
-              className={`rounded-2xl border px-4 py-4 text-sm font-medium shadow-sm ${resultMessage.className}`}
-            >
-              {resultMessage.message}
-            </div>
-          )}
-
-          <QuoteResponseParties
-            clientName={quote.clientName}
-            clientPhone={quote.clientPhone}
-            clientEmail={quote.clientEmail}
-            businessName={businessName}
-            businessEmail={quote.user.email}
+    <main className="min-h-screen bg-[#f3f4f6] px-3 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-[816px]">
+        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
+          <QuoteResponseHeader
+            title={quote.title}
+            status={quote.status}
             createdAt={quote.createdAt}
             responseExpiresAt={quote.responseExpiresAt}
           />
 
-          <QuoteResponseSummary total={quote.total} totalItems={totalItems} />
+          <div className="space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+            {resultMessage && (
+              <div
+                className={`rounded-2xl border px-4 py-4 text-sm font-medium shadow-sm ${resultMessage.className}`}
+              >
+                {resultMessage.message}
+              </div>
+            )}
 
-          <section className="overflow-hidden rounded-[28px] border border-[var(--border)] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]">
-            <QuoteResponseItems items={quote.items} />
-          </section>
+            <QuoteResponseParties
+              clientName={quote.clientName}
+              clientPhone={quote.clientPhone}
+              clientEmail={quote.clientEmail}
+              businessName={businessName}
+              businessEmail={quote.user.email}
+              createdAt={quote.createdAt}
+              responseExpiresAt={quote.responseExpiresAt}
+            />
 
-          <QuoteResponseNotes
-            description={quote.description}
-            notes={quote.notes}
-          />
+            <QuoteResponseSummary total={quote.total} totalItems={totalItems} />
 
-          <QuoteResponseActions
-            quoteId={quote.id}
-            token={token}
-            total={quote.total}
-            totalItems={totalItems}
-            canRespond={canRespond}
-          />
+            <section className="overflow-hidden rounded-[24px] border border-[var(--border)] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]">
+              <QuoteResponseItems items={quote.items} />
+            </section>
+
+            <QuoteResponseNotes
+              description={quote.description}
+              notes={quote.notes}
+            />
+
+            <QuoteResponseActions
+              quoteId={quote.id}
+              token={token}
+              total={quote.total}
+              totalItems={totalItems}
+              canRespond={canRespond}
+            />
+          </div>
         </div>
       </div>
     </main>

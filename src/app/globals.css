@@ -65,15 +65,13 @@
   box-sizing: border-box;
 }
 
+/* ── Scroll global claro y elegante ── */
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-html::-webkit-scrollbar {
-  display: none;
+  background: var(--background);
+  scrollbar-width: thin;
+  scrollbar-color: #9a9a9a #f1f1f1;
 }
 
 body {
@@ -83,12 +81,63 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: #9a9a9a #f1f1f1;
 }
 
+html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  display: none;
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track,
+body::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb,
+body::-webkit-scrollbar-thumb {
+  background: #9a9a9a;
+  border-radius: 999px;
+  border: 2px solid #f1f1f1;
+  min-height: 80px;
+}
+
+html::-webkit-scrollbar-thumb:hover,
+body::-webkit-scrollbar-thumb:hover {
+  background: #7f7f7f;
+}
+
+html::-webkit-scrollbar-corner,
+body::-webkit-scrollbar-corner {
+  background: #f1f1f1;
+}
+
+/* ── Scroll claro para contenedores internos ── */
+.custom-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #9a9a9a #f1f1f1;
+}
+
+.custom-scroll::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.custom-scroll::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 999px;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb {
+  background: #9a9a9a;
+  border-radius: 999px;
+  border: 2px solid #f1f1f1;
+}
+
+.custom-scroll::-webkit-scrollbar-thumb:hover {
+  background: #7f7f7f;
 }
 
 img,
@@ -104,15 +153,6 @@ input,
 textarea,
 select {
   font: inherit;
-}
-
-main {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-main::-webkit-scrollbar {
-  display: none;
 }
 
 @keyframes fadeUp {

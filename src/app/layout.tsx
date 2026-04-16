@@ -29,7 +29,7 @@ export default function RootLayout({
       lang="es"
       className={`${geistSans.variable} ${geistMono.variable} antialiased`}
     >
-      <body className="overflow-x-hidden">
+      <body>
         <Providers>
           {children}
           <Toaster position="top-center" richColors />

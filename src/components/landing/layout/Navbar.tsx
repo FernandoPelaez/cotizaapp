@@ -52,81 +52,53 @@ export default function Navbar() {
     const elementTop =
       found.element.getBoundingClientRect().top + window.scrollY - navbarOffset
 
+    setActiveSection(item.hash)
+
     window.scrollTo({
       top: elementTop,
       behavior: "smooth",
     })
 
     window.history.pushState(null, "", `#${found.id}`)
-    setActiveSection(item.hash)
+  }
+
+  const resetNavbarSelection = () => {
+    setActiveSection("")
+    window.history.pushState(null, "", "/")
   }
 
   useEffect(() => {
-    const updateActiveSection = () => {
-      const scrollPosition = window.scrollY + 140
-      let currentSection = ""
-
-      for (const item of links) {
-        const found = getSectionElement(item.ids)
-        if (!found) continue
-
-        const sectionTop = found.element.offsetTop
-        const sectionHeight = found.element.offsetHeight
-
-        if (
-          scrollPosition >= sectionTop &&
-          scrollPosition < sectionTop + sectionHeight
-        ) {
-          currentSection = item.hash
-          break
-        }
-      }
-
-      if (currentSection) {
-        setActiveSection(currentSection)
-      }
-    }
-
     const handleInitialHash = () => {
       const hash = window.location.hash.replace("#", "")
+
       if (!hash) {
-        updateActiveSection()
+        setActiveSection("")
         return
       }
 
       const matchedItem = links.find((item) => item.ids.includes(hash))
       if (!matchedItem) {
-        updateActiveSection()
+        setActiveSection("")
         return
       }
-
-      const found = getSectionElement(matchedItem.ids)
-      if (!found) {
-        updateActiveSection()
-        return
-      }
-
-      const navbarOffset = 88
-      const elementTop =
-        found.element.getBoundingClientRect().top + window.scrollY - navbarOffset
-
-      window.scrollTo({
-        top: elementTop,
-        behavior: "auto",
-      })
 
       setActiveSection(matchedItem.hash)
     }
 
-    handleInitialHash()
-    updateActiveSection()
+    const handleScroll = () => {
+      if (window.scrollY < 40 && !window.location.hash) {
+        setActiveSection("")
+      }
+    }
 
-    window.addEventListener("scroll", updateActiveSection)
+    handleInitialHash()
+
     window.addEventListener("hashchange", handleInitialHash)
+    window.addEventListener("scroll", handleScroll)
 
     return () => {
-      window.removeEventListener("scroll", updateActiveSection)
       window.removeEventListener("hashchange", handleInitialHash)
+      window.removeEventListener("scroll", handleScroll)
     }
   }, [])
 
@@ -228,6 +200,25 @@ export default function Navbar() {
           cursor: pointer;
           font: inherit;
           background: transparent;
+          position: relative;
+          color: #1B3D7A;
+        }
+
+        .nav-link-btn::after {
+          content: "";
+          position: absolute;
+          left: 50%;
+          bottom: -10px;
+          transform: translateX(-50%);
+          width: 0;
+          height: 4px;
+          border-radius: 9999px;
+          background: #1B3D7A;
+          transition: width 0.25s ease;
+        }
+
+        .nav-link-btn.active::after {
+          width: 28px;
         }
       `}</style>
 
@@ -235,6 +226,7 @@ export default function Navbar() {
         <div className="w-full px-6 h-16 flex items-center justify-between max-w-[1200px] mx-auto">
           <Link
             href="/"
+            onClick={resetNavbarSelection}
             className="text-lg font-bold text-[var(--primary)] tracking-tight"
           >
             CotizaApp
@@ -249,10 +241,8 @@ export default function Navbar() {
                   key={link.hash}
                   type="button"
                   onClick={() => scrollToSection(link)}
-                  className={`nav-link-btn px-4 py-2 rounded-full text-sm font-medium transition ${
-                    isActive
-                      ? "bg-[var(--primary-soft)] text-[var(--primary)]"
-                      : "text-[var(--primary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
+                  className={`nav-link-btn px-4 py-2 text-sm font-medium transition ${
+                    isActive ? "active text-[#1B3D7A]" : "text-[#1B3D7A]"
                   }`}
                 >
                   {link.label}
@@ -308,8 +298,8 @@ export default function Navbar() {
                   }}
                   className={`nav-link-btn text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
                     isActive
-                      ? "bg-[var(--primary-soft)] text-[var(--primary)]"
-                      : "text-[var(--primary)] hover:bg-[var(--primary-soft)] hover:text-[var(--primary)]"
+                      ? "active text-[#1B3D7A]"
+                      : "text-[#1B3D7A] hover:bg-[var(--primary-soft)]"
                   }`}
                 >
                   {link.label}

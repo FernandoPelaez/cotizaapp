@@ -7,33 +7,34 @@ datasource db {
 }
 
 model User {
-  id               String      @id @default(cuid())
-  name             String?
-  email            String      @unique
-  emailVerified    DateTime?
-  image            String?
-  password         String?
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
 
   profileType      ProfileType?
-  profileCompleted Boolean     @default(false)
-  onboardingStep   Int         @default(1)
+  profileCompleted Boolean      @default(false)
+  onboardingStep   Int          @default(1)
 
-  quotesUsed       Int         @default(0)
-  trialQuotesLimit Int         @default(5)
-  trialBlocked     Boolean     @default(false)
+  quotesUsed       Int     @default(0)
+  trialQuotesLimit Int     @default(5)
+  trialBlocked     Boolean @default(false)
 
-  planId           String?
-  plan             Plan?       @relation(fields: [planId], references: [id])
+  planId String?
+  plan   Plan?   @relation(fields: [planId], references: [id])
 
-  quotes           Quote[]
-  profile          Profile?
-  settings         Settings?
+  quotes      Quote[]
+  quoteEvents QuoteEvent[]
+  profile     Profile?
+  settings    Settings?
 
-  createdAt        DateTime    @default(now())
-  updatedAt        DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  accounts         Account[]
-  sessions         Session[]
+  accounts Account[]
+  sessions Session[]
 
   @@index([planId])
   @@index([profileType])
@@ -42,64 +43,64 @@ model User {
 }
 
 model Settings {
-  id                  String      @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId              String      @unique
-  user                User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  confirmDelete       Boolean     @default(true)
-  confirmPDF          Boolean     @default(true)
-  autoSave            Boolean     @default(true)
+  confirmDelete Boolean @default(true)
+  confirmPDF    Boolean @default(true)
+  autoSave      Boolean @default(true)
 
-  autoDownloadPDF     Boolean     @default(false)
-  openPDFNewTab       Boolean     @default(true)
+  autoDownloadPDF Boolean @default(false)
+  openPDFNewTab   Boolean @default(true)
 
-  notifyLimit         Boolean     @default(true)
-  systemConfirmations Boolean     @default(true)
+  notifyLimit         Boolean @default(true)
+  systemConfirmations Boolean @default(true)
 
-  notes               String?
-  conditions          String?
-  validity            String?
-  fileName            String?     @default("Cotizacion")
+  notes      String?
+  conditions String?
+  validity   String?
+  fileName   String? @default("Cotizacion")
 
-  defaultSendChannel  SendChannel @default(PDF)
+  defaultSendChannel SendChannel @default(PDF)
 
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Profile {
-  id                  String         @id @default(cuid())
+  id String @id @default(cuid())
 
-  userId              String         @unique
-  user                User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  phone               String?
+  phone String?
 
-  oficio              String?
-  businessName        String?
-  description         String?
+  oficio       String?
+  businessName String?
+  description  String?
 
-  city                String?
-  state               String?
+  city  String?
+  state String?
 
-  logoUrl             String?
-  themeColor          String?
+  logoUrl    String?
+  themeColor String?
 
-  showPhone           Boolean        @default(true)
-  showAddress         Boolean        @default(false)
+  showPhone   Boolean @default(true)
+  showAddress Boolean @default(false)
 
-  businessModel       BusinessModel?
-  hasFiscalData       Boolean?
-  taxMode             TaxMode?
-  billingMode         BillingMode?
-  depositPolicy       DepositPolicy?
+  businessModel BusinessModel?
+  hasFiscalData Boolean?
+  taxMode       TaxMode?
+  billingMode   BillingMode?
+  depositPolicy DepositPolicy?
 
-  defaultTemplateId   String?
-  defaultTemplate     Template?      @relation("DefaultProfileTemplate", fields: [defaultTemplateId], references: [id])
+  defaultTemplateId String?
+  defaultTemplate   Template? @relation("DefaultProfileTemplate", fields: [defaultTemplateId], references: [id])
 
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([businessModel])
   @@index([taxMode])
@@ -107,21 +108,21 @@ model Profile {
 }
 
 model Account {
-  id                String   @id @default(cuid())
+  id                String @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
 
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
+  refresh_token String?
+  access_token  String?
+  expires_at    Int?
+  token_type    String?
+  scope         String?
+  id_token      String?
+  session_state String?
 
-  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -133,7 +134,7 @@ model Session {
   userId       String
   expires      DateTime
 
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -147,37 +148,37 @@ model VerificationToken {
 }
 
 model Plan {
-  id           String   @id @default(cuid())
+  id           String  @id @default(cuid())
   name         String
   price        Float
   maxQuotes    Int
-  whatsappSend Boolean  @default(false)
+  whatsappSend Boolean @default(false)
 
-  users        User[]
+  users User[]
 
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Template {
-  id                String         @id @default(cuid())
-  name              String         @unique
-  description       String?
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
 
-  category          String?
-  profileType       ProfileType?
-  businessModel     BusinessModel?
+  category      String?
+  profileType   ProfileType?
+  businessModel BusinessModel?
 
-  isPremium         Boolean        @default(false)
+  isPremium Boolean @default(false)
 
-  previewUrl        String?
-  html              String
+  previewUrl String?
+  html       String
 
   quotes            Quote[]
-  defaultForProfile Profile[]      @relation("DefaultProfileTemplate")
+  defaultForProfile Profile[] @relation("DefaultProfileTemplate")
 
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([isPremium])
   @@index([profileType])
@@ -185,43 +186,44 @@ model Template {
 }
 
 model Quote {
-  id                String       @id @default(cuid())
-  title             String
-  description       String?
+  id          String  @id @default(cuid())
+  title       String
+  description String?
 
-  clientName        String
-  clientPhone       String?
-  clientEmail       String?
-  clientAddress     String?
-  clientRFC         String?
+  clientName    String
+  clientPhone   String?
+  clientEmail   String?
+  clientAddress String?
+  clientRFC     String?
 
-  subtotal          Float
-  discount          Float        @default(0)
-  tax               Float        @default(0)
-  total             Float
+  subtotal Float
+  discount Float @default(0)
+  tax      Float @default(0)
+  total    Float
 
-  validUntil        DateTime?
-  notes             String?
+  validUntil DateTime?
+  notes      String?
 
-  status            QuoteStatus  @default(DRAFT)
-  sendChannel       SendChannel  @default(PDF)
-  sentAt            DateTime?
+  status      QuoteStatus @default(DRAFT)
+  sendChannel SendChannel @default(PDF)
+  sentAt      DateTime?
 
   responseToken     String?      @unique
   responseExpiresAt DateTime?
   respondedAt       DateTime?
   responseChannel   SendChannel?
 
-  userId            String
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  templateId        String?
-  template          Template?    @relation(fields: [templateId], references: [id])
+  templateId String?
+  template   Template? @relation(fields: [templateId], references: [id])
 
-  items             QuoteItem[]
+  items  QuoteItem[]
+  events QuoteEvent[]
 
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([templateId])
@@ -233,17 +235,45 @@ model Quote {
 }
 
 model QuoteItem {
-  id       String   @id @default(cuid())
+  id String @id @default(cuid())
 
   name     String
   quantity Int
   price    Float
   total    Float
 
-  quoteId  String
-  quote    Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 
   @@index([quoteId])
+}
+
+model QuoteEvent {
+  id String @id @default(cuid())
+
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    QuoteEventType
+  title   String
+  message String?
+
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  @@index([quoteId])
+  @@index([userId])
+  @@index([type])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([userId, isRead, createdAt])
 }
 
 enum QuoteStatus {
@@ -253,6 +283,13 @@ enum QuoteStatus {
   ACCEPTED
   REJECTED
   EXPIRED
+}
+
+enum QuoteEventType {
+  QUOTE_SENT
+  QUOTE_ACCEPTED
+  QUOTE_REJECTED
+  QUOTE_EXPIRED
 }
 
 enum ProfileType {

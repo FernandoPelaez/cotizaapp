@@ -18,7 +18,7 @@ type QuoteResponseItemsProps = {
 }
 
 function getItemIcon(index: number) {
-  const classes = "h-6 w-6 text-[#2563eb]"
+  const classes = "h-5 w-5 text-[#2563eb]"
 
   if (index % 3 === 0) return <Code2 className={classes} />
   if (index % 3 === 1) return <Briefcase className={classes} />
@@ -28,7 +28,7 @@ function getItemIcon(index: number) {
 export function QuoteResponseItems({ items }: QuoteResponseItemsProps) {
   return (
     <section>
-      <div className="grid grid-cols-[1fr_auto] border-b border-[var(--border)] px-6 py-5 text-sm font-bold uppercase tracking-[0.08em] text-[var(--text-muted)]">
+      <div className="grid grid-cols-[1fr_auto] border-b border-[var(--border)] px-4 py-4 text-xs font-bold uppercase tracking-[0.08em] text-[var(--text-muted)] sm:px-5">
         <p>Concepto</p>
         <p>Importe</p>
       </div>
@@ -37,25 +37,25 @@ export function QuoteResponseItems({ items }: QuoteResponseItemsProps) {
         {items.map((item, index) => (
           <article
             key={item.id}
-            className="grid grid-cols-[1fr_auto] items-center gap-4 px-6 py-5"
+            className="grid grid-cols-[1fr_auto] items-center gap-3 px-4 py-4 sm:px-5"
           >
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[#eef3ff]">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#eef3ff]">
                 {getItemIcon(index)}
               </div>
 
               <div className="min-w-0">
-                <p className="truncate text-2xl font-extrabold text-[var(--foreground)]">
+                <p className="truncate text-base font-extrabold text-[var(--foreground)] sm:text-lg">
                   {item.name}
                 </p>
-                <p className="mt-1 text-xl text-[var(--text-muted)]">
+                <p className="mt-0.5 text-sm text-[var(--text-muted)] sm:text-[15px]">
                   {item.quantity} × {formatCurrency(item.price)}
                 </p>
               </div>
             </div>
 
-            <div className="pl-4 text-right">
-              <p className="text-2xl font-extrabold text-[var(--foreground)]">
+            <div className="pl-3 text-right">
+              <p className="text-base font-extrabold text-[var(--foreground)] sm:text-lg">
                 {formatCurrency(item.total)}
               </p>
             </div>

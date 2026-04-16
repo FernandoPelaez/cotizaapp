@@ -3,7 +3,6 @@ import {
   type QuoteResponseResult,
 } from "@/lib/quotes/quote-response.utils"
 import { QuoteResponseActions } from "./QuoteResponseActions"
-import { QuoteResponseHeader } from "./QuoteResponseHeader"
 import { QuoteResponseItems } from "./QuoteResponseItems"
 import { QuoteResponseNotes } from "./QuoteResponseNotes"
 import { QuoteResponseParties } from "./QuoteResponseParties"
@@ -66,13 +65,6 @@ export function QuoteResponseView({
     <main className="min-h-screen bg-[#f3f4f6] px-3 py-6 sm:px-6 sm:py-10">
       <div className="mx-auto w-full max-w-[816px]">
         <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-          <QuoteResponseHeader
-            title={quote.title}
-            status={quote.status}
-            createdAt={quote.createdAt}
-            responseExpiresAt={quote.responseExpiresAt}
-          />
-
           <div className="space-y-6 px-4 py-6 sm:px-6 sm:py-8">
             {resultMessage && (
               <div

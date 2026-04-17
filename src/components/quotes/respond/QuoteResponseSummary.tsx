@@ -1,4 +1,4 @@
-import { FileText, Mail, Phone } from "lucide-react"
+import { FileText } from "lucide-react"
 import {
   formatCurrency,
   getItemsLabel,
@@ -25,8 +25,8 @@ export function QuoteResponseSummary({
   return (
     <section className="overflow-hidden rounded-xl border border-slate-100">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-slate-100 bg-[#f4f7fc] px-4 py-2.5">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#e8f0fe] text-[#1a50c8]">
+      <div className="flex items-center gap-2 border-b border-[#c7d9f8] bg-[#dce8ff] px-4 py-2.5">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#1a50c8] text-white">
           <FileText className="h-3.5 w-3.5" />
         </div>
         <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#1a50c8]">

@@ -13,11 +13,20 @@ type QuoteResponseHeaderProps = {
 
 export function QuoteResponseHeader({ status }: QuoteResponseHeaderProps) {
   return (
-    <header className="relative overflow-hidden bg-[linear-gradient(100deg,#1a3a8f_0%,#1e4fc2_60%,#1a4ab5_100%)] px-5 py-3.5 text-white">
+    <header className="relative overflow-hidden bg-[linear-gradient(105deg,#0c2d8e_0%,#0f3aaa_40%,#1347c8_100%)] px-5 py-3.5 text-white">
+
+      {/* Figuras decorativas esquina derecha */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute right-[-18px] top-[-22px] h-24 w-24 rounded-full bg-white/[0.07]" />
+        <div className="absolute right-[38px] top-[-30px] h-20 w-20 rounded-full bg-white/[0.05]" />
+        <div className="absolute right-[10px] top-[10px] h-12 w-12 rounded-full bg-white/[0.06]" />
+        <div className="absolute right-[-8px] top-[18px] h-16 w-16 rounded-full bg-[#1a55d4]/40" />
+      </div>
+
       <div className="relative flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2.5">
           <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white shadow-sm">
-            <FileText className="h-4 w-4 text-[#1a3a8f]" strokeWidth={2.2} />
+            <FileText className="h-4 w-4 text-[#0c2d8e]" strokeWidth={2.2} />
           </div>
           <div className="flex min-w-0 items-center gap-2">
             <p className="text-sm font-bold tracking-tight text-white">

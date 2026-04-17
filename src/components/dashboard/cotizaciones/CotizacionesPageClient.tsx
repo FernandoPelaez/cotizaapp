@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import { useSession } from "next-auth/react"
 import { CheckCircle2, Clock3, RefreshCw, Send, XCircle } from "lucide-react"
 
 import CotizacionesList from "@/components/dashboard/cotizaciones/CotizacionesList"
@@ -51,6 +52,8 @@ function getEventStyles(type: QuoteEventType) {
 }
 
 export default function CotizacionesPageClient() {
+  const { status } = useSession()
+
   const [quotes, setQuotes] = useState<Quote[]>([])
   const [events, setEvents] = useState<QuoteEvent[]>([])
   const [loading, setLoading] = useState(true)
@@ -72,6 +75,10 @@ export default function CotizacionesPageClient() {
     const showRefreshing = Boolean(options?.showRefreshing)
 
     try {
+      if (status !== "authenticated") {
+        return
+      }
+
       if (showLoader) {
         setLoading(true)
       }
@@ -85,9 +92,11 @@ export default function CotizacionesPageClient() {
       const [quotesRes, eventsRes] = await Promise.all([
         fetch("/api/quotes", {
           cache: "no-store",
+          credentials: "include",
         }),
         fetch("/api/quotes/events?limit=6", {
           cache: "no-store",
+          credentials: "include",
         }),
       ])
 
@@ -142,8 +151,19 @@ export default function CotizacionesPageClient() {
   }
 
   useEffect(() => {
+    if (status === "loading") {
+      setLoading(true)
+      return
+    }
+
+    if (status === "unauthenticated") {
+      setLoading(false)
+      setError("No autorizado")
+      return
+    }
+
     void loadDashboard({ showLoader: true })
-  }, [])
+  }, [status])
 
   useEffect(() => {
     if (!quoteToDelete) {
@@ -222,6 +242,7 @@ export default function CotizacionesPageClient() {
 
       const res = await fetch(`/api/quotes/${quoteToDelete.id}`, {
         method: "DELETE",
+        credentials: "include",
       })
 
       const data: { error?: string; ok?: boolean } = await res.json()
@@ -256,6 +277,7 @@ export default function CotizacionesPageClient() {
 
       const res = await fetch(`/api/quotes/${quote.id}/whatsapp`, {
         method: "POST",
+        credentials: "include",
       })
 
       const data: {
@@ -295,7 +317,7 @@ export default function CotizacionesPageClient() {
     await loadDashboard({ showRefreshing: true })
   }
 
-  if (loading) {
+  if (loading || status === "loading") {
     return (
       <div className="p-6">
         <p className="text-sm text-neutral-500">Cargando cotizaciones...</p>
@@ -321,7 +343,7 @@ export default function CotizacionesPageClient() {
             <button
               type="button"
               onClick={handleRefresh}
-              disabled={refreshing}
+              disabled={refreshing || status !== "authenticated"}
               className="inline-flex items-center gap-2 rounded-xl border border-neutral-200 bg-white px-3 py-2 text-sm font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
             >
               <RefreshCw

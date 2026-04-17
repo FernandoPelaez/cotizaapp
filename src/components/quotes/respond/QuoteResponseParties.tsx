@@ -28,7 +28,6 @@ export function QuoteResponseParties({
   variant = "full",
 }: QuoteResponsePartiesProps) {
 
-  // Tarjeta de fechas — usada en el bloque de título
   if (variant === "dates-only") {
     return (
       <div className="shrink-0 rounded-xl border border-slate-100 bg-[#f0f4fb] p-3 min-w-[152px]">
@@ -50,7 +49,6 @@ export function QuoteResponseParties({
     )
   }
 
-  // Bloque completo cliente + empresa — usado dentro de QuoteResponseSummary
   return (
     <div className="divide-y divide-slate-100">
       {/* Cliente */}

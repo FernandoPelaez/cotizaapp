@@ -17,14 +17,13 @@ export function QuoteResponseActions({
 }: QuoteResponseActionsProps) {
   return (
     <section className="space-y-3">
-
       {/* PDF link */}
-      <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-[#f8f9fb] px-4 py-3">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#e8f0fe] text-[#1a50c8]">
+      <div className="flex items-center gap-3 rounded-xl border border-[#d8e6ff] bg-[#edf4ff] px-4 py-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#dbe8ff] text-[#1a50c8]">
           <Download className="h-3.5 w-3.5" />
         </div>
         <div className="min-w-0">
-          <p className="text-xs text-slate-600 leading-snug">
+          <p className="text-xs leading-snug text-slate-600">
             Consulta el PDF para ver el detalle completo de productos, cantidades, precios y condiciones.
           </p>
           <Link
@@ -97,16 +96,20 @@ export function QuoteResponseActions({
 
       {/* Footer security message */}
       <div className="flex items-center justify-center gap-1.5 pt-1">
-        <svg className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="5" y="11" width="14" height="10" rx="2"/>
-          <path d="M8 11V7a4 4 0 018 0v4"/>
+        <svg
+          className="h-3 w-3 text-slate-400"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <rect x="5" y="11" width="14" height="10" rx="2" />
+          <path d="M8 11V7a4 4 0 018 0v4" />
         </svg>
         <p className="text-center text-[11px] text-slate-400">
           Enlace seguro y temporal. Tus datos están protegidos.
         </p>
       </div>
-
     </section>
   )
 }
-

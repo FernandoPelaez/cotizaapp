@@ -3,8 +3,6 @@ import {
   type QuoteResponseResult,
 } from "@/lib/quotes/quote-response.utils"
 import { QuoteResponseActions } from "./QuoteResponseActions"
-import { QuoteResponseItems } from "./QuoteResponseItems"
-import { QuoteResponseNotes } from "./QuoteResponseNotes"
 import { QuoteResponseParties } from "./QuoteResponseParties"
 import { QuoteResponseSummary } from "./QuoteResponseSummary"
 import { QuoteResponseHeader } from "./QuoteResponseHeader"
@@ -119,17 +117,6 @@ export function QuoteResponseView({
               clientPhone={quote.clientPhone}
               clientEmail={quote.clientEmail}
               businessName={businessName}
-            />
-
-            {/* Items */}
-            <section className="overflow-hidden rounded-xl border border-slate-100 bg-white">
-              <QuoteResponseItems items={quote.items} />
-            </section>
-
-            {/* Notes */}
-            <QuoteResponseNotes
-              description={quote.description}
-              notes={quote.notes}
             />
 
             {/* Actions */}

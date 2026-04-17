@@ -27,7 +27,7 @@ export function QuoteResponseActions({
             Consulta el PDF para ver el detalle completo de productos, cantidades, precios y condiciones.
           </p>
           <Link
-            href={`/api/quotes/${quoteId}/pdf`}
+            href={`/api/quotes/respond/${token}/pdf`}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-1 inline-flex items-center gap-1 text-xs font-bold text-[#2563eb] underline-offset-4 hover:underline"

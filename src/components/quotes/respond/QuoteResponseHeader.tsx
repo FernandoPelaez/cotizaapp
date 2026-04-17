@@ -15,7 +15,6 @@ export function QuoteResponseHeader({ status }: QuoteResponseHeaderProps) {
   return (
     <header className="relative overflow-hidden bg-[linear-gradient(105deg,#0c2d8e_0%,#0f3aaa_40%,#1347c8_100%)] px-5 py-3.5 text-white">
 
-      {/* Figuras decorativas esquina derecha */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute right-[-18px] top-[-22px] h-24 w-24 rounded-full bg-white/[0.07]" />
         <div className="absolute right-[38px] top-[-30px] h-20 w-20 rounded-full bg-white/[0.05]" />

@@ -7,6 +7,7 @@ import { QuoteResponseItems } from "./QuoteResponseItems"
 import { QuoteResponseNotes } from "./QuoteResponseNotes"
 import { QuoteResponseParties } from "./QuoteResponseParties"
 import { QuoteResponseSummary } from "./QuoteResponseSummary"
+import { QuoteResponseHeader } from "./QuoteResponseHeader"
 
 type QuoteResponseItem = {
   id: string
@@ -62,39 +63,76 @@ export function QuoteResponseView({
   const resultMessage = getResultMessage(result)
 
   return (
-    <main className="min-h-screen bg-[#f3f4f6] px-3 py-6 sm:px-6 sm:py-10">
-      <div className="mx-auto w-full max-w-[816px]">
-        <div className="overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-[0_18px_45px_rgba(15,23,42,0.08)]">
-          <div className="space-y-6 px-4 py-6 sm:px-6 sm:py-8">
+    <main className="min-h-screen bg-[#f0f2f5] px-3 py-6 sm:px-6 sm:py-10">
+      <div className="mx-auto w-full max-w-[560px]">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_4px_24px_rgba(15,23,42,0.08)]">
+
+          {/* Header */}
+          <QuoteResponseHeader
+            title={quote.title}
+            status={quote.status}
+            createdAt={quote.createdAt}
+            responseExpiresAt={quote.responseExpiresAt}
+          />
+
+          <div className="space-y-3.5 px-4 py-5 sm:px-5">
+
+            {/* Result message */}
             {resultMessage && (
               <div
-                className={`rounded-2xl border px-4 py-4 text-sm font-medium shadow-sm ${resultMessage.className}`}
+                className={`rounded-xl border px-3 py-3 text-sm font-medium ${resultMessage.className}`}
               >
                 {resultMessage.message}
               </div>
             )}
 
-            <QuoteResponseParties
+            {/* Title block + dates */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-[#1a50c8]">
+                  Cotización
+                </p>
+                <h1 className="mt-1 text-xl font-extrabold leading-tight text-slate-900">
+                  {quote.title}
+                </h1>
+                <p className="mt-1 text-xs text-slate-500">
+                  Revisa el resumen y responde si aceptas o rechazas esta cotización.
+                </p>
+              </div>
+              <QuoteResponseParties
+                clientName={quote.clientName}
+                clientPhone={quote.clientPhone}
+                clientEmail={quote.clientEmail}
+                businessName={businessName}
+                businessEmail={quote.user.email}
+                createdAt={quote.createdAt}
+                responseExpiresAt={quote.responseExpiresAt}
+                variant="dates-only"
+              />
+            </div>
+
+            {/* Summary + parties */}
+            <QuoteResponseSummary
+              total={quote.total}
+              totalItems={totalItems}
               clientName={quote.clientName}
               clientPhone={quote.clientPhone}
               clientEmail={quote.clientEmail}
               businessName={businessName}
-              businessEmail={quote.user.email}
-              createdAt={quote.createdAt}
-              responseExpiresAt={quote.responseExpiresAt}
             />
 
-            <QuoteResponseSummary total={quote.total} totalItems={totalItems} />
-
-            <section className="overflow-hidden rounded-[24px] border border-[var(--border)] bg-white shadow-[0_12px_34px_rgba(15,23,42,0.06)]">
+            {/* Items */}
+            <section className="overflow-hidden rounded-xl border border-slate-100 bg-white">
               <QuoteResponseItems items={quote.items} />
             </section>
 
+            {/* Notes */}
             <QuoteResponseNotes
               description={quote.description}
               notes={quote.notes}
             />
 
+            {/* Actions */}
             <QuoteResponseActions
               quoteId={quote.id}
               token={token}
@@ -102,6 +140,7 @@ export function QuoteResponseView({
               totalItems={totalItems}
               canRespond={canRespond}
             />
+
           </div>
         </div>
       </div>

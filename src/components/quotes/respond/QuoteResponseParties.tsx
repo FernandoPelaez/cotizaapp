@@ -15,6 +15,7 @@ type QuoteResponsePartiesProps = {
   businessEmail?: string | null
   createdAt: Date | string
   responseExpiresAt?: Date | string | null
+  variant?: "full" | "dates-only"
 }
 
 export function QuoteResponseParties({
@@ -24,87 +25,71 @@ export function QuoteResponseParties({
   businessName,
   createdAt,
   responseExpiresAt,
+  variant = "full",
 }: QuoteResponsePartiesProps) {
-  return (
-    <section className="grid gap-3 lg:grid-cols-[1fr_1fr_250px]">
-      <article className="rounded-[20px] border border-[var(--border)] bg-[#eef3ff] p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#dce8ff] text-[#1e5fd1]">
-            <UserRound className="h-5 w-5" />
-          </div>
 
-          <div className="min-w-0">
-            <p className="inline-flex rounded-md bg-[#dce8ff] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
-              Cliente
-            </p>
-
-            <h2 className="mt-2.5 text-xl font-extrabold text-[var(--foreground)] sm:text-[1.75rem]">
-              {clientName}
-            </h2>
-
-            {clientPhone && (
-              <p className="mt-2.5 flex items-center gap-2 text-sm text-[var(--text-muted)] sm:text-[15px]">
-                <Phone className="h-4 w-4 text-[#2563eb]" />
-                {clientPhone}
-              </p>
-            )}
-
-            {clientEmail && (
-              <p className="mt-1.5 flex items-center gap-2 break-all text-sm text-[var(--text-muted)] sm:text-[15px]">
-                <Mail className="h-4 w-4 text-[#2563eb]" />
-                {clientEmail}
-              </p>
-            )}
-          </div>
-        </div>
-      </article>
-
-      <article className="rounded-[20px] border border-[var(--border)] bg-[#eef3ff] p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#dce8ff] text-[#1e5fd1]">
-            <Building2 className="h-5 w-5" />
-          </div>
-
-          <div className="min-w-0">
-            <p className="inline-flex rounded-md bg-[#dce8ff] px-2 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-[#2563eb]">
-              Empresa o profesional
-            </p>
-
-            <h2 className="mt-2.5 text-xl font-extrabold text-[var(--foreground)] sm:text-[1.75rem]">
-              {businessName}
-            </h2>
-          </div>
-        </div>
-      </article>
-
-      <article className="rounded-[20px] border border-[var(--border)] bg-[#eef3ff] p-4 shadow-[0_8px_20px_rgba(15,23,42,0.04)]">
-        <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#dce8ff] text-[#1e5fd1]">
-            <CalendarDays className="h-5 w-5" />
-          </div>
-
-          <div className="min-w-0">
-            <p className="text-xs text-[var(--text-muted)] sm:text-sm">
-              Fecha de emisión
-            </p>
-            <p className="mt-1 text-xl font-extrabold leading-tight text-[var(--foreground)] sm:text-[1.9rem]">
-              {formatDate(createdAt)}
-            </p>
-
+  // Tarjeta de fechas — usada en el bloque de título
+  if (variant === "dates-only") {
+    return (
+      <div className="shrink-0 rounded-xl border border-slate-100 bg-[#f0f4fb] p-3 min-w-[152px]">
+        <div className="flex items-start gap-2">
+          <CalendarDays className="mt-0.5 h-4 w-4 shrink-0 text-[#1a50c8]" />
+          <div>
+            <p className="text-[10px] text-slate-500">Fecha de emisión</p>
+            <p className="text-xs font-bold text-[#1a3a7a]">{formatDate(createdAt)}</p>
             {responseExpiresAt && (
               <>
-                <div className="my-3 h-px bg-[var(--border)]" />
-                <p className="text-xs text-[var(--text-muted)] sm:text-sm">
-                  Disponible hasta
-                </p>
-                <p className="mt-1 text-xl font-extrabold leading-tight text-[var(--foreground)] sm:text-[1.9rem]">
-                  {formatDate(responseExpiresAt)}
-                </p>
+                <div className="my-1.5 h-px bg-slate-200" />
+                <p className="text-[10px] text-slate-500">Disponible hasta</p>
+                <p className="text-xs font-bold text-[#1a3a7a]">{formatDate(responseExpiresAt)}</p>
               </>
             )}
           </div>
         </div>
-      </article>
-    </section>
+      </div>
+    )
+  }
+
+  // Bloque completo cliente + empresa — usado dentro de QuoteResponseSummary
+  return (
+    <div className="divide-y divide-slate-100">
+      {/* Cliente */}
+      <div className="flex items-start gap-2.5 py-3 first:pt-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#e8f0fe] text-[#1e5fd1]">
+          <UserRound className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <span className="inline-block rounded bg-[#e8f0fe] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#2563eb]">
+            Cliente
+          </span>
+          <p className="mt-1 text-sm font-bold text-slate-900">{clientName}</p>
+          {clientPhone && (
+            <p className="mt-0.5 flex items-center gap-1 text-xs text-slate-500">
+              <Phone className="h-3 w-3 text-[#2563eb]" />
+              {clientPhone}
+            </p>
+          )}
+          {clientEmail && (
+            <p className="mt-0.5 flex items-center gap-1 break-all text-xs text-slate-500">
+              <Mail className="h-3 w-3 shrink-0 text-[#2563eb]" />
+              {clientEmail}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Empresa */}
+      <div className="flex items-start gap-2.5 py-3 last:pb-0">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#e8f0fe] text-[#1e5fd1]">
+          <Building2 className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <span className="inline-block rounded bg-[#e8f0fe] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-[#2563eb]">
+            Empresa o profesional
+          </span>
+          <p className="mt-1 text-sm font-bold text-slate-900">{businessName}</p>
+        </div>
+      </div>
+    </div>
   )
 }

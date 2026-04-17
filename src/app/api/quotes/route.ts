@@ -49,8 +49,8 @@ async function expirePendingQuotes(userId: string) {
     return
   }
 
-  await prisma.$transaction([
-    ...quotesToExpire.map((quote) =>
+  for (const quote of quotesToExpire) {
+    await prisma.$transaction([
       prisma.quote.update({
         where: {
           id: quote.id,
@@ -58,9 +58,7 @@ async function expirePendingQuotes(userId: string) {
         data: {
           status: "EXPIRED",
         },
-      })
-    ),
-    ...quotesToExpire.map((quote) =>
+      }),
       prisma.quoteEvent.create({
         data: {
           quoteId: quote.id,
@@ -74,9 +72,9 @@ async function expirePendingQuotes(userId: string) {
             expiredAt: now.toISOString(),
           },
         },
-      })
-    ),
-  ])
+      }),
+    ])
+  }
 }
 
 export async function GET() {
@@ -93,40 +91,40 @@ export async function GET() {
     startOfMonth.setDate(1)
     startOfMonth.setHours(0, 0, 0, 0)
 
-    const quotes = await prisma.quote.findMany({
-      where: { userId },
-      include: {
-        items: true,
-        template: true,
-      },
-      orderBy: { createdAt: "desc" },
-    })
-
-    const totalThisMonth = await prisma.quote.count({
-      where: {
-        userId,
-        createdAt: { gte: startOfMonth },
-      },
-    })
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        profileType: true,
-        profileCompleted: true,
-        quotesUsed: true,
-        trialQuotesLimit: true,
-        trialBlocked: true,
-        plan: {
-          select: {
-            id: true,
-            name: true,
-            maxQuotes: true,
+    const [quotes, totalThisMonth, user] = await Promise.all([
+      prisma.quote.findMany({
+        where: { userId },
+        include: {
+          items: true,
+          template: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.quote.count({
+        where: {
+          userId,
+          createdAt: { gte: startOfMonth },
+        },
+      }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: {
+          id: true,
+          profileType: true,
+          profileCompleted: true,
+          quotesUsed: true,
+          trialQuotesLimit: true,
+          trialBlocked: true,
+          plan: {
+            select: {
+              id: true,
+              name: true,
+              maxQuotes: true,
+            },
           },
         },
-      },
-    })
+      }),
+    ])
 
     return NextResponse.json({
       quotes,

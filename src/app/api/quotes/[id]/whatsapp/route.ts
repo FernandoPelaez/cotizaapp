@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 
-const RESPONSE_EXPIRATION_MINUTES = 1
+const RESPONSE_EXPIRATION_HOURS = 24
 
 function normalizePhone(phone: string) {
   const digits = phone.replace(/\D/g, "")
@@ -127,7 +127,7 @@ export async function POST(
 
     const sentAt = new Date()
     const responseExpiresAt = new Date(
-      sentAt.getTime() + RESPONSE_EXPIRATION_MINUTES * 60 * 1000
+      sentAt.getTime() + RESPONSE_EXPIRATION_HOURS * 60 * 60 * 1000
     )
 
     await prisma.$transaction([
@@ -177,9 +177,7 @@ export async function POST(
       `Responder cotización: ${responseUrl}`,
       ``,
       `Por favor indícanos si aceptas o rechazas la cotización.`,
-      `Este enlace estará disponible por ${RESPONSE_EXPIRATION_MINUTES} minuto${
-        RESPONSE_EXPIRATION_MINUTES > 1 ? "s" : ""
-      }.`,
+      `Este enlace estará disponible por ${RESPONSE_EXPIRATION_HOURS} horas.`,
     ].join("\n")
 
     const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(

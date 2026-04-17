@@ -54,7 +54,7 @@ export function QuoteResponseActions({
             {canRespond && (
               <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#d8f0da] px-2.5 py-1 text-[11px] font-semibold text-[#0f8a43]">
                 <Clock3 className="h-3 w-3" />
-                Este enlace estará disponible por 1 minuto.
+                Este enlace estará disponible por 24 horas.
               </div>
             )}
           </div>

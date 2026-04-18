@@ -33,6 +33,76 @@ const GoogleIcon = () => (
   </svg>
 )
 
+const CotizaAppLogo = () => (
+  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+    <div style={{ position: "relative", width: "24px", height: "24px", flexShrink: 0 }}>
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        width: "18px", height: "18px",
+        background: "#1E6FC8",
+        borderRadius: "4px",
+        transform: "translate(-50%, -50%) rotate(45deg)"
+      }} />
+      <span style={{
+        position: "absolute", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        color: "#fff", fontSize: "11px", fontWeight: 800, lineHeight: 1,
+        fontFamily: "Sora, sans-serif"
+      }}>$</span>
+      <div style={{
+        position: "absolute", bottom: "-1px", right: "-1px",
+        width: "9px", height: "9px",
+        background: "#16A34A",
+        borderRadius: "50%",
+        border: "1.5px solid #1B3D7A",
+        display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+        <svg width="5" height="5" viewBox="0 0 7 7" fill="none">
+          <path d="M1 3.5l2 2 3-3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <span style={{ fontFamily: "Sora, sans-serif", fontSize: "14px", fontWeight: 700, color: "white", letterSpacing: "-0.2px" }}>
+      Cotiza<span style={{ color: "#4A9EEB" }}>App</span>
+    </span>
+  </div>
+)
+
+const CotizaAppLogoDark = () => (
+  <div style={{ display: "inline-flex", alignItems: "center", gap: "8px" }}>
+    <div style={{ position: "relative", width: "24px", height: "24px", flexShrink: 0 }}>
+      <div style={{
+        position: "absolute", top: "50%", left: "50%",
+        width: "18px", height: "18px",
+        background: "#1E6FC8",
+        borderRadius: "4px",
+        transform: "translate(-50%, -50%) rotate(45deg)"
+      }} />
+      <span style={{
+        position: "absolute", top: "50%", left: "50%",
+        transform: "translate(-50%, -50%)",
+        color: "#fff", fontSize: "11px", fontWeight: 800, lineHeight: 1,
+        fontFamily: "Sora, sans-serif"
+      }}>$</span>
+      <div style={{
+        position: "absolute", bottom: "-1px", right: "-1px",
+        width: "9px", height: "9px",
+        background: "#16A34A",
+        borderRadius: "50%",
+        border: "1.5px solid white",
+        display: "flex", alignItems: "center", justifyContent: "center"
+      }}>
+        <svg width="5" height="5" viewBox="0 0 7 7" fill="none">
+          <path d="M1 3.5l2 2 3-3" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+    </div>
+    <span style={{ fontFamily: "Sora, sans-serif", fontSize: "14px", fontWeight: 700, color: "#1B3D7A", letterSpacing: "-0.2px" }}>
+      Cotiza<span style={{ color: "#1E6FC8" }}>App</span>
+    </span>
+  </div>
+)
+
 const features = [
   "Crea y envía cotizaciones en menos de 2 minutos",
   "Tus clientes reciben un PDF listo para aprobar",
@@ -117,25 +187,31 @@ export default function SignInForm({ initialEmail = "" }: SignInFormProps) {
           .orb { position:absolute; border-radius:50%; filter:blur(55px); pointer-events:none; }
           .orb-1 { width:280px; height:280px; background:rgba(96,165,250,0.16); top:-70px; left:-70px; }
           .orb-2 { width:220px; height:220px; background:rgba(147,197,253,0.11); bottom:-50px; right:-50px; }
-          .dot-live { width:7px; height:7px; border-radius:50%; background:#4ADE80; animation:pulse-live 2.2s ease-in-out infinite; flex-shrink:0; }
-          @keyframes pulse-live { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
           .check-circle { width:18px; height:18px; border-radius:50%; flex-shrink:0; background:rgba(255,255,255,0.13); border:1px solid rgba(255,255,255,0.24); display:flex; align-items:center; justify-content:center; }
           .check-circle::after { content:''; width:5px; height:5px; border-radius:50%; background:#93C5FD; }
           @keyframes errorIn { from{opacity:0;transform:translateY(-6px);} to{opacity:1;transform:translateY(0);} }
           .error-inline { animation: errorIn 0.25s cubic-bezier(0.16,1,0.3,1) both; }
-          .glass-card { border-radius:12px; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.13); }
         `}</style>
 
         <div className="page-enter w-full" style={{ maxWidth:"920px", borderRadius:"20px", border:"1px solid #C8D3E8", boxShadow:"0 20px 60px rgba(27,61,122,0.18), 0 4px 16px rgba(0,0,0,0.06)", overflow:"hidden", display:"grid", gridTemplateColumns:"1fr 1fr", minHeight:"590px", background:"white" }}>
+
+          {/* ── PANEL IZQUIERDO ── */}
           <div className="left-enter left-bg hidden md:flex flex-col justify-between" style={{ background:"#1B3D7A", padding:"36px 32px", position:"relative", overflow:"hidden" }}>
             <div className="orb orb-1" /><div className="orb orb-2" />
+
+            {/* Logo */}
             <div style={{ position:"relative", zIndex:1 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-2" style={{ background:"rgba(255,255,255,0.10)", border:"1px solid rgba(255,255,255,0.18)", borderRadius:"999px" }}>
-                <div className="dot-live" />
-                <span className="sora font-semibold text-sm" style={{ color:"white" }}>CotizaApp</span>
+              <div className="inline-flex items-center" style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.14)",
+                borderRadius: "999px",
+                padding: "6px 12px 6px 8px"
+              }}>
+                <CotizaAppLogo />
               </div>
             </div>
 
+            {/* Copy central */}
             <div style={{ position:"relative", zIndex:1 }}>
               <p className="sora text-xs font-semibold mb-2" style={{ color:"#60A5FA", letterSpacing:"0.1em", textTransform:"uppercase" }}>Plantillas · PDF · Cotizaciones</p>
               <h1 className="sora font-bold mb-3" style={{ fontSize:"22px", color:"white", lineHeight:1.3, letterSpacing:"-0.02em" }}>
@@ -152,24 +228,24 @@ export default function SignInForm({ initialEmail = "" }: SignInFormProps) {
               ))}
             </div>
 
-            <div style={{ position:"relative", zIndex:1 }}>
-              <div className="glass-card" style={{ padding:"12px 16px", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-                <div>
-                  <p className="sora text-xs font-semibold" style={{ color:"white", marginBottom:"2px" }}>"Antes tardaba 1 hora en Word..."</p>
-                  <p className="sora text-xs" style={{ color:"rgba(255,255,255,0.50)" }}>Roberto Sánchez · Guadalajara, MX</p>
-                </div>
-              </div>
-            </div>
+            <div style={{ position:"relative", zIndex:1, minHeight:"20px" }} />
           </div>
 
+          {/* ── PANEL DERECHO ── */}
           <div className="right-enter flex flex-col justify-between" style={{ background:"#DCE3EE", padding:"28px" }}>
+
+            {/* Logo móvil */}
             <div className="flex md:hidden justify-center mb-4">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full" style={{ background:"white", border:"1px solid #C8D3E8" }}>
-                <div className="dot-live" style={{ background:"#1B3D7A" }} />
-                <span className="sora font-semibold text-sm" style={{ color:"#1B3D7A" }}>CotizaApp</span>
+              <div className="inline-flex items-center rounded-full" style={{
+                background: "white",
+                border: "1px solid #C8D3E8",
+                padding: "6px 12px 6px 8px"
+              }}>
+                <CotizaAppLogoDark />
               </div>
             </div>
 
+            {/* Formulario */}
             <div className="form-enter" style={{ background:"white", borderRadius:"16px", border:"1px solid #C8D3E8", padding:"28px 24px", boxShadow:"0 4px 24px rgba(27,61,122,0.10)" }}>
               <h2 className="sora font-bold mb-1" style={{ fontSize:"20px", color:"#1B3D7A", letterSpacing:"-0.02em" }}>Iniciar sesión</h2>
               <p className="text-sm mb-5" style={{ color:"#64748B" }}>
@@ -280,6 +356,7 @@ export default function SignInForm({ initialEmail = "" }: SignInFormProps) {
               © 2026 CotizaApp · Todos los derechos reservados
             </p>
           </div>
+
         </div>
       </div>
     </div>

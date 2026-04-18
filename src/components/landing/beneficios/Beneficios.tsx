@@ -15,9 +15,11 @@ export default function Beneficios() {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement
             const delay = el.dataset.delay ?? "0"
+
             setTimeout(() => {
               el.classList.add("b-card--visible")
             }, Number(delay))
+
             observer.unobserve(el)
           }
         })
@@ -100,10 +102,12 @@ export default function Beneficios() {
     <>
       <style>{`
         .b-section {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
+          width: 100%;
           box-sizing: border-box;
+          position: relative;
+          scroll-margin-top: 76px;
+          padding-top: clamp(52px, 4vw, 64px);
+          padding-bottom: 80px;
         }
         .b-card {
           opacity: 0;
@@ -112,6 +116,7 @@ export default function Beneficios() {
             opacity 0.45s ease,
             transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
             box-shadow 0.25s ease;
+          will-change: transform, opacity;
         }
         .b-card--visible {
           opacity: 1;
@@ -119,12 +124,12 @@ export default function Beneficios() {
         }
         .b-card:hover {
           transform: translateY(-5px) scale(1.015);
-          box-shadow: 0 16px 36px rgba(0,0,0,0.14);
+          box-shadow: 0 16px 36px rgba(0, 0, 0, 0.14);
         }
         .b-shimmer {
           position: absolute;
           inset: 0;
-          background: rgba(255,255,255,0.07);
+          background: rgba(255, 255, 255, 0.07);
           transform: translateX(-120%) skewX(-20deg);
           pointer-events: none;
         }
@@ -140,7 +145,7 @@ export default function Beneficios() {
         }
         @keyframes float {
           0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-4px); }
+          50% { transform: translateY(-4px); }
         }
         .b-badge {
           display: inline-block;
@@ -156,24 +161,36 @@ export default function Beneficios() {
         }
         .b-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
+          grid-template-columns: repeat(4, minmax(0, 1fr));
           gap: 16px;
         }
         @media (max-width: 1024px) {
-          .b-grid { grid-template-columns: repeat(2, 1fr); }
+          .b-section {
+            padding-top: 56px;
+            padding-bottom: 72px;
+          }
+          .b-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 640px) {
+          .b-section {
+            padding-top: 52px;
+            padding-bottom: 64px;
+          }
         }
         @media (max-width: 560px) {
-          .b-grid { grid-template-columns: repeat(1, 1fr); }
+          .b-grid {
+            grid-template-columns: repeat(1, minmax(0, 1fr));
+          }
         }
       `}</style>
 
       <section
         className="b-section w-full px-8 bg-[var(--background)]"
         id="beneficios"
-        style={{ paddingTop: "120px", paddingBottom: "80px", marginTop: "-8px" }}
       >
         <div className="max-w-7xl mx-auto w-full">
-
           <div className="text-center mb-10">
             <span className="b-badge">Beneficios</span>
 
@@ -185,7 +202,10 @@ export default function Beneficios() {
               <span style={{ color: "#1b3d7a" }}>CotizaApp</span>
             </h2>
 
-            <p className="mt-4 max-w-xl mx-auto text-base leading-relaxed" style={{ color: "#64748b" }}>
+            <p
+              className="mt-4 max-w-xl mx-auto text-base leading-relaxed"
+              style={{ color: "#64748b" }}
+            >
               Más clientes cerrados, menos tiempo perdido y una imagen que habla por tu negocio.
             </p>
           </div>
@@ -227,7 +247,6 @@ export default function Beneficios() {
               </div>
             ))}
           </div>
-
         </div>
       </section>
     </>

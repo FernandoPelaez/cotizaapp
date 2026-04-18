@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 type NavItem = {
   label: string
@@ -9,98 +9,167 @@ type NavItem = {
   hash: string
 }
 
+const HEADER_ID = "site-navbar"
+
+const NAV_LINKS: NavItem[] = [
+  {
+    label: "Beneficios",
+    ids: ["beneficios"],
+    hash: "beneficios",
+  },
+  {
+    label: "Funcionalidades",
+    ids: ["funcionalidades"],
+    hash: "funcionalidades",
+  },
+  {
+    label: "Planes",
+    ids: ["planes"],
+    hash: "planes",
+  },
+  {
+    label: "Preguntas frecuentes",
+    ids: ["faq", "preguntas-frecuentes", "cta"],
+    hash: "faq",
+  },
+]
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState("")
 
-  const links: NavItem[] = [
-    {
-      label: "Beneficios",
-      ids: ["beneficios"],
-      hash: "beneficios",
-    },
-    {
-      label: "Funcionalidades",
-      ids: ["funcionalidades"],
-      hash: "funcionalidades",
-    },
-    {
-      label: "Planes",
-      ids: ["planes"],
-      hash: "planes",
-    },
-    {
-      label: "Preguntas frecuentes",
-      ids: ["faq", "preguntas-frecuentes", "cta"],
-      hash: "faq",
-    },
-  ]
-
-  const getSectionElement = (ids: string[]) => {
+  const getSectionElement = useCallback((ids: string[]) => {
     for (const id of ids) {
       const element = document.getElementById(id)
       if (element) return { element, id }
     }
     return null
-  }
+  }, [])
 
-  const scrollToSection = (item: NavItem) => {
-    const found = getSectionElement(item.ids)
-    if (!found) return
+  const getNavbarOffset = useCallback(() => {
+    const navbar = document.getElementById(HEADER_ID)
+    return navbar?.offsetHeight ?? 64
+  }, [])
 
-    const navbarOffset = 88
-    const elementTop =
-      found.element.getBoundingClientRect().top + window.scrollY - navbarOffset
+  const scrollToElement = useCallback(
+    (
+      element: HTMLElement,
+      id: string,
+      activeHash: string,
+      behavior: ScrollBehavior = "smooth"
+    ) => {
+      const navbarOffset = getNavbarOffset()
+      const extraOffset = 12
+      const elementTop = Math.max(
+        element.getBoundingClientRect().top +
+          window.scrollY -
+          navbarOffset -
+          extraOffset,
+        0
+      )
 
-    setActiveSection(item.hash)
+      setActiveSection(activeHash)
+
+      window.scrollTo({
+        top: elementTop,
+        behavior,
+      })
+
+      window.history.pushState(null, "", `#${id}`)
+    },
+    [getNavbarOffset]
+  )
+
+  const scrollToSection = useCallback(
+    (item: NavItem, behavior: ScrollBehavior = "smooth") => {
+      const found = getSectionElement(item.ids)
+      if (!found) return
+
+      scrollToElement(found.element, found.id, item.hash, behavior)
+    },
+    [getSectionElement, scrollToElement]
+  )
+
+  const resetNavbarSelection = useCallback(() => {
+    setActiveSection("")
+    setMenuOpen(false)
+
+    const cleanUrl = `${window.location.pathname}${window.location.search}`
+    window.history.pushState(null, "", cleanUrl || "/")
 
     window.scrollTo({
-      top: elementTop,
+      top: 0,
       behavior: "smooth",
     })
-
-    window.history.pushState(null, "", `#${found.id}`)
-  }
-
-  const resetNavbarSelection = () => {
-    setActiveSection("")
-    window.history.pushState(null, "", "/")
-  }
+  }, [])
 
   useEffect(() => {
-    const handleInitialHash = () => {
-      const hash = window.location.hash.replace("#", "")
+    const handleScroll = () => {
 
+      if (window.scrollY < 40) {
+        setActiveSection("")
+        window.history.replaceState(null, "", window.location.pathname)
+        return
+      }
+
+      const navbarOffset = getNavbarOffset()
+      const currentPosition = window.scrollY + navbarOffset + 24
+
+      let currentActive = ""
+
+      for (const item of NAV_LINKS) {
+        const found = getSectionElement(item.ids)
+        if (!found) continue
+
+        const sectionTop = found.element.offsetTop
+
+        if (currentPosition >= sectionTop) {
+          currentActive = item.hash
+        }
+      }
+
+      setActiveSection(currentActive)
+    }
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace("#", "")
       if (!hash) {
         setActiveSection("")
         return
       }
 
-      const matchedItem = links.find((item) => item.ids.includes(hash))
+      const matchedItem = NAV_LINKS.find((item) => item.ids.includes(hash))
       if (!matchedItem) {
         setActiveSection("")
         return
       }
 
-      setActiveSection(matchedItem.hash)
-    }
-
-    const handleScroll = () => {
-      if (window.scrollY < 40 && !window.location.hash) {
-        setActiveSection("")
+      const found = getSectionElement(matchedItem.ids)
+      if (!found) {
+        setActiveSection(matchedItem.hash)
+        return
       }
+
+      requestAnimationFrame(() => {
+        scrollToElement(found.element, found.id, matchedItem.hash, "auto")
+      })
     }
 
-    handleInitialHash()
+    if (window.location.hash) {
+      window.history.replaceState(null, "", window.location.pathname)
+    }
+    setActiveSection("")
 
-    window.addEventListener("hashchange", handleInitialHash)
-    window.addEventListener("scroll", handleScroll)
+    window.addEventListener("hashchange", handleHashChange)
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    window.addEventListener("resize", handleScroll)
 
     return () => {
-      window.removeEventListener("hashchange", handleInitialHash)
+      window.removeEventListener("hashchange", handleHashChange)
       window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
     }
-  }, [])
+  }, [getNavbarOffset, getSectionElement, scrollToElement])
 
   return (
     <>
@@ -222,7 +291,10 @@ export default function Navbar() {
         }
       `}</style>
 
-      <header className="fixed top-0 left-0 w-full z-50 bg-white border-b border-[var(--border)]">
+      <header
+        id={HEADER_ID}
+        className="fixed top-0 left-0 w-full z-50 bg-white border-b border-[var(--border)]"
+      >
         <div className="w-full px-6 h-16 flex items-center justify-between max-w-[1200px] mx-auto">
           <Link
             href="/"
@@ -233,7 +305,7 @@ export default function Navbar() {
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
-            {links.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.hash
 
               return (
@@ -241,6 +313,7 @@ export default function Navbar() {
                   key={link.hash}
                   type="button"
                   onClick={() => scrollToSection(link)}
+                  aria-current={isActive ? "page" : undefined}
                   className={`nav-link-btn px-4 py-2 text-sm font-medium transition ${
                     isActive ? "active text-[#1B3D7A]" : "text-[#1B3D7A]"
                   }`}
@@ -260,9 +333,11 @@ export default function Navbar() {
             </Link>
 
             <button
+              type="button"
               className="md:hidden flex flex-col gap-1.5 p-1"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Abrir menú"
+              aria-expanded={menuOpen}
             >
               <span
                 className={`block w-5 h-0.5 bg-[var(--primary)] transition-all ${
@@ -285,7 +360,7 @@ export default function Navbar() {
 
         {menuOpen && (
           <div className="md:hidden bg-white border-t border-[var(--border)] px-6 py-4 flex flex-col gap-2">
-            {links.map((link) => {
+            {NAV_LINKS.map((link) => {
               const isActive = activeSection === link.hash
 
               return (
@@ -296,6 +371,7 @@ export default function Navbar() {
                     scrollToSection(link)
                     setMenuOpen(false)
                   }}
+                  aria-current={isActive ? "page" : undefined}
                   className={`nav-link-btn text-left px-4 py-2.5 rounded-xl text-sm font-medium transition ${
                     isActive
                       ? "active text-[#1B3D7A]"

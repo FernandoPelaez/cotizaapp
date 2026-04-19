@@ -261,7 +261,6 @@ export default function TemplateClasica4({ data }: Props) {
           </table>
         </div>
 
-        {/* TOTALES */}
         <div className="flex justify-end mt-5">
           <div className="w-60 rounded-2xl border border-[#f3d6dd] bg-white p-4 shadow-sm">
             <div className="space-y-2 text-sm">
@@ -293,7 +292,6 @@ export default function TemplateClasica4({ data }: Props) {
         </div>
       </div>
 
-      {/* NOTAS */}
       <div className="px-10 mt-6">
         <p className="text-[9px] uppercase tracking-[0.25em] text-[#f09aae] font-bold mb-2">
           Notas
@@ -308,7 +306,6 @@ export default function TemplateClasica4({ data }: Props) {
         </div>
       </div>
 
-      {/* FOOTER */}
       <div className="mt-8 px-10 py-4 bg-[#f9d3da] border-t border-[#f3c7d1] flex justify-between items-center">
         <p className="text-[10px] text-[#9a4057]">✿ Gracias por tu preferencia</p>
         <p className="text-[10px] text-[#9a4057] font-semibold">

@@ -69,8 +69,8 @@ html {
   scroll-behavior: smooth;
   overflow-x: hidden;
   background: var(--background);
-  scrollbar-width: thin;
-  scrollbar-color: #9a9a9a #f1f1f1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 body {
@@ -82,39 +82,24 @@ body {
   line-height: 1.5;
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: #9a9a9a #f1f1f1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 html::-webkit-scrollbar,
 body::-webkit-scrollbar {
-  width: 12px;
+  display: none;
 }
 
-html::-webkit-scrollbar-track,
-body::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 999px;
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-html::-webkit-scrollbar-thumb,
-body::-webkit-scrollbar-thumb {
-  background: #9a9a9a;
-  border-radius: 999px;
-  border: 2px solid #f1f1f1;
-  min-height: 80px;
-}
-
-html::-webkit-scrollbar-thumb:hover,
-body::-webkit-scrollbar-thumb:hover {
-  background: #7f7f7f;
-}
-
-html::-webkit-scrollbar-corner,
-body::-webkit-scrollbar-corner {
-  background: #f1f1f1;
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 .custom-scroll {
@@ -368,4 +353,559 @@ select {
 
 .segment-card:hover .segment-inner {
   transform: scale(1.03);
+}
+
+@keyframes modalBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modalPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes premiumGlow {
+  0% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  100% {
+    opacity: 0.45;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px;
+  background: rgba(5, 10, 25, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: modalBackdropIn 0.22s ease;
+}
+
+.modal-panel {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  border-radius: 30px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background:
+    radial-gradient(circle at 68% 35%, rgba(123, 92, 255, 0.26), transparent 26%),
+    radial-gradient(circle at 74% 52%, rgba(76, 29, 149, 0.2), transparent 24%),
+    linear-gradient(135deg, #06103a 0%, #08164b 45%, #030a2a 100%);
+  box-shadow:
+    0 30px 90px rgba(0, 0, 0, 0.48),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  animation: modalPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-panel::before {
+  content: "";
+  position: absolute;
+  top: 46%;
+  left: 67%;
+  width: 300px;
+  height: 300px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(122, 92, 255, 0.38) 0%, rgba(122, 92, 255, 0) 70%);
+  filter: blur(10px);
+  pointer-events: none;
+  animation: premiumGlow 4.2s ease-in-out infinite;
+}
+
+.modal-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  z-index: 5;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.76);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: rotate(90deg);
+}
+
+.upsell-modal-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+  gap: 24px;
+  align-items: center;
+  min-height: 560px;
+  padding: 28px 28px 22px;
+}
+
+.upsell-modal-copy {
+  position: relative;
+  z-index: 2;
+  padding: 18px 18px 18px 22px;
+  color: #fff;
+}
+
+.upsell-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(234, 179, 8, 0.5);
+  background: rgba(245, 158, 11, 0.08);
+  color: #f5c34b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+.upsell-title {
+  margin: 0;
+  font-size: clamp(34px, 4vw, 56px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.upsell-title-accent {
+  display: block;
+  color: #8b7cff;
+}
+
+.upsell-subtitle {
+  max-width: 520px;
+  margin: 16px 0 24px;
+  font-size: 17px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.upsell-feature-list {
+  display: grid;
+  gap: 12px;
+  max-width: 470px;
+}
+
+.upsell-feature-card {
+  display: grid;
+  grid-template-columns: 50px minmax(0, 1fr);
+  gap: 14px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: rgba(17, 26, 74, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.upsell-feature-card:hover {
+  transform: translateY(-2px);
+  background: rgba(27, 40, 95, 0.72);
+  border-color: rgba(139, 124, 255, 0.24);
+}
+
+.upsell-feature-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, rgba(126, 98, 255, 0.18), rgba(91, 65, 201, 0.16));
+  color: #9d8cff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.upsell-feature-title {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+}
+
+.upsell-feature-desc {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.62);
+  line-height: 1.5;
+}
+
+.upsell-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 26px;
+  flex-wrap: wrap;
+}
+
+.upsell-btn-primary {
+  height: 58px;
+  padding: 0 26px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #7c5cff 0%, #9568ff 52%, #6d4cff 100%);
+  color: white;
+  font-size: 16px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow:
+    0 18px 36px rgba(108, 76, 255, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    filter 0.18s ease;
+  text-decoration: none;
+}
+
+.upsell-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 22px 40px rgba(108, 76, 255, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+  filter: brightness(1.03);
+}
+
+.upsell-btn-secondary {
+  height: 58px;
+  padding: 0 22px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease,
+    border-color 0.18s ease;
+  text-decoration: none;
+}
+
+.upsell-btn-secondary:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.upsell-footnote {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.54);
+}
+
+.upsell-modal-visual {
+  position: relative;
+  z-index: 2;
+  min-height: 470px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 16px 16px 0;
+}
+
+.upsell-visual-badge {
+  position: absolute;
+  top: 16px;
+  right: 22px;
+  padding: 12px 18px;
+  border-radius: 20px;
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  background: rgba(255, 153, 0, 0.08);
+  color: #f4c14e;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  backdrop-filter: blur(10px);
+}
+
+.upsell-doc-stack {
+  position: relative;
+  width: min(100%, 400px);
+  height: 470px;
+}
+
+.upsell-doc-back,
+.upsell-doc-front {
+  position: absolute;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.upsell-doc-back {
+  width: 230px;
+  height: 360px;
+  left: 42px;
+  top: 64px;
+  transform: rotate(4deg);
+  background: linear-gradient(180deg, #2c1d86 0%, #5138d7 55%, #c1b7ff 100%);
+  opacity: 0.9;
+}
+
+.upsell-doc-front {
+  width: 320px;
+  height: 480px;
+  right: 8px;
+  top: 18px;
+  transform: rotate(4deg);
+  background: #ffffff;
+}
+
+.upsell-doc-front-header {
+  height: 92px;
+  background: linear-gradient(90deg, #20115e 0%, #5431cc 48%, #8f5eff 100%);
+  color: white;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 22px 16px;
+}
+
+.upsell-doc-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.upsell-doc-logo-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.upsell-doc-title {
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+.upsell-doc-number {
+  margin-top: 4px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+  text-align: right;
+}
+
+.upsell-doc-body {
+  padding: 20px 22px 18px;
+}
+
+.upsell-doc-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 14px;
+}
+
+.upsell-doc-table-head {
+  display: grid;
+  grid-template-columns: 1.8fr 0.55fr 0.8fr 0.8fr;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #8d5dfd 0%, #5d39dc 100%);
+  font-size: 12px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 10px;
+}
+
+.upsell-doc-row {
+  display: grid;
+  grid-template-columns: 1.8fr 0.55fr 0.8fr 0.8fr;
+  gap: 8px;
+  padding: 11px 4px;
+  font-size: 13px;
+  color: #1e293b;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.upsell-doc-total {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.upsell-doc-total-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  background: #f3efff;
+  color: #5b3fe0;
+  font-weight: 800;
+}
+
+.upsell-preview-chip {
+  position: absolute;
+  right: 0;
+  bottom: 22px;
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(66, 43, 166, 0.96), rgba(88, 63, 203, 0.94));
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 18px 34px rgba(38, 20, 112, 0.28);
+}
+
+@media (max-width: 980px) {
+  .upsell-modal-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 22px 22px 20px;
+  }
+
+  .upsell-modal-copy {
+    padding: 8px 4px 0;
+  }
+
+  .upsell-modal-visual {
+    min-height: auto;
+    padding: 0 0 10px;
+  }
+
+  .upsell-doc-stack {
+    height: 420px;
+  }
+
+  .upsell-doc-front {
+    width: 290px;
+    height: 430px;
+    right: 8px;
+  }
+
+  .upsell-doc-back {
+    width: 210px;
+    height: 320px;
+    left: 30px;
+  }
+
+  .upsell-visual-badge {
+    right: 8px;
+    top: 0;
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+}
+
+@media (max-width: 640px) {
+  .modal-panel {
+    border-radius: 24px;
+  }
+
+  .upsell-modal-grid {
+    padding: 18px 18px 18px;
+    gap: 18px;
+  }
+
+  .upsell-pill {
+    margin-bottom: 16px;
+    font-size: 11px;
+  }
+
+  .upsell-title {
+    font-size: 32px;
+  }
+
+  .upsell-subtitle {
+    font-size: 15px;
+    margin-bottom: 18px;
+  }
+
+  .upsell-feature-list {
+    gap: 10px;
+  }
+
+  .upsell-feature-card {
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px 13px;
+    border-radius: 16px;
+  }
+
+  .upsell-feature-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .upsell-actions {
+    gap: 10px;
+  }
+
+  .upsell-btn-primary,
+  .upsell-btn-secondary {
+    width: 100%;
+    justify-content: center;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .upsell-footnote {
+    width: 100%;
+    font-size: 13px;
+  }
+
+  .upsell-modal-visual {
+    display: none;
+  }
 }

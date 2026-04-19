@@ -76,13 +76,18 @@ model Profile {
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   phone String?
+  rfc   String?
 
   oficio       String?
   businessName String?
+  razonSocial  String?
   description  String?
 
-  city  String?
-  state String?
+  specialties String[] @default([])
+
+  city            String?
+  state           String?
+  direccionFiscal String?
 
   logoUrl    String?
   themeColor String?

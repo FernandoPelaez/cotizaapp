@@ -273,7 +273,6 @@ export default function TemplateClasica2({ data }: Props) {
           </div>
         </div>
 
-        {/* Notas */}
         <div className="mt-10 rounded-2xl border border-gray-200 bg-white p-6">
           <h2 className="text-lg font-bold text-gray-900 mb-3">
             Observaciones

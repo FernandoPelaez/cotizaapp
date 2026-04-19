@@ -145,7 +145,6 @@ export default function TemplateClasica({ data }: Props) {
         </div>
       </div>
 
-      {/* Tabla Servicios */}
       {safeData.services.length > 0 && (
         <div className="px-10 relative z-10">
           <div className="flex items-center gap-3 mb-2">

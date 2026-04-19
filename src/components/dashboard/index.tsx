@@ -45,7 +45,6 @@ interface DashboardProps {
   onDuplicarCotizacion?: (id: string) => void
 }
 
-/* ── Google Fonts: Inter ── */
 const FONT_LINK = `https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap`
 
 const FONT = "'Inter', 'Segoe UI', system-ui, sans-serif"
@@ -83,7 +82,6 @@ function cardHoverStyle(hovered: boolean): React.CSSProperties {
   }
 }
 
-/* ── Mini preview SVG de cotización ── */
 function PlantillaPreviewSVG({
   p,
   activa,
@@ -1068,7 +1066,6 @@ function PlantillaActivaMini({
   )
 }
 
-/* ── Acciones rápidas (mini) ── */
 function AccionesRapidasMini({
   onNuevaCotizacion,
   onVerHistorial,
@@ -1425,7 +1422,6 @@ function PlanCard({
   )
 }
 
-/* ── Plantillas disponibles ── */
 function PlantillasDisponiblesFullWidth({
   plantillas,
   plantillaActivaId,

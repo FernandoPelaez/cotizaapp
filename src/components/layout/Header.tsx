@@ -7,15 +7,7 @@ import {
   Bell,
   CheckCircle2,
   Clock3,
-  FileText,
-  HelpCircle,
-  LayoutDashboard,
-  Palette,
-  PlusCircle,
   Send,
-  Settings,
-  Sparkles,
-  User,
   XCircle,
 } from "lucide-react"
 
@@ -29,15 +21,16 @@ import {
   formatRelativeDateTime,
 } from "@/components/dashboard/cotizaciones/cotizaciones.utils"
 
-const routeMeta: Record<string, { title: string; icon: React.ElementType }> = {
-  "/dashboard": { title: "Panel de inicio", icon: LayoutDashboard },
-  "/cotizaciones/nueva": { title: "Nueva cotización", icon: PlusCircle },
-  "/cotizaciones": { title: "Historial", icon: FileText },
-  "/perfil": { title: "Perfil", icon: User },
-  "/planes": { title: "Planes", icon: Sparkles },
-  "/personalizar": { title: "Personalizar", icon: Palette },
-  "/configuracion": { title: "Configuración", icon: Settings },
-  "/ayuda": { title: "Ayuda", icon: HelpCircle },
+const routeMeta: Record<string, { title: string }> = {
+  "/cotizaciones/nueva": { title: "Nueva cotización" },
+  "/cotizaciones": { title: "Historial" },
+  "/dashboard": { title: "Panel de inicio" },
+  "/plantillas": { title: "Plantillas" },
+  "/planes": { title: "Planes" },
+  "/perfil": { title: "Perfil" },
+  "/personalizar": { title: "Personalizar" },
+  "/configuracion": { title: "Configuración" },
+  "/ayuda": { title: "Ayuda" },
 }
 
 function getSaludo() {
@@ -99,6 +92,15 @@ function isQuoteEventsResponse(
   )
 }
 
+type HeaderProfileResponse = {
+  user?: {
+    profile?: {
+      logoUrl?: string | null
+    } | null
+  }
+  error?: string
+}
+
 export default function Header() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
@@ -109,6 +111,8 @@ export default function Header() {
   const [loadingNotifications, setLoadingNotifications] = useState(false)
   const [events, setEvents] = useState<QuoteEvent[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
+  const [profileLogoUrl, setProfileLogoUrl] = useState("")
+  const [logoError, setLogoError] = useState(false)
 
   const notificationsRef = useRef<HTMLDivElement | null>(null)
 
@@ -130,10 +134,10 @@ export default function Header() {
       .toUpperCase()
   }, [fullName])
 
-  const userLogo = session?.user?.image || null
   const saludo = getSaludo()
   const fecha = getFecha()
   const fullText = `${saludo} — ${fecha}`
+  const showProfileLogo = Boolean(profileLogoUrl) && !logoError
 
   useEffect(() => {
     let i = 0
@@ -148,6 +152,10 @@ export default function Header() {
 
     return () => clearInterval(interval)
   }, [pathname, fullText, saludo])
+
+  useEffect(() => {
+    setLogoError(false)
+  }, [profileLogoUrl])
 
   const loadNotifications = async () => {
     try {
@@ -187,6 +195,34 @@ export default function Header() {
       void loadNotifications()
     }
   }, [status, pathname])
+
+  useEffect(() => {
+    const loadProfileLogo = async () => {
+      try {
+        const res = await fetch("/api/user/profile", {
+          method: "GET",
+          cache: "no-store",
+        })
+
+        const data = (await res.json()) as HeaderProfileResponse
+
+        if (!res.ok) {
+          throw new Error(data.error || "No se pudo cargar el logo del perfil")
+        }
+
+        setProfileLogoUrl(data.user?.profile?.logoUrl?.trim() || "")
+      } catch (error) {
+        console.error("Error cargando logo del perfil en header", error)
+        setProfileLogoUrl("")
+      }
+    }
+
+    if (status === "authenticated") {
+      void loadProfileLogo()
+    } else {
+      setProfileLogoUrl("")
+    }
+  }, [status])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -266,22 +302,7 @@ export default function Header() {
         fontFamily: "'Sora', sans-serif",
       }}
     >
-      <div className="flex items-center gap-3">
-        <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl"
-          style={{ background: "var(--primary-light)" }}
-        >
-          {userLogo ? (
-            <img
-              src={userLogo}
-              alt="logo"
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <LayoutDashboard size={16} color="var(--primary)" />
-          )}
-        </div>
-
+      <div className="flex items-center">
         <div className="flex flex-col leading-tight">
           <h1 className="text-sm font-bold" style={{ color: "var(--foreground)" }}>
             {title}
@@ -311,7 +332,7 @@ export default function Header() {
             aria-label="Abrir notificaciones"
             title="Notificaciones"
           >
-            <Bell className="h-4 w-4 text-neutral-700" />
+            <Bell className="h-4 w-4 text-[#2f5fe3]" />
 
             {unreadCount > 0 && (
               <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
@@ -403,13 +424,22 @@ export default function Header() {
         </div>
 
         <div
-          className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold"
+          className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold"
           style={{
             background: "var(--primary-light)",
             color: "var(--primary)",
           }}
         >
-          {initials}
+          {showProfileLogo ? (
+            <img
+              src={profileLogoUrl}
+              alt="Logo del perfil"
+              className="h-full w-full object-cover"
+              onError={() => setLogoError(true)}
+            />
+          ) : (
+            initials
+          )}
         </div>
       </div>
     </header>

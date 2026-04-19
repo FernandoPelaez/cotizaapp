@@ -261,7 +261,6 @@ export default function TemplateClasica9({ data }: Props) {
         </div>
       </div>
 
-      {/* NOTAS */}
       <div className="px-10 mt-6 text-center">
         <p className="text-[10px] uppercase tracking-[0.28em] text-[#c4a882] mb-2">
           — Notas —

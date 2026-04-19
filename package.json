@@ -4,10 +4,15 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "prisma generate && next build --webpack",
+    "build": "npm run prisma:generate && next build --webpack",
     "start": "next start",
-    "postinstall": "prisma generate",
-    "lint": "eslint"
+    "postinstall": "npm run prisma:generate",
+    "lint": "eslint",
+    "prisma:generate": "prisma generate",
+    "prisma:format": "prisma format",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.6.0",

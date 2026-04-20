@@ -4,22 +4,22 @@ import { useEffect, useMemo, useState } from "react"
 import { useSession } from "next-auth/react"
 import { CheckCircle2, Clock3, RefreshCw, Send, XCircle } from "lucide-react"
 
-import CotizacionesList from "@/components/dashboard/cotizaciones/CotizacionesList"
-import CotizacionesStats from "@/components/dashboard/cotizaciones/CotizacionesStats"
-import DeleteQuoteModal from "@/components/dashboard/cotizaciones/DeleteQuoteModal"
-import {
+import CotizacionesList from "@/components/dashboard/cotizaciones/list/CotizacionesList"
+import CotizacionesStats from "@/components/dashboard/cotizaciones/list/CotizacionesStats"
+import DeleteQuoteModal from "@/components/dashboard/cotizaciones/list/DeleteQuoteModal"
+import type {
   Notice,
   Quote,
   QuoteEvent,
   QuoteEventsResponse,
   QuoteEventType,
   QuotesResponse,
-} from "@/components/dashboard/cotizaciones/cotizaciones.types"
+} from "@/types/cotizacion"
 import {
   formatDateTime,
   formatRelativeDateTime,
   getEventTypeLabel,
-} from "@/components/dashboard/cotizaciones/cotizaciones.utils"
+} from "@/lib/cotizacion"
 
 function getEventStyles(type: QuoteEventType) {
   switch (type) {

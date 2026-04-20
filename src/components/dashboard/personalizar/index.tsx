@@ -1,152 +1,85 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import {
-  Sun,
-  Palette,
-  RotateCcw,
-  Save,
-  Check,
-} from "lucide-react"
-
-type Theme = "claro" | "oscuro"
-
-const accents = [
-  { color: "#2D6BFF", label: "Azul" },
-  { color: "#7F77DD", label: "Violeta" },
-  { color: "#1D9E75", label: "Verde" },
-  { color: "#D85A30", label: "Naranja" },
-  { color: "#D4537E", label: "Rosa" },
-  { color: "#BA7517", label: "Ámbar" },
-]
+import ThemeActionBar from "@/components/dashboard/personalizar/actions/ThemeActionBar"
+import ThemePreview from "@/components/dashboard/personalizar/preview/ThemePreview"
+import AppearanceSection from "@/components/dashboard/personalizar/sections/AppearanceSection"
+import BrandSection from "@/components/dashboard/personalizar/sections/BrandSection"
+import DensitySection from "@/components/dashboard/personalizar/sections/DensitySection"
+import SurfaceSection from "@/components/dashboard/personalizar/sections/SurfaceSection"
+import TypographySection from "@/components/dashboard/personalizar/sections/TypographySection"
+import { useThemeContext } from "@/components/providers/ThemeProvider"
 
 export default function Personalizar() {
-  const [theme, setTheme] = useState<Theme>("claro")
-  const [accent, setAccent] = useState("#2D6BFF")
-  const [saved, setSaved] = useState(false)
-
-  // 🔥 APLICAR CAMBIOS GLOBALMENTE
-  useEffect(() => {
-    const root = document.documentElement
-
-    // Tema
-    if (theme === "oscuro") {
-      root.classList.add("dark")
-    } else {
-      root.classList.remove("dark")
-    }
-
-    // Color principal
-    root.style.setProperty("--primary", accent)
-
-  }, [theme, accent])
-
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
-  }
-
-  const handleReset = () => {
-    setTheme("claro")
-    setAccent("#2D6BFF")
-  }
+  const { isLoading, hasChanges } = useThemeContext()
 
   return (
-    <div className="p-6 flex flex-col gap-6">
+    <div
+      className="flex flex-col px-4 py-4 md:px-5 md:py-5 xl:px-6 xl:py-5"
+      style={{ gap: "16px" }}
+    >
+      <header className="space-y-2">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-1">
+            
+            <p
+              className="max-w-2xl text-sm leading-6"
+              style={{ color: "hsl(var(--text-muted))" }}
+            >
+              Ajusta la apariencia global del dashboard con un sistema de tema
+              controlado, consistente y persistente.
+            </p>
+          </div>
 
-      <h1 className="text-xl font-bold">
-        Personalizar
-      </h1>
-
-      {/* ─── Tema ───────────────── */}
-      <div
-        className="p-4 rounded-xl border"
-        style={{
-          background: "var(--card)",
-          borderColor: "var(--border)"
-        }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Sun size={16} />
-          <span className="font-semibold">Tema</span>
-        </div>
-
-        <div className="flex gap-2">
-          {["claro", "oscuro"].map((t) => (
-            <button
-              key={t}
-              onClick={() => setTheme(t as Theme)}
-              className="px-4 py-2 rounded-lg border"
+          <div className="flex flex-wrap gap-2 lg:justify-end">
+            <span
+              className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
-                background: theme === t ? "var(--primary)" : "transparent",
-                color: theme === t ? "white" : "var(--foreground)",
-                borderColor: "var(--border)"
+                backgroundColor: "hsl(var(--primary-soft))",
+                color: "hsl(var(--primary))",
               }}
             >
-              {t}
-            </button>
-          ))}
-        </div>
-      </div>
+              Tema global
+            </span>
 
-      {/* ─── Color ───────────────── */}
-      <div
-        className="p-4 rounded-xl border"
-        style={{
-          background: "var(--card)",
-          borderColor: "var(--border)"
-        }}
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <Palette size={16} />
-          <span className="font-semibold">Color principal</span>
-        </div>
-
-        <div className="flex gap-3 flex-wrap">
-          {accents.map((a) => (
-            <button
-              key={a.color}
-              onClick={() => setAccent(a.color)}
-              className="w-8 h-8 rounded-full"
+            <span
+              className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
-                background: a.color,
-                outline: accent === a.color
-                  ? `3px solid ${a.color}`
-                  : "2px solid transparent"
+                backgroundColor: isLoading
+                  ? "hsl(var(--background))"
+                  : hasChanges
+                  ? "hsl(var(--warning))"
+                  : "hsl(var(--success))",
+                color: isLoading ? "hsl(var(--foreground))" : "white",
+                border: isLoading
+                  ? "1px solid hsl(var(--border))"
+                  : "none",
               }}
-            />
-          ))}
+            >
+              {isLoading
+                ? "Cargando configuración"
+                : hasChanges
+                ? "Cambios sin guardar"
+                : "Configuración al día"}
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="min-w-0 space-y-4">
+          <AppearanceSection />
+          <BrandSection />
+          <TypographySection />
+          <SurfaceSection />
+          <DensitySection />
+        </div>
+
+        <div className="min-w-0 2xl:sticky 2xl:top-4">
+          <ThemePreview />
         </div>
       </div>
 
-      {/* ─── Botones ───────────────── */}
-      <div className="flex gap-3 justify-end">
-
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg border"
-          style={{
-            borderColor: "var(--border)"
-          }}
-        >
-          <RotateCcw size={14} />
-          Reset
-        </button>
-
-        <button
-          onClick={handleSave}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg"
-          style={{
-            background: saved ? "var(--success)" : "var(--primary)",
-            color: "white"
-          }}
-        >
-          <Save size={14} />
-          {saved ? "Guardado" : "Guardar"}
-        </button>
-
-      </div>
-
+      <ThemeActionBar />
     </div>
   )
 }

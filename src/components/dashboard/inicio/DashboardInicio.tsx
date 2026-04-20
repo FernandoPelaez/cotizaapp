@@ -134,7 +134,7 @@ export default function DashboardInicio({
                 filter: "blur(14px)",
               }}
             />
-            {/* Ambient blob bottom-left */}
+
             <div
               className="pointer-events-none absolute"
               style={{
@@ -146,7 +146,6 @@ export default function DashboardInicio({
               }}
             />
 
-            {/* Close button — top-left */}
             <button
               type="button"
               onClick={handleCloseUpsell}
@@ -168,11 +167,7 @@ export default function DashboardInicio({
             >
               <X size={13} />
             </button>
-
-            {/* ── BODY: left + right ── */}
             <div style={{ display: "flex", alignItems: "stretch", borderRadius: 24, overflow: "hidden" }}>
-
-              {/* ══ LEFT COLUMN ══ */}
               <div
                 style={{
                   flex: 1,
@@ -183,7 +178,7 @@ export default function DashboardInicio({
                   minWidth: 0,
                 }}
               >
-                {/* PREMIUM badge */}
+
                 <div
                   style={{
                     display: "inline-flex",
@@ -206,7 +201,6 @@ export default function DashboardInicio({
                   Premium
                 </div>
 
-                {/* Heading */}
                 <div>
                   <h2
                     id="upsell-title"
@@ -226,7 +220,6 @@ export default function DashboardInicio({
                   </p>
                 </div>
 
-                {/* Sub-copy */}
                 <p style={{ fontSize: 13, color: "rgba(199,189,255,0.65)", lineHeight: 1.6, margin: 0 }}>
                   Te quedan{" "}
                   <span style={{ color: "#c084fc", fontWeight: 700 }}>2 cotizaciones gratis</span>. Más
@@ -312,18 +305,16 @@ export default function DashboardInicio({
                 </div>
               </div>
 
-              {/* ══ RIGHT COLUMN ══ */}
               <div
                 className="hidden md:block"
                 style={{
                   width: 360,
                   flexShrink: 0,
                   position: "relative",
-                  /* exact height so cards don't overflow vertically */
                   minHeight: 460,
                 }}
               >
-                {/* Neon glow blob */}
+
                 <div
                   className="pointer-events-none"
                   style={{
@@ -337,7 +328,6 @@ export default function DashboardInicio({
                   }}
                 />
 
-                {/* ── "SE VE MÁS PRO" badge ── */}
                 <div
                   style={{
                     position: "absolute",

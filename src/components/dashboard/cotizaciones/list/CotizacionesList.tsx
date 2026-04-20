@@ -1,4 +1,4 @@
-import { Quote } from "./cotizaciones.types"
+import type { Quote } from "@/types/cotizacion"
 import CotizacionCard from "./CotizacionCard"
 
 type CotizacionesListProps = {

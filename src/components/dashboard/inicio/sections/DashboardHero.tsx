@@ -7,6 +7,26 @@ type DashboardHeroProps = {
   onExplorarPlantillas?: () => void
 }
 
+const HERO_BG = "var(--primary, #1B3D7A)"
+const HERO_BG_HOVER = "var(--primary-hover, #2A5298)"
+const HERO_TEXT = "var(--sidebar-text, #FFFFFF)"
+const HERO_TEXT_SOFT = "var(--hero-text-soft, rgba(255,255,255,0.92))"
+const HERO_GLOW_SOFT = "var(--hero-glow-soft, rgba(255,255,255,0.04))"
+const HERO_GLOW_MEDIUM = "var(--hero-glow-medium, rgba(255,255,255,0.05))"
+const HERO_GLOW_STRONG = "var(--hero-glow-strong, rgba(255,255,255,0.07))"
+const HERO_CARD_BG = "var(--hero-card-bg, rgba(255,255,255,0.96))"
+const HERO_CARD_BORDER = "var(--hero-card-border, rgba(255,255,255,0.22))"
+const HERO_CARD_TEXT = "var(--hero-card-text, #1B3D7A)"
+const HERO_CARD_MUTED = "var(--hero-card-muted, #64748B)"
+const HERO_CARD_STRONG = "var(--hero-card-strong, #334155)"
+const HERO_CARD_LINE = "var(--hero-card-line, #E2E8F0)"
+const HERO_BUTTON_BG = "var(--hero-button-bg, #FFFFFF)"
+const HERO_BUTTON_TEXT = "var(--hero-button-text, #1B3D7A)"
+const HERO_BUTTON_SHADOW = "0 4px 14px rgba(255,255,255,0.25)"
+const HERO_SHELL_SHADOW = "0 12px 40px rgba(15,37,84,0.28)"
+const HERO_DOC_SHADOW = "0 8px 24px rgba(0,0,0,0.28)"
+const HERO_DOC_SHADOW_LARGE = "0 16px 40px rgba(1,15,50,0.35)"
+
 export default function DashboardHero({
   userConfig: _userConfig,
   onNuevaCotizacion,
@@ -28,20 +48,57 @@ export default function DashboardHero({
         .hero-cards   { animation: heroSlideLeft 0.6s 0.18s cubic-bezier(0.22,1,0.36,1) both; }
       `}</style>
 
-      <section className="hero-section relative overflow-hidden rounded-2xl bg-[linear-gradient(125deg,#0f2554_0%,#1b3d7a_50%,#1e4fa8_100%)] shadow-[0_12px_40px_rgba(15,37,84,0.35)]">
+      <section
+        className="hero-section relative overflow-hidden rounded-2xl"
+        style={{
+          background: HERO_BG,
+          boxShadow: HERO_SHELL_SHADOW,
+        }}
+      >
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%)",
+          }}
+        />
 
-        <div aria-hidden className="pointer-events-none absolute -left-16 top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full bg-[#1040a0]/40 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute right-[20%] top-[-60%] h-[200px] w-[200px] rounded-full bg-[#4f8ef7]/15 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute right-[10%] bottom-[-40%] h-[180px] w-[180px] rounded-full bg-[#a5c4ff]/10 blur-3xl" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -left-16 top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full blur-3xl"
+          style={{ background: HERO_GLOW_SOFT }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-[20%] top-[-60%] h-[200px] w-[200px] rounded-full blur-3xl"
+          style={{ background: HERO_GLOW_MEDIUM }}
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute right-[10%] bottom-[-40%] h-[180px] w-[180px] rounded-full blur-3xl"
+          style={{ background: HERO_GLOW_SOFT }}
+        />
 
-        <div aria-hidden className="pointer-events-none absolute inset-0" style={{
-          backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }} />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
+          }}
+        />
 
         <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
           <div className="absolute left-[26%] top-[8%] rotate-[-14deg] opacity-[0.12]">
-            <div className="w-[100px] rounded-lg border border-white/60 bg-white/5 p-2">
+            <div
+              className="w-[100px] rounded-lg p-2"
+              style={{
+                border: `1px solid ${HERO_CARD_BORDER}`,
+                background: "rgba(255,255,255,0.05)",
+              }}
+            >
               <div className="mb-1.5 flex items-center justify-between">
                 <div className="h-2 w-14 rounded-full bg-white" />
                 <div className="h-1.5 w-6 rounded-full bg-white/60" />
@@ -66,7 +123,13 @@ export default function DashboardHero({
           </div>
 
           <div className="absolute left-[40%] bottom-[6%] rotate-[10deg] opacity-[0.10]">
-            <div className="w-[80px] rounded-lg border border-white/60 bg-white/5 p-1.5">
+            <div
+              className="w-[80px] rounded-lg p-1.5"
+              style={{
+                border: `1px solid ${HERO_CARD_BORDER}`,
+                background: "rgba(255,255,255,0.05)",
+              }}
+            >
               <div className="mb-1 h-1.5 w-10 rounded-full bg-white" />
               <div className="mb-1 h-px w-full bg-white/40" />
               <div className="space-y-0.5">
@@ -79,7 +142,13 @@ export default function DashboardHero({
           </div>
 
           <div className="absolute left-[55%] top-[12%] rotate-[6deg] opacity-[0.09]">
-            <div className="w-[72px] rounded-lg border border-white/60 bg-white/5 p-1.5">
+            <div
+              className="w-[72px] rounded-lg p-1.5"
+              style={{
+                border: `1px solid ${HERO_CARD_BORDER}`,
+                background: "rgba(255,255,255,0.05)",
+              }}
+            >
               <div className="mb-1 h-1.5 w-9 rounded-full bg-white" />
               <div className="mb-1 h-px w-full bg-white/40" />
               <div className="space-y-0.5">
@@ -91,7 +160,13 @@ export default function DashboardHero({
           </div>
 
           <div className="absolute left-[67%] bottom-[10%] rotate-[-7deg] opacity-[0.08]">
-            <div className="w-[60px] rounded-lg border border-white/60 bg-white/5 p-1.5">
+            <div
+              className="w-[60px] rounded-lg p-1.5"
+              style={{
+                border: `1px solid ${HERO_CARD_BORDER}`,
+                background: "rgba(255,255,255,0.05)",
+              }}
+            >
               <div className="mb-1 h-1 w-8 rounded-full bg-white" />
               <div className="space-y-0.5">
                 <div className="h-1 w-full rounded-full bg-white" />
@@ -101,14 +176,17 @@ export default function DashboardHero({
             </div>
           </div>
 
-          <div className="absolute left-[25%] top-0 h-full w-px rotate-[20deg] origin-top bg-gradient-to-b from-transparent via-white/10 to-transparent" />
-          <div className="absolute left-[48%] top-0 h-full w-px rotate-[15deg] origin-top bg-gradient-to-b from-transparent via-white/8 to-transparent" />
-          <div className="absolute left-[65%] top-0 h-full w-px rotate-[10deg] origin-top bg-gradient-to-b from-transparent via-white/6 to-transparent" />
+          <div className="absolute left-[25%] top-0 h-full w-px origin-top rotate-[20deg] bg-gradient-to-b from-transparent via-white/10 to-transparent" />
+          <div className="absolute left-[48%] top-0 h-full w-px origin-top rotate-[15deg] bg-gradient-to-b from-transparent via-white/8 to-transparent" />
+          <div className="absolute left-[65%] top-0 h-full w-px origin-top rotate-[10deg] bg-gradient-to-b from-transparent via-white/6 to-transparent" />
         </div>
 
         <div className="relative flex items-center justify-between gap-4 px-6 py-5 md:px-8 md:py-6">
-          <div className="flex-1 max-w-[480px]">
-            <p className="hero-text text-[13px] font-medium leading-snug text-white">
+          <div className="max-w-[480px] flex-1">
+            <p
+              className="hero-text text-[13px] font-medium leading-snug"
+              style={{ color: HERO_TEXT_SOFT }}
+            >
               Elige una plantilla, agrega tus datos y obtén
               <br />
               un PDF profesional listo para enviar.
@@ -118,7 +196,12 @@ export default function DashboardHero({
               <button
                 type="button"
                 onClick={onNuevaCotizacion}
-                className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[10px] font-bold text-[#16346A] shadow-[0_4px_14px_rgba(255,255,255,0.25)] transition hover:-translate-y-0.5 hover:shadow-[0_6px_18px_rgba(255,255,255,0.35)]"
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold transition hover:-translate-y-0.5 hover:brightness-[0.98]"
+                style={{
+                  background: HERO_BUTTON_BG,
+                  color: HERO_BUTTON_TEXT,
+                  boxShadow: HERO_BUTTON_SHADOW,
+                }}
               >
                 <Plus className="h-2.5 w-2.5" strokeWidth={2.5} />
                 Nueva cotización
@@ -127,63 +210,167 @@ export default function DashboardHero({
           </div>
 
           <div className="hero-cards relative ml-auto hidden h-[148px] w-[135px] shrink-0 lg:block">
-            <div className="absolute left-[-20px] top-1/2 h-[118px] w-[80px] -translate-y-1/2 rotate-[-8deg] overflow-hidden rounded-xl border border-white/20 bg-white/95 p-1.5 shadow-[0_8px_24px_rgba(0,0,0,0.28)]">
-              <div className="inline-block rounded bg-[#1b3d7a] px-1 py-0.5 text-[5.5px] font-bold text-white">TU LOGO</div>
-              <p className="mt-1 text-[6.5px] font-bold leading-none tracking-tight text-[#1b3d7a]">COTIZA…</p>
+            <div
+              className="absolute left-[-20px] top-1/2 h-[118px] w-[80px] -translate-y-1/2 rotate-[-8deg] overflow-hidden rounded-xl p-1.5"
+              style={{
+                border: `1px solid ${HERO_CARD_BORDER}`,
+                background: HERO_CARD_BG,
+                boxShadow: HERO_DOC_SHADOW,
+              }}
+            >
+              <div
+                className="inline-block rounded px-1 py-0.5 text-[5.5px] font-bold text-white"
+                style={{ background: HERO_BG }}
+              >
+                TU LOGO
+              </div>
+              <p
+                className="mt-1 text-[6.5px] font-bold leading-none tracking-tight"
+                style={{ color: HERO_CARD_TEXT }}
+              >
+                COTIZA…
+              </p>
               <div className="mt-1">
-                <p className="text-[4.5px] font-bold text-slate-700">Cliente:</p>
-                <p className="text-[4.5px] leading-tight text-slate-500">Nombre cliente<br />Ciudad 00000</p>
+                <p
+                  className="text-[4.5px] font-bold"
+                  style={{ color: HERO_CARD_STRONG }}
+                >
+                  Cliente:
+                </p>
+                <p
+                  className="text-[4.5px] leading-tight"
+                  style={{ color: HERO_CARD_MUTED }}
+                >
+                  Nombre cliente
+                  <br />
+                  Ciudad 00000
+                </p>
               </div>
               <div className="mt-1.5 space-y-0.5">
-                <div className="h-0.5 rounded-full bg-slate-200" />
-                <div className="h-0.5 w-3/4 rounded-full bg-slate-200" />
-                <div className="h-0.5 rounded-full bg-slate-200" />
+                <div
+                  className="h-0.5 rounded-full"
+                  style={{ background: HERO_CARD_LINE }}
+                />
+                <div
+                  className="h-0.5 w-3/4 rounded-full"
+                  style={{ background: HERO_CARD_LINE }}
+                />
+                <div
+                  className="h-0.5 rounded-full"
+                  style={{ background: HERO_CARD_LINE }}
+                />
               </div>
             </div>
 
-            <div className="absolute right-0 top-1/2 h-[138px] w-[100px] -translate-y-1/2 overflow-hidden rounded-xl bg-white p-1.5 shadow-[0_16px_40px_rgba(1,15,50,0.35)]">
+            <div
+              className="absolute right-0 top-1/2 h-[138px] w-[100px] -translate-y-1/2 overflow-hidden rounded-xl p-1.5"
+              style={{
+                background: HERO_CARD_BG,
+                boxShadow: HERO_DOC_SHADOW_LARGE,
+              }}
+            >
               <div className="flex items-start justify-between">
-                <div className="rounded bg-[#1b3d7a] px-1 py-0.5 text-[5px] font-bold leading-none text-white">TU LOGO</div>
+                <div
+                  className="rounded px-1 py-0.5 text-[5px] font-bold leading-none text-white"
+                  style={{ background: HERO_BG }}
+                >
+                  TU LOGO
+                </div>
                 <div className="text-right">
-                  <p className="text-[5.5px] font-bold leading-none tracking-tight text-[#1b3d7a]">COTIZACIÓN</p>
-                  <p className="mt-0.5 text-[4px] font-semibold text-slate-400">COT-001</p>
+                  <p
+                    className="text-[5.5px] font-bold leading-none tracking-tight"
+                    style={{ color: HERO_CARD_TEXT }}
+                  >
+                    COTIZACIÓN
+                  </p>
+                  <p
+                    className="mt-0.5 text-[4px] font-semibold"
+                    style={{ color: "#94A3B8" }}
+                  >
+                    COT-001
+                  </p>
                 </div>
               </div>
+
               <div className="mt-1.5 text-[4.5px] leading-tight">
-                <p className="font-bold text-slate-700">Cliente:</p>
-                <p className="text-slate-500">Nombre del cliente</p>
-                <p className="text-slate-500">Ciudad, CP 00000</p>
+                <p style={{ color: HERO_CARD_STRONG, fontWeight: 700 }}>
+                  Cliente:
+                </p>
+                <p style={{ color: HERO_CARD_MUTED }}>Nombre del cliente</p>
+                <p style={{ color: HERO_CARD_MUTED }}>Ciudad, CP 00000</p>
               </div>
+
               <div className="mt-1 text-[4.5px] leading-tight">
-                <p><span className="font-bold text-slate-700">Fecha: </span><span className="text-slate-500">17 Abril 2026</span></p>
-                <p><span className="font-bold text-slate-700">Vigencia: </span><span className="text-slate-500">30 días</span></p>
+                <p>
+                  <span style={{ color: HERO_CARD_STRONG, fontWeight: 700 }}>
+                    Fecha:{" "}
+                  </span>
+                  <span style={{ color: HERO_CARD_MUTED }}>17 Abril 2026</span>
+                </p>
+                <p>
+                  <span style={{ color: HERO_CARD_STRONG, fontWeight: 700 }}>
+                    Vigencia:{" "}
+                  </span>
+                  <span style={{ color: HERO_CARD_MUTED }}>30 días</span>
+                </p>
               </div>
+
               <div className="mt-1.5 overflow-hidden rounded">
-                <div className="grid grid-cols-[1.3fr_0.6fr_0.7fr_0.7fr] gap-0.5 bg-[#1b3d7a] px-1 py-0.5 text-[4px] font-bold text-white">
-                  <span>Desc.</span><span>Cant.</span><span>Precio</span><span>Total</span>
+                <div
+                  className="grid grid-cols-[1.3fr_0.6fr_0.7fr_0.7fr] gap-0.5 px-1 py-0.5 text-[4px] font-bold text-white"
+                  style={{ background: HERO_BG }}
+                >
+                  <span>Desc.</span>
+                  <span>Cant.</span>
+                  <span>Precio</span>
+                  <span>Total</span>
                 </div>
                 <div className="space-y-0.5 px-1 py-0.5">
                   {[1, 2].map((row) => (
-                    <div key={row} className="grid grid-cols-[1.3fr_0.6fr_0.7fr_0.7fr] items-center gap-0.5">
-                      <div className="h-0.5 w-4 rounded-full bg-slate-200" />
-                      <div className="h-0.5 w-2 rounded-full bg-slate-200" />
-                      <div className="h-0.5 w-2.5 rounded-full bg-slate-200" />
-                      <div className="h-0.5 w-2.5 rounded-full bg-slate-200" />
+                    <div
+                      key={row}
+                      className="grid grid-cols-[1.3fr_0.6fr_0.7fr_0.7fr] items-center gap-0.5"
+                    >
+                      <div
+                        className="h-0.5 w-4 rounded-full"
+                        style={{ background: HERO_CARD_LINE }}
+                      />
+                      <div
+                        className="h-0.5 w-2 rounded-full"
+                        style={{ background: HERO_CARD_LINE }}
+                      />
+                      <div
+                        className="h-0.5 w-2.5 rounded-full"
+                        style={{ background: HERO_CARD_LINE }}
+                      />
+                      <div
+                        className="h-0.5 w-2.5 rounded-full"
+                        style={{ background: HERO_CARD_LINE }}
+                      />
                     </div>
                   ))}
                 </div>
               </div>
+
               <div className="mt-1 ml-auto w-[52px] space-y-0.5">
                 <div className="flex items-center justify-between text-[4px]">
-                  <span className="font-semibold text-slate-600">Subtotal</span>
-                  <span className="font-bold text-slate-800">$0.00</span>
+                  <span style={{ color: "#475569", fontWeight: 600 }}>
+                    Subtotal
+                  </span>
+                  <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
                 </div>
                 <div className="flex items-center justify-between text-[4px]">
-                  <span className="font-semibold text-slate-600">IVA (16%)</span>
-                  <span className="font-bold text-slate-800">$0.00</span>
+                  <span style={{ color: "#475569", fontWeight: 600 }}>
+                    IVA (16%)
+                  </span>
+                  <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
                 </div>
-                <div className="mt-0.5 flex items-center justify-between rounded-sm bg-[#1b3d7a] px-1 py-0.5 text-[4px] font-bold text-white">
-                  <span>TOTAL</span><span>$0.00</span>
+                <div
+                  className="mt-0.5 flex items-center justify-between rounded-sm px-1 py-0.5 text-[4px] font-bold text-white"
+                  style={{ background: HERO_BG_HOVER }}
+                >
+                  <span>TOTAL</span>
+                  <span>$0.00</span>
                 </div>
               </div>
             </div>

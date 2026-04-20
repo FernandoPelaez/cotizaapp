@@ -1,12 +1,7 @@
+import type { QuotesSummary } from "@/types/cotizacion"
+
 type CotizacionesStatsProps = {
-  summary: {
-    drafts: number
-    sent: number
-    pending: number
-    accepted: number
-    rejected: number
-    expired: number
-  }
+  summary: QuotesSummary
 }
 
 export default function CotizacionesStats({

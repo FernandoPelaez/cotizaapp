@@ -1,4 +1,4 @@
-import { Quote } from "./cotizaciones.types"
+import type { Quote } from "@/types/cotizacion"
 
 type DeleteQuoteModalProps = {
   quote: Quote | null
@@ -50,9 +50,7 @@ export default function DeleteQuoteModal({
             <p className="mt-1 text-sm font-semibold text-neutral-900">
               {quote.title}
             </p>
-            <p className="mt-1 text-sm text-neutral-500">
-              {quote.clientName}
-            </p>
+            <p className="mt-1 text-sm text-neutral-500">{quote.clientName}</p>
           </div>
         </div>
 

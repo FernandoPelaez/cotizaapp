@@ -10,34 +10,59 @@ type QuoteSummaryCardProps = {
   onVerTodo?: () => void
 }
 
-const STATUS_STYLES: Record<
-  Cotizacion["estado"],
-  { label: string; className: string }
-> = {
+type StatusStyle = {
+  label: string
+  background: string
+  color: string
+}
+
+const STATUS_STYLES: Record<Cotizacion["estado"], StatusStyle> = {
   borrador: {
     label: "Borrador",
-    className: "bg-violet-100 text-violet-700",
+    background: "#F3E8FF",
+    color: "#7E22CE",
   },
   pendiente: {
     label: "Pendiente",
-    className: "bg-amber-100 text-amber-700",
+    background: "#FEF3C7",
+    color: "#B45309",
   },
   aprobada: {
     label: "Aceptada",
-    className: "bg-emerald-100 text-emerald-700",
+    background: "#DCFCE7",
+    color: "#15803D",
   },
   rechazada: {
     label: "Rechazada",
-    className: "bg-rose-100 text-rose-700",
+    background: "#FFE4E6",
+    color: "#BE123C",
   },
   expirada: {
     label: "Expirada",
-    className: "bg-orange-100 text-orange-700",
+    background: "#FFEDD5",
+    color: "#C2410C",
   },
 }
 
 const CHANGE_EVERY_MS = 10000
 const FADE_DURATION_MS = 220
+
+const CARD_BACKGROUND = "var(--card, #FFFFFF)"
+const CARD_BORDER = "var(--border, #E6EBF5)"
+const CARD_FOREGROUND = "var(--foreground, #0F172A)"
+const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
+const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
+const CARD_ACCENT_BG = "var(--primary-soft, #EEF2FF)"
+const CARD_ACCENT_BG_HOVER = "var(--primary-light, #E4EBFF)"
+const CARD_ACCENT_TEXT = "var(--primary, #1B3D7A)"
+const CARD_ACCENT_TEXT_STRONG = "var(--primary-hover, #2447D5)"
+const CARD_EMPTY_BG = "var(--background, #F8FAFC)"
+const CARD_ACTIVE_DOT = "var(--primary, #1F4ED8)"
+const CARD_INACTIVE_DOT = "var(--border, #E2E8F0)"
+const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
+const CARD_RADIUS = "20px"
+const INNER_RADIUS = "14px"
+const CHIP_RADIUS = "9999px"
 
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("es-MX", {
@@ -92,27 +117,68 @@ export default function QuoteSummaryCard({
 
   if (!cotizacion) {
     return (
-      <article className="flex h-[216px] w-full flex-col rounded-2xl border border-[#e6ebf5] bg-white p-4 shadow-sm">
+      <article
+        className="flex h-[216px] w-full flex-col p-4"
+        style={{
+          background: CARD_BACKGROUND,
+          border: `1px solid ${CARD_BORDER}`,
+          boxShadow: CARD_SHADOW,
+          borderRadius: CARD_RADIUS,
+        }}
+      >
         <div className="flex items-center justify-between">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eef2ff]">
-            <FileText className="h-4 w-4 text-[#1b3d7a]" />
+          <div
+            className="flex h-8 w-8 items-center justify-center"
+            style={{
+              background: CARD_ACCENT_BG,
+              borderRadius: "10px",
+            }}
+          >
+            <FileText
+              className="h-4 w-4"
+              style={{ color: CARD_ACCENT_TEXT }}
+            />
           </div>
 
           <button
             type="button"
             onClick={onVerTodo}
-            className="inline-flex items-center gap-1 rounded-md bg-[#eef2ff] px-2 py-0.5 text-[9px] font-semibold text-[#2447d5] transition hover:bg-[#e4ebff]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition"
+            style={{
+              background: CARD_ACCENT_BG,
+              color: CARD_ACCENT_TEXT_STRONG,
+              borderRadius: "10px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = CARD_ACCENT_BG
+            }}
           >
             Ver todo
           </button>
         </div>
 
         <div className="mt-3 flex flex-1 items-center">
-          <div className="w-full rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-4 text-center">
-            <p className="text-[11px] font-semibold text-slate-700">
+          <div
+            className="w-full px-3 py-4 text-center"
+            style={{
+              background: CARD_EMPTY_BG,
+              border: `1px dashed ${CARD_BORDER}`,
+              borderRadius: INNER_RADIUS,
+            }}
+          >
+            <p
+              className="text-[11px] font-semibold"
+              style={{ color: CARD_FOREGROUND }}
+            >
               No hay cotizaciones aún
             </p>
-            <p className="mt-0.5 text-[10px] text-slate-500">
+            <p
+              className="mt-0.5 text-[10px]"
+              style={{ color: CARD_TEXT_MUTED }}
+            >
               Cuando crees una, aquí aparecerá la más reciente.
             </p>
           </div>
@@ -127,18 +193,44 @@ export default function QuoteSummaryCard({
     : "translate-y-2 opacity-0"
 
   return (
-    <article className="flex h-[216px] w-full flex-col rounded-2xl border border-[#e6ebf5] bg-white p-4 shadow-sm">
+    <article
+      className="flex h-[216px] w-full flex-col p-4"
+      style={{
+        background: CARD_BACKGROUND,
+        border: `1px solid ${CARD_BORDER}`,
+        boxShadow: CARD_SHADOW,
+        borderRadius: CARD_RADIUS,
+      }}
+    >
       <div className="flex items-start justify-between gap-2">
         <div
-          className={`flex h-8 w-8 items-center justify-center rounded-lg bg-[#eef2ff] transition-all duration-300 ease-out [transition-delay:0ms] ${animationClass}`}
+          className={`flex h-8 w-8 items-center justify-center transition-all duration-300 ease-out [transition-delay:0ms] ${animationClass}`}
+          style={{
+            background: CARD_ACCENT_BG,
+            borderRadius: "10px",
+          }}
         >
-          <FileText className="h-4 w-4 text-[#1b3d7a]" />
+          <FileText
+            className="h-4 w-4"
+            style={{ color: CARD_ACCENT_TEXT }}
+          />
         </div>
 
         <button
           type="button"
           onClick={onVerTodo}
-          className={`inline-flex items-center gap-1 rounded-md bg-[#eef2ff] px-2 py-0.5 text-[9px] font-semibold text-[#2447d5] transition-all duration-300 ease-out hover:bg-[#e4ebff] [transition-delay:20ms] ${animationClass}`}
+          className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition-all duration-300 ease-out [transition-delay:20ms] ${animationClass}`}
+          style={{
+            background: CARD_ACCENT_BG,
+            color: CARD_ACCENT_TEXT_STRONG,
+            borderRadius: "10px",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = CARD_ACCENT_BG
+          }}
         >
           Ver todo
         </button>
@@ -146,7 +238,8 @@ export default function QuoteSummaryCard({
 
       <div className="mt-3 flex flex-1 flex-col">
         <div
-          className={`flex items-center justify-between text-[10px] text-slate-400 transition-all duration-300 ease-out [transition-delay:40ms] ${animationClass}`}
+          className={`flex items-center justify-between text-[10px] transition-all duration-300 ease-out [transition-delay:40ms] ${animationClass}`}
+          style={{ color: CARD_TEXT_SOFT }}
         >
           <span className="font-medium uppercase">
             COT-{String(cotizacion.numero).padStart(3, "0")}
@@ -155,13 +248,15 @@ export default function QuoteSummaryCard({
         </div>
 
         <h3
-          className={`mt-1 line-clamp-2 text-[12px] font-bold leading-tight text-slate-900 transition-all duration-300 ease-out [transition-delay:80ms] ${animationClass}`}
+          className={`mt-1 line-clamp-2 text-[12px] font-bold leading-tight transition-all duration-300 ease-out [transition-delay:80ms] ${animationClass}`}
+          style={{ color: CARD_FOREGROUND }}
         >
           {cotizacion.nombre}
         </h3>
 
         <p
-          className={`mt-1 line-clamp-2 text-[10px] leading-relaxed text-slate-500 transition-all duration-300 ease-out [transition-delay:120ms] ${animationClass}`}
+          className={`mt-1 line-clamp-2 text-[10px] leading-relaxed transition-all duration-300 ease-out [transition-delay:120ms] ${animationClass}`}
+          style={{ color: CARD_TEXT_MUTED }}
         >
           {cotizacion.descripcion ?? "Sin descripción"}
         </p>
@@ -169,12 +264,20 @@ export default function QuoteSummaryCard({
         <div
           className={`mt-3 flex items-end justify-between gap-2 transition-all duration-300 ease-out [transition-delay:160ms] ${animationClass}`}
         >
-          <p className="text-[12px] font-extrabold tracking-tight text-slate-900">
+          <p
+            className="text-[12px] font-extrabold tracking-tight"
+            style={{ color: CARD_FOREGROUND }}
+          >
             {formatCurrency(cotizacion.monto)}
           </p>
 
           <span
-            className={`inline-flex shrink-0 rounded-full px-2 py-0.5 text-[9px] font-semibold ${status.className}`}
+            className="inline-flex shrink-0 px-2 py-0.5 text-[9px] font-semibold"
+            style={{
+              background: status.background,
+              color: status.color,
+              borderRadius: CHIP_RADIUS,
+            }}
           >
             {status.label}
           </span>
@@ -187,11 +290,16 @@ export default function QuoteSummaryCard({
             {items.map((_, index) => (
               <span
                 key={index}
-                className={
-                  index === currentIndex
-                    ? "h-1.5 w-4 rounded-full bg-[#1f4ed8] transition-all duration-300"
-                    : "h-1.5 w-2.5 rounded-full bg-slate-200 transition-all duration-300"
-                }
+                className="transition-all duration-300"
+                style={{
+                  height: "6px",
+                  width: index === currentIndex ? "16px" : "10px",
+                  borderRadius: CHIP_RADIUS,
+                  background:
+                    index === currentIndex
+                      ? CARD_ACTIVE_DOT
+                      : CARD_INACTIVE_DOT,
+                }}
               />
             ))}
           </div>
@@ -199,7 +307,18 @@ export default function QuoteSummaryCard({
           <button
             type="button"
             onClick={() => onVerDetalle?.(cotizacion)}
-            className="inline-flex items-center gap-1 rounded-md bg-[#eef2ff] px-2 py-0.5 text-[9px] font-semibold text-[#2447d5] transition hover:bg-[#e4ebff]"
+            className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition"
+            style={{
+              background: CARD_ACCENT_BG,
+              color: CARD_ACCENT_TEXT_STRONG,
+              borderRadius: "10px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = CARD_ACCENT_BG
+            }}
           >
             Ver detalle
             <ArrowRight className="h-2.5 w-2.5" />

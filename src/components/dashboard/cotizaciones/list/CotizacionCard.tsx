@@ -1,12 +1,12 @@
 import Link from "next/link"
 
-import { Quote } from "./cotizaciones.types"
+import type { Quote } from "@/types/cotizacion"
 import {
   formatCurrency,
   formatDate,
   getStatusClasses,
   getStatusLabel,
-} from "./cotizaciones.utils"
+} from "@/lib/cotizacion"
 
 type CotizacionCardProps = {
   quote: Quote

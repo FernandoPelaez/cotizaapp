@@ -88,3 +88,4 @@ export type QuotesSummary = {
   rejected: number
   expired: number
 }
+

@@ -23,6 +23,26 @@ type SidebarProfileResponse = {
   error?: string
 }
 
+const SIDEBAR_BG = "var(--primary, #1B3D7A)"
+const SIDEBAR_BG_HOVER = "var(--primary-hover, #2A5298)"
+const SIDEBAR_TEXT = "var(--sidebar-text, #FFFFFF)"
+const SIDEBAR_TEXT_MUTED = "var(--sidebar-text-muted, rgba(255,255,255,0.72))"
+const SIDEBAR_TEXT_SOFT = "var(--sidebar-text-soft, rgba(255,255,255,0.5))"
+const SIDEBAR_TEXT_FAINT = "var(--sidebar-text-faint, rgba(255,255,255,0.2))"
+const SIDEBAR_BORDER = "var(--sidebar-border, rgba(255,255,255,0.08))"
+const SIDEBAR_DIVIDER = "var(--sidebar-divider, rgba(255,255,255,0.1))"
+const SIDEBAR_SURFACE = "var(--sidebar-surface, rgba(255,255,255,0.08))"
+const SIDEBAR_SURFACE_BORDER =
+  "var(--sidebar-surface-border, rgba(255,255,255,0.12))"
+const SIDEBAR_HOVER_BG = "var(--sidebar-hover-bg, rgba(255,255,255,0.1))"
+const SIDEBAR_BRAND_ACCENT = "var(--sidebar-brand-accent, #93C5FD)"
+const SIDEBAR_ICON_SOFT = "var(--sidebar-icon-soft, #E5E7EB)"
+
+const SIDEBAR_DANGER_BG = "var(--sidebar-danger-bg, rgba(220,38,38,0.2))"
+const SIDEBAR_DANGER_BORDER =
+  "var(--sidebar-danger-border, rgba(252,165,165,0.35))"
+const SIDEBAR_DANGER_TEXT = "var(--sidebar-danger-text, #FCA5A5)"
+
 export default function Sidebar() {
   const pathname = usePathname()
   const { data: session, status } = useSession()
@@ -88,19 +108,19 @@ export default function Sidebar() {
         href={link.href}
         className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-150"
         style={{
-          background: isActive ? "#2A5298" : "transparent",
-          color: isActive ? "#FFFFFF" : "rgba(255,255,255,0.72)",
+          background: isActive ? SIDEBAR_BG_HOVER : "transparent",
+          color: isActive ? SIDEBAR_TEXT : SIDEBAR_TEXT_MUTED,
         }}
         onMouseEnter={(e) => {
           if (!isActive) {
-            e.currentTarget.style.background = "rgba(255,255,255,0.1)"
-            e.currentTarget.style.color = "#FFFFFF"
+            e.currentTarget.style.background = SIDEBAR_HOVER_BG
+            e.currentTarget.style.color = SIDEBAR_TEXT
           }
         }}
         onMouseLeave={(e) => {
           if (!isActive) {
             e.currentTarget.style.background = "transparent"
-            e.currentTarget.style.color = "rgba(255,255,255,0.72)"
+            e.currentTarget.style.color = SIDEBAR_TEXT_MUTED
           }
         }}
       >
@@ -114,45 +134,41 @@ export default function Sidebar() {
     <aside
       className="hidden h-screen w-64 md:flex md:flex-col"
       style={{
-        background: "#1B3D7A",
-        borderRight: "1px solid rgba(255,255,255,0.08)",
+        background: SIDEBAR_BG,
+        borderRight: `1px solid ${SIDEBAR_BORDER}`,
         fontFamily: "'Sora', sans-serif",
       }}
     >
-      {/* Logo  */}
       <div
-        className="flex h-[72px] items-center gap-2 px-5 flex-shrink-0"
+        className="flex h-[72px] flex-shrink-0 items-center gap-2 px-5"
         style={{
-          borderBottom: "1px solid rgba(255,255,255,0.08)",
+          borderBottom: `1px solid ${SIDEBAR_BORDER}`,
         }}
       >
         <div
-          className="h-2 w-2 rounded-full flex-shrink-0"
-          style={{ background: "white" }}
+          className="h-2 w-2 flex-shrink-0 rounded-full"
+          style={{ background: SIDEBAR_TEXT }}
         />
         <span className="text-base font-bold tracking-tight">
-          <span style={{ color: "#FFFFFF" }}>Cotiza</span>
-          <span style={{ color: "#93C5FD" }}>App</span>
+          <span style={{ color: SIDEBAR_TEXT }}>Cotiza</span>
+          <span style={{ color: SIDEBAR_BRAND_ACCENT }}>App</span>
         </span>
       </div>
 
-      {/* Nav principal */}
       <nav className="flex flex-col gap-0.5 px-3 pt-4">
         {primaryLinks.map((link) => (
           <NavLink key={link.href} link={link} />
         ))}
       </nav>
 
-      {/* Divisor entre secciones */}
       <div
         style={{
           height: "1px",
-          background: "rgba(255,255,255,0.1)",
+          background: SIDEBAR_DIVIDER,
           margin: "12px 20px",
         }}
       />
 
-      {/* Nav secundario */}
       <nav className="flex flex-col gap-0.5 px-3">
         {secondaryLinks.map((link) => (
           <NavLink key={link.href} link={link} />
@@ -161,11 +177,10 @@ export default function Sidebar() {
 
       <div className="flex-1" />
 
-      {/* Footer  */}
       <div style={{ padding: "0 0.875rem 1rem" }}>
         <div
           style={{
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            borderTop: `1px solid ${SIDEBAR_DIVIDER}`,
             paddingTop: "10px",
           }}
         >
@@ -177,7 +192,7 @@ export default function Sidebar() {
           >
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold"
-              style={{ background: "#2A5298", color: "#FFFFFF" }}
+              style={{ background: SIDEBAR_BG_HOVER, color: SIDEBAR_TEXT }}
             >
               {showProfileLogo ? (
                 <img
@@ -194,13 +209,13 @@ export default function Sidebar() {
             <div className="flex-1 overflow-hidden text-left">
               <p
                 className="truncate text-xs font-semibold"
-                style={{ color: "#FFFFFF", margin: 0 }}
+                style={{ color: SIDEBAR_TEXT, margin: 0 }}
               >
                 {session?.user?.name || "Usuario"}
               </p>
               <p
                 className="truncate text-xs"
-                style={{ color: "rgba(255,255,255,0.5)", margin: 0 }}
+                style={{ color: SIDEBAR_TEXT_SOFT, margin: 0 }}
               >
                 {session?.user?.email || ""}
               </p>
@@ -211,20 +226,20 @@ export default function Sidebar() {
               onClick={() => signOut({ callbackUrl: "/auth/signin" })}
               className="flex h-9 w-9 items-center justify-center rounded-xl transition-all duration-150"
               style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "1px solid rgba(255,255,255,0.12)",
+                background: SIDEBAR_SURFACE,
+                border: `1px solid ${SIDEBAR_SURFACE_BORDER}`,
                 cursor: "pointer",
-                color: "#E5E7EB",
+                color: SIDEBAR_ICON_SOFT,
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(220,38,38,0.2)"
-                e.currentTarget.style.border = "1px solid rgba(252,165,165,0.35)"
-                e.currentTarget.style.color = "#FCA5A5"
+                e.currentTarget.style.background = SIDEBAR_DANGER_BG
+                e.currentTarget.style.border = `1px solid ${SIDEBAR_DANGER_BORDER}`
+                e.currentTarget.style.color = SIDEBAR_DANGER_TEXT
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.08)"
-                e.currentTarget.style.border = "1px solid rgba(255,255,255,0.12)"
-                e.currentTarget.style.color = "#E5E7EB"
+                e.currentTarget.style.background = SIDEBAR_SURFACE
+                e.currentTarget.style.border = `1px solid ${SIDEBAR_SURFACE_BORDER}`
+                e.currentTarget.style.color = SIDEBAR_ICON_SOFT
               }}
               aria-label="Cerrar sesión"
               title="Cerrar sesión"
@@ -235,7 +250,7 @@ export default function Sidebar() {
 
           <p
             className="mt-1 px-2 text-xs"
-            style={{ color: "rgba(255,255,255,0.2)" }}
+            style={{ color: SIDEBAR_TEXT_FAINT }}
           >
             v1.0
           </p>

@@ -1,12 +1,20 @@
 "use client"
 
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { useEffect, useMemo, useRef, useState } from "react"
 import {
   Bell,
   CheckCircle2,
   Clock3,
+  PanelLeftClose,
+  PanelLeftOpen,
   Send,
   XCircle,
 } from "lucide-react"
@@ -15,11 +23,11 @@ import type {
   QuoteEvent,
   QuoteEventsResponse,
   QuoteEventType,
-} from "@/components/dashboard/cotizaciones/cotizaciones.types"
+} from "@/types/cotizacion"
 import {
   formatDateTime,
   formatRelativeDateTime,
-} from "@/components/dashboard/cotizaciones/cotizaciones.utils"
+} from "@/lib/cotizacion"
 
 const routeMeta: Record<string, { title: string }> = {
   "/cotizaciones/nueva": { title: "Nueva cotización" },
@@ -31,6 +39,35 @@ const routeMeta: Record<string, { title: string }> = {
   "/personalizar": { title: "Personalizar" },
   "/configuracion": { title: "Configuración" },
   "/ayuda": { title: "Ayuda" },
+}
+
+const HEADER_BG = "var(--card, #FFFFFF)"
+const HEADER_BORDER = "var(--border, #E5E7EB)"
+const HEADER_TEXT = "var(--foreground, #0F172A)"
+const HEADER_TEXT_MUTED = "var(--text-muted, #64748B)"
+const HEADER_TEXT_SOFT = "var(--text-muted, #94A3B8)"
+
+const HEADER_BUTTON_BG = "var(--card, #FFFFFF)"
+const HEADER_BUTTON_BORDER = "var(--border, #E5E7EB)"
+const HEADER_BUTTON_ICON = "var(--primary, #1B3D7A)"
+const HEADER_BUTTON_HOVER_BG = "var(--primary-soft, #EEF2FF)"
+const HEADER_BUTTON_HOVER_BORDER = "var(--primary-light, #DBE4FF)"
+
+const HEADER_DROPDOWN_BG = "var(--card, #FFFFFF)"
+const HEADER_DROPDOWN_BORDER = "var(--border, #E5E7EB)"
+const HEADER_DROPDOWN_SURFACE = "var(--background, #F8FAFC)"
+const HEADER_TAG_BG = "var(--primary-soft, #EEF2FF)"
+const HEADER_TAG_TEXT = "var(--primary, #1B3D7A)"
+const HEADER_UNREAD_BADGE_BG = "var(--error, #EF4444)"
+const HEADER_UNREAD_BADGE_TEXT = "#FFFFFF"
+const HEADER_PROFILE_BG = "var(--primary-light, #DBEAFE)"
+const HEADER_PROFILE_TEXT = "var(--primary, #1B3D7A)"
+
+type EventVisualStyle = {
+  border: string
+  background: string
+  color: string
+  icon: ReactNode
 }
 
 function getSaludo() {
@@ -49,31 +86,41 @@ function getFecha() {
   })
 }
 
-function getEventStyles(type: QuoteEventType) {
+function getEventStyles(type: QuoteEventType): EventVisualStyle {
   switch (type) {
     case "QUOTE_SENT":
       return {
-        container: "border-blue-200 bg-blue-50 text-blue-700",
+        border: "#BFDBFE",
+        background: "#EFF6FF",
+        color: "#1D4ED8",
         icon: <Send className="h-4 w-4" />,
       }
     case "QUOTE_ACCEPTED":
       return {
-        container: "border-emerald-200 bg-emerald-50 text-emerald-700",
+        border: "#A7F3D0",
+        background: "#ECFDF5",
+        color: "#047857",
         icon: <CheckCircle2 className="h-4 w-4" />,
       }
     case "QUOTE_REJECTED":
       return {
-        container: "border-red-200 bg-red-50 text-red-700",
+        border: "#FECACA",
+        background: "#FEF2F2",
+        color: "#B91C1C",
         icon: <XCircle className="h-4 w-4" />,
       }
     case "QUOTE_EXPIRED":
       return {
-        container: "border-slate-200 bg-slate-100 text-slate-700",
+        border: "#E2E8F0",
+        background: "#F8FAFC",
+        color: "#475569",
         icon: <Clock3 className="h-4 w-4" />,
       }
     default:
       return {
-        container: "border-neutral-200 bg-neutral-100 text-neutral-700",
+        border: "#E2E8F0",
+        background: "#F8FAFC",
+        color: "#475569",
         icon: <Bell className="h-4 w-4" />,
       }
   }
@@ -101,9 +148,19 @@ type HeaderProfileResponse = {
   error?: string
 }
 
-export default function Header() {
+type HeaderProps = {
+  onToggleSidebar?: () => void
+  sidebarCollapsed?: boolean
+}
+
+export default function Header({
+  onToggleSidebar,
+  sidebarCollapsed,
+}: HeaderProps) {
   const pathname = usePathname()
   const { data: session, status } = useSession()
+
+  const isPersonalizar = pathname.startsWith("/personalizar")
 
   const [displayText, setDisplayText] = useState("")
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -146,7 +203,6 @@ export default function Header() {
     const interval = setInterval(() => {
       i++
       setDisplayText(fullText.slice(0, i))
-
       if (i >= fullText.length) clearInterval(interval)
     }, i < saludo.length ? 35 : 65)
 
@@ -160,11 +216,9 @@ export default function Header() {
   const loadNotifications = async () => {
     try {
       setLoadingNotifications(true)
-
       const res = await fetch("/api/quotes/events?limit=5", {
         cache: "no-store",
       })
-
       const data: QuoteEventsResponse | { error?: string } = await res.json()
 
       if (!res.ok) {
@@ -176,7 +230,9 @@ export default function Header() {
       }
 
       if (!isQuoteEventsResponse(data)) {
-        throw new Error("La respuesta de notificaciones no tiene el formato esperado")
+        throw new Error(
+          "La respuesta de notificaciones no tiene el formato esperado"
+        )
       }
 
       setEvents(data.events)
@@ -203,13 +259,10 @@ export default function Header() {
           method: "GET",
           cache: "no-store",
         })
-
         const data = (await res.json()) as HeaderProfileResponse
-
         if (!res.ok) {
           throw new Error(data.error || "No se pudo cargar el logo del perfil")
         }
-
         setProfileLogoUrl(data.user?.profile?.logoUrl?.trim() || "")
       } catch (error) {
         console.error("Error cargando logo del perfil en header", error)
@@ -235,26 +288,18 @@ export default function Header() {
     }
 
     document.addEventListener("mousedown", handleClickOutside)
-
-    return () => {
+    return () =>
       document.removeEventListener("mousedown", handleClickOutside)
-    }
   }, [])
 
   const markNotificationsAsRead = async () => {
     try {
       setMarkingNotifications(true)
-
       const res = await fetch("/api/quotes/events", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          readAll: true,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ readAll: true }),
       })
-
       const data: { error?: string; unreadCount?: number } = await res.json()
 
       if (!res.ok) {
@@ -264,7 +309,6 @@ export default function Header() {
       }
 
       setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0)
-
       setEvents((prev) =>
         prev.map((event) => ({
           ...event,
@@ -297,24 +341,54 @@ export default function Header() {
       className="flex flex-shrink-0 items-center justify-between px-6"
       style={{
         height: "72px",
-        background: "var(--card)",
-        borderBottom: "1px solid var(--border)",
+        background: HEADER_BG,
+        borderBottom: `1px solid ${HEADER_BORDER}`,
         fontFamily: "'Sora', sans-serif",
       }}
     >
-      <div className="flex items-center">
+      <div className="flex items-center gap-3">
+        {isPersonalizar && onToggleSidebar && (
+          <button
+            type="button"
+            onClick={onToggleSidebar}
+            className="flex h-9 w-9 items-center justify-center rounded-lg transition"
+            style={{
+              background: HEADER_BUTTON_BG,
+              border: `1px solid ${HEADER_BUTTON_BORDER}`,
+              color: HEADER_TEXT_MUTED,
+              boxShadow: "0 1px 2px rgba(15,23,42,0.06)",
+            }}
+            title={sidebarCollapsed ? "Mostrar sidebar" : "Ocultar sidebar"}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = HEADER_BUTTON_HOVER_BG
+              e.currentTarget.style.border = `1px solid ${HEADER_BUTTON_HOVER_BORDER}`
+              e.currentTarget.style.color = HEADER_BUTTON_ICON
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = HEADER_BUTTON_BG
+              e.currentTarget.style.border = `1px solid ${HEADER_BUTTON_BORDER}`
+              e.currentTarget.style.color = HEADER_TEXT_MUTED
+            }}
+          >
+            {sidebarCollapsed ? (
+              <PanelLeftOpen className="h-4 w-4" />
+            ) : (
+              <PanelLeftClose className="h-4 w-4" />
+            )}
+          </button>
+        )}
+
         <div className="flex flex-col leading-tight">
-          <h1 className="text-sm font-bold" style={{ color: "var(--foreground)" }}>
+          <h1 className="text-sm font-bold" style={{ color: HEADER_TEXT }}>
             {title}
           </h1>
-
           <span
             className="text-xs"
             style={{
-              color: "var(--text-muted)",
+              color: HEADER_TEXT_MUTED,
               whiteSpace: "nowrap",
               overflow: "hidden",
-              borderRight: "2px solid var(--primary)",
+              borderRight: `2px solid ${HEADER_BUTTON_ICON}`,
               paddingRight: "4px",
             }}
           >
@@ -328,27 +402,52 @@ export default function Header() {
           <button
             type="button"
             onClick={() => void handleToggleNotifications()}
-            className="relative flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white shadow-sm transition hover:bg-neutral-50"
+            className="relative flex h-10 w-10 items-center justify-center rounded-full transition"
+            style={{
+              background: HEADER_BUTTON_BG,
+              border: `1px solid ${HEADER_BUTTON_BORDER}`,
+              boxShadow: "0 1px 2px rgba(15,23,42,0.06)",
+            }}
             aria-label="Abrir notificaciones"
             title="Notificaciones"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = HEADER_BUTTON_HOVER_BG
+              e.currentTarget.style.border = `1px solid ${HEADER_BUTTON_HOVER_BORDER}`
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = HEADER_BUTTON_BG
+              e.currentTarget.style.border = `1px solid ${HEADER_BUTTON_BORDER}`
+            }}
           >
-            <Bell className="h-4 w-4 text-[#2f5fe3]" />
-
+            <Bell className="h-4 w-4" style={{ color: HEADER_BUTTON_ICON }} />
             {unreadCount > 0 && (
-              <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
+              <span
+                className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
+                style={{
+                  background: HEADER_UNREAD_BADGE_BG,
+                  color: HEADER_UNREAD_BADGE_TEXT,
+                }}
+              >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </span>
             )}
           </button>
 
           {notificationsOpen && (
-            <div className="absolute right-0 top-12 z-30 w-[360px] rounded-2xl border border-neutral-200 bg-white p-3 shadow-xl">
+            <div
+              className="absolute right-0 top-12 z-30 w-[360px] rounded-2xl p-3"
+              style={{
+                background: HEADER_DROPDOWN_BG,
+                border: `1px solid ${HEADER_DROPDOWN_BORDER}`,
+                boxShadow: "0 18px 40px rgba(15,23,42,0.14)",
+              }}
+            >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold text-neutral-900">
+                  <p className="text-sm font-semibold" style={{ color: HEADER_TEXT }}>
                     Notificaciones
                   </p>
-                  <p className="text-xs text-neutral-500">
+                  <p className="text-xs" style={{ color: HEADER_TEXT_MUTED }}>
                     {markingNotifications
                       ? "Marcando como leídas..."
                       : "Eventos recientes de tus cotizaciones"}
@@ -358,18 +457,39 @@ export default function Header() {
                 <button
                   type="button"
                   onClick={() => setNotificationsOpen(false)}
-                  className="text-xs font-medium text-neutral-500 transition hover:text-neutral-700"
+                  className="text-xs font-medium transition"
+                  style={{ color: HEADER_TEXT_MUTED }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.color = HEADER_BUTTON_ICON
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.color = HEADER_TEXT_MUTED
+                  }}
                 >
                   Cerrar
                 </button>
               </div>
 
               {loadingNotifications ? (
-                <div className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-500">
+                <div
+                  className="rounded-xl p-4 text-sm"
+                  style={{
+                    background: HEADER_DROPDOWN_SURFACE,
+                    border: `1px dashed ${HEADER_DROPDOWN_BORDER}`,
+                    color: HEADER_TEXT_MUTED,
+                  }}
+                >
                   Cargando notificaciones...
                 </div>
               ) : events.length === 0 ? (
-                <div className="rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-4 text-sm text-neutral-500">
+                <div
+                  className="rounded-xl p-4 text-sm"
+                  style={{
+                    background: HEADER_DROPDOWN_SURFACE,
+                    border: `1px dashed ${HEADER_DROPDOWN_BORDER}`,
+                    color: HEADER_TEXT_MUTED,
+                  }}
+                >
                   Aún no tienes notificaciones recientes.
                 </div>
               ) : (
@@ -380,34 +500,57 @@ export default function Header() {
                     return (
                       <div
                         key={event.id}
-                        className="rounded-xl border border-neutral-200 p-3"
+                        className="rounded-xl p-3"
+                        style={{
+                          background: HEADER_DROPDOWN_BG,
+                          border: `1px solid ${HEADER_DROPDOWN_BORDER}`,
+                        }}
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className={`mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border ${styles.container}`}
+                            className="mt-0.5 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border"
+                            style={{
+                              borderColor: styles.border,
+                              background: styles.background,
+                              color: styles.color,
+                            }}
                           >
                             {styles.icon}
                           </div>
 
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-sm font-semibold text-neutral-900">
+                              <p
+                                className="text-sm font-semibold"
+                                style={{ color: HEADER_TEXT }}
+                              >
                                 {event.title}
                               </p>
 
                               {!event.isRead && (
-                                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-700">
+                                <span
+                                  className="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
+                                  style={{
+                                    background: HEADER_TAG_BG,
+                                    color: HEADER_TAG_TEXT,
+                                  }}
+                                >
                                   Nuevo
                                 </span>
                               )}
                             </div>
 
-                            <p className="mt-1 text-sm text-neutral-600">
-                              {event.message || "Se registró actividad reciente."}
+                            <p
+                              className="mt-1 text-sm"
+                              style={{ color: HEADER_TEXT_MUTED }}
+                            >
+                              {event.message ||
+                                "Se registró actividad reciente."}
                             </p>
 
                             <p
-                              className="mt-1 text-xs text-neutral-400"
+                              className="mt-1 text-xs"
+                              style={{ color: HEADER_TEXT_SOFT }}
                               title={formatDateTime(event.createdAt)}
                             >
                               {formatRelativeDateTime(event.createdAt)}
@@ -426,8 +569,8 @@ export default function Header() {
         <div
           className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold"
           style={{
-            background: "var(--primary-light)",
-            color: "var(--primary)",
+            background: HEADER_PROFILE_BG,
+            color: HEADER_PROFILE_TEXT,
           }}
         >
           {showProfileLogo ? (

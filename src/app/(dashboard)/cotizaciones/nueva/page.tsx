@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import CotizacionForm from "@/components/dashboard/cotizaciones/CotizacionForm"
+import CotizacionForm from "@/components/dashboard/cotizaciones/form/CotizacionForm"
 
 function LoadingCotizacionForm() {
   return <div>Cargando formulario...</div>

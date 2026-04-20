@@ -1,4 +1,4 @@
-import { QuoteEventType, QuoteStatus } from "./cotizaciones.types"
+import { QuoteEventType, QuoteStatus } from "@/types/cotizacion"
 
 export function getStatusLabel(status: QuoteStatus) {
   switch (status) {
@@ -99,3 +99,4 @@ export function formatRelativeDateTime(value: string) {
 
   return formatDateTime(value)
 }
+

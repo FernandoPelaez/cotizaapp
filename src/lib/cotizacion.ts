@@ -1,56 +1,51 @@
 import { QuoteEventType, QuoteStatus } from "@/types/cotizacion"
 
+const STATUS_LABELS: Record<QuoteStatus, string> = {
+  DRAFT: "Borrador",
+  SENT: "Enviada",
+  PENDING: "Pendiente",
+  ACCEPTED: "Aceptada",
+  REJECTED: "Rechazada",
+  EXPIRED: "Expirada",
+}
+
+const STATUS_CLASSES: Record<QuoteStatus, string> = {
+  DRAFT: "border-neutral-200 bg-neutral-100 text-neutral-700",
+  SENT: "border-blue-200 bg-blue-50 text-blue-700",
+  PENDING: "border-amber-200 bg-amber-50 text-amber-700",
+  ACCEPTED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  REJECTED: "border-red-200 bg-red-50 text-red-700",
+  EXPIRED: "border-slate-200 bg-slate-100 text-slate-600",
+}
+
+const EVENT_TYPE_LABELS: Record<QuoteEventType, string> = {
+  QUOTE_SENT: "Enviada",
+  QUOTE_ACCEPTED: "Aceptada",
+  QUOTE_REJECTED: "Rechazada",
+  QUOTE_EXPIRED: "Expirada",
+}
+
+const EVENT_TYPE_CLASSES: Record<QuoteEventType, string> = {
+  QUOTE_SENT: "border-blue-200 bg-blue-50 text-blue-700",
+  QUOTE_ACCEPTED: "border-emerald-200 bg-emerald-50 text-emerald-700",
+  QUOTE_REJECTED: "border-red-200 bg-red-50 text-red-700",
+  QUOTE_EXPIRED: "border-slate-200 bg-slate-100 text-slate-700",
+}
+
 export function getStatusLabel(status: QuoteStatus) {
-  switch (status) {
-    case "DRAFT":
-      return "Borrador"
-    case "SENT":
-      return "Enviada"
-    case "PENDING":
-      return "Pendiente"
-    case "ACCEPTED":
-      return "Aceptada"
-    case "REJECTED":
-      return "Rechazada"
-    case "EXPIRED":
-      return "Expirada"
-    default:
-      return status
-  }
+  return STATUS_LABELS[status] ?? status
 }
 
 export function getStatusClasses(status: QuoteStatus) {
-  switch (status) {
-    case "DRAFT":
-      return "border-neutral-200 bg-neutral-100 text-neutral-700"
-    case "SENT":
-      return "border-blue-200 bg-blue-50 text-blue-700"
-    case "PENDING":
-      return "border-amber-200 bg-amber-50 text-amber-700"
-    case "ACCEPTED":
-      return "border-emerald-200 bg-emerald-50 text-emerald-700"
-    case "REJECTED":
-      return "border-red-200 bg-red-50 text-red-700"
-    case "EXPIRED":
-      return "border-slate-200 bg-slate-100 text-slate-600"
-    default:
-      return "border-neutral-200 bg-neutral-100 text-neutral-700"
-  }
+  return STATUS_CLASSES[status] ?? STATUS_CLASSES.DRAFT
 }
 
 export function getEventTypeLabel(type: QuoteEventType) {
-  switch (type) {
-    case "QUOTE_SENT":
-      return "Enviada"
-    case "QUOTE_ACCEPTED":
-      return "Aceptada"
-    case "QUOTE_REJECTED":
-      return "Rechazada"
-    case "QUOTE_EXPIRED":
-      return "Expirada"
-    default:
-      return "Actividad"
-  }
+  return EVENT_TYPE_LABELS[type] ?? "Actividad"
+}
+
+export function getEventTypeClasses(type: QuoteEventType) {
+  return EVENT_TYPE_CLASSES[type] ?? "border-neutral-200 bg-neutral-100 text-neutral-700"
 }
 
 export function formatCurrency(value: number) {
@@ -99,4 +94,3 @@ export function formatRelativeDateTime(value: string) {
 
   return formatDateTime(value)
 }
-

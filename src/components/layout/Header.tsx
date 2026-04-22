@@ -41,6 +41,12 @@ const routeMeta: Record<string, { title: string }> = {
   "/ayuda": { title: "Ayuda" },
 }
 
+const SIDEBAR_COLLAPSIBLE_ROUTES = [
+  "/personalizar",
+  "/cotizaciones",
+  "/plantillas",
+]
+
 const HEADER_BG = "var(--card, #FFFFFF)"
 const HEADER_BORDER = "var(--border, #E5E7EB)"
 const HEADER_TEXT = "var(--foreground, #0F172A)"
@@ -160,7 +166,9 @@ export default function Header({
   const pathname = usePathname()
   const { data: session, status } = useSession()
 
-  const isPersonalizar = pathname.startsWith("/personalizar")
+  const canCollapseSidebar = SIDEBAR_COLLAPSIBLE_ROUTES.some((route) =>
+    pathname.startsWith(route)
+  )
 
   const [displayText, setDisplayText] = useState("")
   const [notificationsOpen, setNotificationsOpen] = useState(false)
@@ -308,7 +316,9 @@ export default function Header({
         )
       }
 
-      setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0)
+      setUnreadCount(
+        typeof data.unreadCount === "number" ? data.unreadCount : 0
+      )
       setEvents((prev) =>
         prev.map((event) => ({
           ...event,
@@ -347,7 +357,7 @@ export default function Header({
       }}
     >
       <div className="flex items-center gap-3">
-        {isPersonalizar && onToggleSidebar && (
+        {canCollapseSidebar && onToggleSidebar && (
           <button
             type="button"
             onClick={onToggleSidebar}

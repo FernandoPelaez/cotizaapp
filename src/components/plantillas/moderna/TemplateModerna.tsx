@@ -1,64 +1,74 @@
-type Service = {
-  name: string
-  description?: string
-  price: number
-}
-
-type Product = {
-  name: string
-  quantity: number
-  price: number
-}
-
-type TemplateData = {
-  title: string
-  clientName: string
-  clientEmail?: string
-  clientPhone?: string
-  clientAddress?: string
-  companyName?: string
-  companyEmail?: string
-  companyPhone?: string
-  companyAddress?: string
-  companyWeb?: string
-  docNumber?: string
-  date?: string
-  discount?: number
-  tax?: number
-  notes?: string
-  services: Service[]
-  products: Product[]
-  total: number
-  subtotal?: number
-}
+import type { TemplateData } from "@/types/cotizacion-form"
 
 type Props = {
   data?: TemplateData
 }
 
+type QuoteItem = {
+  id: string
+  type: "service" | "product"
+  name: string
+  quantity: number
+  price: number
+  amount: number
+  detail?: string
+}
+
 const defaultData: TemplateData = {
   title: "Cotización",
+  description: "Documento comercial profesional listo para compartir con tu cliente.",
   clientName: "Cliente ejemplo",
-  clientEmail: undefined,
-  clientPhone: undefined,
-  clientAddress: undefined,
+  clientEmail: "cliente@correo.com",
+  clientPhone: "+52 667 123 4567",
+  clientAddress: "Los Mochis, Sinaloa",
+  clientRFC: "XAXX010101000",
   companyName: "Tu Empresa",
-  companyEmail: undefined,
-  companyPhone: undefined,
-  companyAddress: undefined,
-  companyWeb: undefined,
+  companyLogo: undefined,
   docNumber: "COT-001",
-  date: undefined,
+  date: new Date().toLocaleDateString("es-MX"),
   discount: 0,
-  tax: 0,
-  notes: undefined,
+  tax: 16,
+  notes: "Gracias por considerar nuestra propuesta.",
   services: [
     { name: "Servicio 1", price: 500 },
     { name: "Servicio 2", price: 800 },
   ],
-  products: [],
-  total: 1300,
-  subtotal: 1300,
+  products: [{ name: "Producto 1", quantity: 2, price: 150 }],
+  total: 1856,
+  subtotal: 1600,
+  validUntil: new Date().toISOString().slice(0, 10),
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 2,
+  }).format(value || 0)
+}
+
+function buildItems(data: TemplateData): QuoteItem[] {
+  const serviceItems: QuoteItem[] = (data.services ?? []).map((service, index) => ({
+    id: `service-${index}`,
+    type: "service",
+    name: service.name || `Servicio ${index + 1}`,
+    quantity: 1,
+    price: Number(service.price || 0),
+    amount: Number(service.price || 0),
+    detail: "Servicio",
+  }))
+
+  const productItems: QuoteItem[] = (data.products ?? []).map((product, index) => ({
+    id: `product-${index}`,
+    type: "product",
+    name: product.name || `Producto ${index + 1}`,
+    quantity: Number(product.quantity || 0),
+    price: Number(product.price || 0),
+    amount: Number(product.quantity || 0) * Number(product.price || 0),
+    detail: "Producto",
+  }))
+
+  return [...serviceItems, ...productItems]
 }
 
 export default function TemplateModerna({ data }: Props) {
@@ -69,36 +79,24 @@ export default function TemplateModerna({ data }: Props) {
     products: data?.products ?? defaultData.products,
   }
 
-  const today =
-    safeData.date ??
-    new Date().toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    })
+  const items = buildItems(safeData)
 
-  const subtotal = safeData.subtotal ?? safeData.total
-  const tax = safeData.tax ?? 0
-  const discount = safeData.discount ?? 0
+  const calculatedSubtotal =
+    items.length > 0
+      ? items.reduce((acc, item) => acc + item.amount, 0)
+      : Number(safeData.subtotal || 0)
+
+  const subtotal = Number(safeData.subtotal ?? calculatedSubtotal)
+  const discount = Number(safeData.discount ?? 0)
+  const tax = Number(safeData.tax ?? 0)
   const taxableBase = Math.max(0, subtotal - discount)
   const taxAmount = taxableBase * (tax / 100)
+  const finalTotal = Number(safeData.total ?? taxableBase + taxAmount)
 
-  const allItems = [
-    ...safeData.services.map((s) => ({
-      name: s.name,
-      description: s.description,
-      qty: 1,
-      price: s.price,
-      total: s.price,
-    })),
-    ...safeData.products.map((p) => ({
-      name: p.name,
-      description: undefined,
-      qty: p.quantity,
-      price: p.price,
-      total: p.price * p.quantity,
-    })),
-  ]
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div
@@ -106,8 +104,10 @@ export default function TemplateModerna({ data }: Props) {
       style={{
         width: "595px",
         minHeight: "842px",
-        fontFamily: "'Georgia', 'Times New Roman', serif",
-        backgroundColor: "#FAFAF8",
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        background: "#f6f8fb",
+        color: "#102033",
         position: "relative",
         overflow: "hidden",
       }}
@@ -117,62 +117,43 @@ export default function TemplateModerna({ data }: Props) {
           position: "absolute",
           top: 0,
           left: 0,
-          width: "168px",
+          width: "170px",
           height: "100%",
-          background:
-            "linear-gradient(180deg, #1C2B3A 0%, #0F1E2B 60%, #162333 100%)",
-          zIndex: 0,
+          background: "linear-gradient(180deg, #0f1f35 0%, #102846 55%, #0b1b2e 100%)",
         }}
       />
 
-      <div
-        style={{
-          position: "absolute",
-          top: "72px",
-          left: "168px",
-          width: "3px",
-          height: "calc(100% - 144px)",
-          background:
-            "linear-gradient(180deg, #C9A96E 0%, #E8C97A 40%, #C9A96E 100%)",
-          zIndex: 1,
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          top: "-40px",
-          left: "-40px",
-          width: "140px",
-          height: "140px",
-          borderRadius: "50%",
-          border: "2px solid rgba(201,169,110,0.25)",
-          zIndex: 1,
-        }}
-      />
       <div
         style={{
           position: "absolute",
           top: "-20px",
           left: "-20px",
-          width: "100px",
-          height: "100px",
+          width: "120px",
+          height: "120px",
           borderRadius: "50%",
-          border: "1px solid rgba(201,169,110,0.15)",
-          zIndex: 1,
+          border: "1px solid rgba(232, 201, 122, 0.18)",
         }}
       />
-
       <div
         style={{
           position: "absolute",
-          bottom: "-50px",
-          right: "-50px",
-          width: "180px",
-          height: "180px",
+          top: "18px",
+          left: "18px",
+          width: "84px",
+          height: "84px",
           borderRadius: "50%",
-          border: "2px solid rgba(201,169,110,0.15)",
-          zIndex: 1,
+          border: "1px solid rgba(232, 201, 122, 0.12)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: "-40px",
+          right: "-40px",
+          width: "160px",
+          height: "160px",
+          borderRadius: "50%",
+          border: "1px solid rgba(201, 169, 110, 0.12)",
         }}
       />
 
@@ -181,267 +162,191 @@ export default function TemplateModerna({ data }: Props) {
           position: "absolute",
           top: 0,
           left: 0,
-          width: "168px",
+          width: "170px",
           height: "100%",
-          zIndex: 2,
+          padding: "28px 18px 24px 22px",
+          boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
-          padding: "40px 20px 40px 24px",
-          boxSizing: "border-box",
+          zIndex: 2,
         }}
       >
-        <div style={{ marginBottom: "36px" }}>
-          <div
-            style={{
-              width: "38px",
-              height: "38px",
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, #C9A96E 0%, #E8C97A 100%)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "10px",
-            }}
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#1C2B3A"
-              strokeWidth="2"
+        <div style={{ marginBottom: "24px" }}>
+          {safeData.companyLogo ? (
+            <div
+              style={{
+                width: "54px",
+                height: "54px",
+                borderRadius: "14px",
+                background: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                padding: "6px",
+                boxShadow: "0 8px 22px rgba(0,0,0,0.22)",
+                marginBottom: "10px",
+              }}
             >
-              <path d="M12 2C8 2 5 5 5 9c0 5 7 13 7 13s7-8 7-13c0-4-3-7-7-7z" />
-              <circle cx="12" cy="9" r="2.5" />
-            </svg>
-          </div>
+              <img
+                src={safeData.companyLogo}
+                alt="Logo de la empresa"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              style={{
+                width: "54px",
+                height: "54px",
+                borderRadius: "14px",
+                background: "linear-gradient(135deg, #c9a96e 0%, #e8c97a 100%)",
+                color: "#0f1f35",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "18px",
+                fontWeight: 800,
+                boxShadow: "0 8px 22px rgba(0,0,0,0.22)",
+                marginBottom: "10px",
+              }}
+            >
+              {initials}
+            </div>
+          )}
+
           <p
             style={{
-              color: "#FFFFFF",
-              fontSize: "13px",
-              fontWeight: "700",
-              lineHeight: "1.3",
-              letterSpacing: "0.02em",
+              color: "#ffffff",
+              fontSize: "15px",
+              fontWeight: 700,
+              lineHeight: 1.25,
               margin: 0,
             }}
           >
             {safeData.companyName || "Tu Empresa"}
           </p>
+
           <p
             style={{
-              color: "#C9A96E",
+              color: "#c9a96e",
               fontSize: "9px",
-              letterSpacing: "0.12em",
+              letterSpacing: "0.16em",
               textTransform: "uppercase",
-              margin: "3px 0 0",
+              margin: "4px 0 0",
             }}
           >
-            Glamour & Style
+            Pro · Modern
           </p>
         </div>
 
         <div
           style={{
-            width: "32px",
-            height: "1.5px",
-            background: "linear-gradient(90deg, #C9A96E, transparent)",
-            marginBottom: "24px",
+            width: "34px",
+            height: "2px",
+            background: "linear-gradient(90deg, #c9a96e, transparent)",
+            marginBottom: "18px",
           }}
         />
 
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "18px" }}>
           <p
             style={{
-              color: "#C9A96E",
+              color: "#c9a96e",
               fontSize: "8px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               margin: "0 0 8px",
-            }}
-          >
-            Contacto
-          </p>
-          {safeData.companyPhone && (
-            <p
-              style={{
-                color: "#CBD5E0",
-                fontSize: "10px",
-                margin: "0 0 4px",
-                lineHeight: "1.4",
-              }}
-            >
-              {safeData.companyPhone}
-            </p>
-          )}
-          {safeData.companyEmail && (
-            <p
-              style={{
-                color: "#CBD5E0",
-                fontSize: "9px",
-                margin: "0 0 4px",
-                lineHeight: "1.4",
-                wordBreak: "break-all",
-              }}
-            >
-              {safeData.companyEmail}
-            </p>
-          )}
-          {safeData.companyWeb && (
-            <p
-              style={{
-                color: "#C9A96E",
-                fontSize: "9px",
-                margin: "0",
-                lineHeight: "1.4",
-              }}
-            >
-              {safeData.companyWeb}
-            </p>
-          )}
-          {safeData.companyAddress && (
-            <p
-              style={{
-                color: "#8899AA",
-                fontSize: "9px",
-                margin: "6px 0 0",
-                lineHeight: "1.5",
-              }}
-            >
-              {safeData.companyAddress}
-            </p>
-          )}
-        </div>
-
-        <div
-          style={{
-            width: "32px",
-            height: "1px",
-            background: "rgba(201,169,110,0.3)",
-            marginBottom: "24px",
-          }}
-        />
-
-        <div style={{ marginBottom: "28px" }}>
-          <p
-            style={{
-              color: "#C9A96E",
-              fontSize: "8px",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              margin: "0 0 8px",
+              fontWeight: 700,
             }}
           >
             Cliente
           </p>
+
           <p
             style={{
-              color: "#FFFFFF",
+              color: "#ffffff",
               fontSize: "11px",
-              fontWeight: "700",
-              margin: "0 0 5px",
-              lineHeight: "1.3",
+              fontWeight: 700,
+              margin: "0 0 6px",
+              lineHeight: 1.35,
             }}
           >
-            {safeData.clientName}
+            {safeData.clientName || "Cliente ejemplo"}
           </p>
-          {safeData.clientEmail && (
-            <p
-              style={{
-                color: "#8899AA",
-                fontSize: "9px",
-                margin: "0 0 3px",
-                wordBreak: "break-all",
-                lineHeight: "1.4",
-              }}
-            >
-              {safeData.clientEmail}
-            </p>
-          )}
-          {safeData.clientPhone && (
-            <p
-              style={{
-                color: "#8899AA",
-                fontSize: "9px",
-                margin: "0 0 3px",
-                lineHeight: "1.4",
-              }}
-            >
-              {safeData.clientPhone}
-            </p>
-          )}
-          {safeData.clientAddress && (
-            <p
-              style={{
-                color: "#8899AA",
-                fontSize: "9px",
-                margin: "0",
-                lineHeight: "1.5",
-              }}
-            >
-              {safeData.clientAddress}
-            </p>
-          )}
+
+          <div
+            style={{
+              color: "#9fb0c2",
+              fontSize: "9px",
+              lineHeight: 1.55,
+            }}
+          >
+            {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+            {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+            {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+            {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+          </div>
         </div>
 
         <div
           style={{
-            width: "32px",
+            width: "34px",
             height: "1px",
-            background: "rgba(201,169,110,0.3)",
-            marginBottom: "24px",
+            background: "rgba(201,169,110,0.28)",
+            marginBottom: "18px",
           }}
         />
 
-        <div>
+        <div style={{ marginBottom: "18px" }}>
           <p
             style={{
-              color: "#C9A96E",
+              color: "#c9a96e",
               fontSize: "8px",
               letterSpacing: "0.14em",
               textTransform: "uppercase",
               margin: "0 0 8px",
+              fontWeight: 700,
             }}
           >
             Documento
           </p>
-          {safeData.docNumber && (
-            <p
-              style={{
-                color: "#FFFFFF",
-                fontSize: "10px",
-                fontWeight: "700",
-                margin: "0 0 4px",
-              }}
-            >
-              {safeData.docNumber}
-            </p>
-          )}
-          <p
+
+          <div
             style={{
-              color: "#8899AA",
+              color: "#ffffff",
               fontSize: "9px",
-              margin: 0,
-              lineHeight: "1.5",
+              lineHeight: 1.65,
             }}
           >
-            {today}
-          </p>
+            <div style={{ fontWeight: 700 }}>{safeData.docNumber || "COT-001"}</div>
+            <div style={{ color: "#91a2b6" }}>
+              {safeData.date || new Date().toLocaleDateString("es-MX")}
+            </div>
+            {safeData.validUntil && (
+              <div style={{ color: "#91a2b6" }}>Vigencia: {safeData.validUntil}</div>
+            )}
+          </div>
         </div>
 
         <div style={{ marginTop: "auto" }}>
           <div
             style={{
               background:
-                "linear-gradient(135deg, rgba(201,169,110,0.15), rgba(201,169,110,0.05))",
-              border: "1px solid rgba(201,169,110,0.3)",
-              borderRadius: "10px",
-              padding: "14px 12px",
-              textAlign: "center",
+                "linear-gradient(135deg, rgba(201,169,110,0.18), rgba(201,169,110,0.06))",
+              border: "1px solid rgba(201,169,110,0.28)",
+              borderRadius: "12px",
+              padding: "12px 10px",
             }}
           >
             <p
               style={{
-                color: "#8899AA",
+                color: "#8ea0b4",
                 fontSize: "8px",
                 letterSpacing: "0.12em",
                 textTransform: "uppercase",
@@ -450,19 +355,18 @@ export default function TemplateModerna({ data }: Props) {
             >
               Total a pagar
             </p>
+
             <p
               style={{
-                color: "#E8C97A",
-                fontSize: "20px",
-                fontWeight: "700",
+                color: "#e8c97a",
+                fontSize: "19px",
+                fontWeight: 800,
                 margin: 0,
-                lineHeight: "1",
+                lineHeight: 1,
                 letterSpacing: "-0.01em",
               }}
             >
-              ${(safeData.total || 0).toLocaleString("es-MX", {
-                minimumFractionDigits: 2,
-              })}
+              {formatMoney(finalTotal)}
             </p>
           </div>
         </div>
@@ -470,344 +374,387 @@ export default function TemplateModerna({ data }: Props) {
 
       <div
         style={{
-          marginLeft: "171px",
-          padding: "40px 32px 40px 28px",
+          marginLeft: "170px",
+          minHeight: "842px",
+          padding: "28px 28px 26px 26px",
+          boxSizing: "border-box",
           position: "relative",
           zIndex: 2,
-          minHeight: "842px",
-          boxSizing: "border-box",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
-        <div style={{ marginBottom: "28px" }}>
+        <div style={{ marginBottom: "18px" }}>
           <p
             style={{
-              color: "#1C2B3A",
-              fontSize: "26px",
-              fontWeight: "700",
-              letterSpacing: "-0.02em",
-              margin: "0 0 2px",
-              lineHeight: "1",
+              color: "#102033",
+              fontSize: "30px",
+              fontWeight: 800,
+              letterSpacing: "-0.03em",
+              margin: "0 0 4px",
+              lineHeight: 1.05,
             }}
           >
             {safeData.title || "Cotización"}
           </p>
+
           <div
             style={{
-              width: "48px",
+              width: "54px",
               height: "3px",
-              background: "linear-gradient(90deg, #C9A96E, #E8C97A)",
-              borderRadius: "2px",
-              marginTop: "8px",
+              background: "linear-gradient(90deg, #c9a96e, #e8c97a)",
+              borderRadius: "999px",
+              marginTop: "10px",
             }}
           />
-          <p
-            style={{
-              color: "#8899AA",
-              fontSize: "10px",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              margin: "10px 0 0",
-            }}
-          >
-            Servicios profesionales de belleza
-          </p>
+
+          {safeData.description ? (
+            <p
+              style={{
+                color: "#6d7f92",
+                fontSize: "10px",
+                lineHeight: 1.7,
+                margin: "12px 0 0",
+                maxWidth: "300px",
+              }}
+            >
+              {safeData.description}
+            </p>
+          ) : (
+            <p
+              style={{
+                color: "#8fa0b2",
+                fontSize: "10px",
+                lineHeight: 1.7,
+                margin: "12px 0 0",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+              }}
+            >
+              Propuesta de servicios profesional
+            </p>
+          )}
         </div>
 
         <div
           style={{
-            background: "#F0F4F8",
-            borderLeft: "3px solid #C9A96E",
-            borderRadius: "0 6px 6px 0",
-            padding: "10px 14px",
-            marginBottom: "24px",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr 1fr",
+            gap: "10px",
+            marginBottom: "18px",
           }}
         >
-          <p
-            style={{
-              color: "#4A5568",
-              fontSize: "10px",
-              lineHeight: "1.6",
-              margin: 0,
-              fontStyle: "italic",
-            }}
-          >
-            Estimada{" "}
-            <strong style={{ color: "#1C2B3A", fontStyle: "normal" }}>
-              {safeData.clientName}
-            </strong>
-            , gracias por elegirnos. A continuación encontrará el detalle de los
-            servicios y productos cotizados con todo nuestro cuidado y
-            profesionalismo.
-          </p>
+          {[
+            {
+              label: "Conceptos",
+              value: String(items.length),
+            },
+            {
+              label: "Descuento",
+              value: formatMoney(discount),
+            },
+            {
+              label: "IVA",
+              value: `${tax}%`,
+            },
+          ].map((card, index) => (
+            <div
+              key={index}
+              style={{
+                background: "#ffffff",
+                border: "1px solid #e6ebf1",
+                borderRadius: "12px",
+                padding: "12px 12px",
+                boxShadow: "0 1px 4px rgba(15,31,53,0.04)",
+              }}
+            >
+              <div
+                style={{
+                  color: "#8a9aab",
+                  fontSize: "8px",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                  marginBottom: "6px",
+                }}
+              >
+                {card.label}
+              </div>
+              <div
+                style={{
+                  color: "#102033",
+                  fontSize: "16px",
+                  fontWeight: 800,
+                  lineHeight: 1.1,
+                }}
+              >
+                {card.value}
+              </div>
+            </div>
+          ))}
         </div>
 
-        <table
+        <div
           style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: "10.5px",
+            background: "#ffffff",
+            border: "1px solid #e6ebf1",
+            borderRadius: "14px",
+            overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(15,31,53,0.04)",
           }}
         >
-          <thead>
-            <tr
-              style={{
-                background:
-                  "linear-gradient(135deg, #1C2B3A 0%, #243447 100%)",
-              }}
-            >
-              <th
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2.2fr 0.7fr 1fr 1fr 0.9fr",
+              gap: "8px",
+              padding: "11px 14px",
+              background: "linear-gradient(135deg, #102033 0%, #1c2b3a 100%)",
+              color: "#d9bf88",
+              fontSize: "8.5px",
+              fontWeight: 700,
+              textTransform: "uppercase",
+              letterSpacing: "0.14em",
+            }}
+          >
+            <div>Descripción</div>
+            <div>Tipo</div>
+            <div style={{ textAlign: "center" }}>Cant.</div>
+            <div style={{ textAlign: "right" }}>Precio</div>
+            <div style={{ textAlign: "right" }}>Total</div>
+          </div>
+
+          {items.length > 0 ? (
+            items.map((item, index) => (
+              <div
+                key={item.id}
                 style={{
-                  textAlign: "left",
-                  color: "#C9A96E",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "10px 12px",
-                  fontWeight: "600",
+                  display: "grid",
+                  gridTemplateColumns: "2.2fr 0.7fr 1fr 1fr 0.9fr",
+                  gap: "8px",
+                  padding: "11px 14px",
+                  borderTop: index === 0 ? "none" : "1px solid #eef2f6",
+                  background: index % 2 === 0 ? "#ffffff" : "#fafbfd",
+                  fontSize: "10px",
+                  alignItems: "center",
                 }}
               >
-                Descripción
-              </th>
-              <th
-                style={{
-                  textAlign: "center",
-                  color: "#C9A96E",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "10px 8px",
-                  fontWeight: "600",
-                }}
-              >
-                Cant.
-              </th>
-              <th
-                style={{
-                  textAlign: "right",
-                  color: "#C9A96E",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "10px 8px",
-                  fontWeight: "600",
-                }}
-              >
-                Precio
-              </th>
-              <th
-                style={{
-                  textAlign: "right",
-                  color: "#C9A96E",
-                  fontSize: "8.5px",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  padding: "10px 12px",
-                  fontWeight: "600",
-                }}
-              >
-                Total
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {allItems.map((item, i) => (
-              <tr
-                key={i}
-                style={{
-                  backgroundColor: i % 2 === 0 ? "#FFFFFF" : "#F7F9FB",
-                  borderBottom: "1px solid #E8EDF2",
-                }}
-              >
-                <td
-                  style={{
-                    padding: "10px 12px",
-                    color: "#2D3748",
-                    fontWeight: "600",
-                  }}
-                >
-                  {item.name || "-"}
-                  {item.description && (
-                    <span
+                <div>
+                  <div
+                    style={{
+                      color: "#213246",
+                      fontWeight: 700,
+                      lineHeight: 1.35,
+                    }}
+                  >
+                    {item.name}
+                  </div>
+                  {item.detail ? (
+                    <div
                       style={{
-                        display: "block",
+                        color: "#9aa8b8",
                         fontSize: "8.5px",
-                        color: "#A0AEC0",
-                        fontWeight: "400",
-                        marginTop: "2px",
+                        marginTop: "3px",
                       }}
                     >
-                      {item.description}
-                    </span>
-                  )}
-                </td>
-                <td
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "center",
-                    color: "#718096",
-                  }}
-                >
-                  {item.qty}
-                </td>
-                <td
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "right",
-                    color: "#718096",
-                  }}
-                >
-                  ${(item.price || 0).toLocaleString("es-MX", {
-                    minimumFractionDigits: 2,
-                  })}
-                </td>
-                <td
-                  style={{
-                    padding: "10px 12px",
-                    textAlign: "right",
-                    color: "#1C2B3A",
-                    fontWeight: "700",
-                  }}
-                >
-                  ${(item.total || 0).toLocaleString("es-MX", {
-                    minimumFractionDigits: 2,
-                  })}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      {item.detail}
+                    </div>
+                  ) : null}
+                </div>
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-          <div style={{ width: "200px" }}>
+                <div
+                  style={{
+                    color: "#7a8a99",
+                    fontSize: "9px",
+                  }}
+                >
+                  {item.type === "service" ? "Servicio" : "Producto"}
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "center",
+                    color: "#6f8091",
+                  }}
+                >
+                  {item.quantity}
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "right",
+                    color: "#6f8091",
+                  }}
+                >
+                  {formatMoney(item.price)}
+                </div>
+
+                <div
+                  style={{
+                    textAlign: "right",
+                    color: "#102033",
+                    fontWeight: 800,
+                  }}
+                >
+                  {formatMoney(item.amount)}
+                </div>
+              </div>
+            ))
+          ) : (
             <div
               style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "5px 0",
-                borderBottom: "1px solid #E8EDF2",
+                padding: "26px 14px",
+                textAlign: "center",
+                color: "#97a6b4",
+                fontSize: "10px",
               }}
             >
-              <span style={{ color: "#718096", fontSize: "10px" }}>Subtotal</span>
-              <span style={{ color: "#4A5568", fontSize: "10px" }}>
-                ${subtotal.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-              </span>
+              No hay conceptos agregados en esta cotización.
+            </div>
+          )}
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 210px",
+            gap: "14px",
+            marginTop: "18px",
+            alignItems: "start",
+          }}
+        >
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e6ebf1",
+              borderRadius: "14px",
+              padding: "14px 14px",
+              boxShadow: "0 1px 4px rgba(15,31,53,0.04)",
+            }}
+          >
+            <div
+              style={{
+                color: "#c9a96e",
+                fontSize: "8px",
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                marginBottom: "8px",
+              }}
+            >
+              Notas
             </div>
 
-            {tax > 0 && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "5px 0",
-                  borderBottom: "1px solid #E8EDF2",
-                }}
-              >
-                <span style={{ color: "#718096", fontSize: "10px" }}>
-                  IVA ({tax}%)
-                </span>
-                <span style={{ color: "#4A5568", fontSize: "10px" }}>
-                  ${taxAmount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-                </span>
-              </div>
-            )}
+            <p
+              style={{
+                color: "#6f8091",
+                fontSize: "9.5px",
+                lineHeight: 1.65,
+                margin: 0,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {safeData.notes || "Sin observaciones adicionales."}
+            </p>
+          </div>
 
-            {discount > 0 && (
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #e6ebf1",
+              borderRadius: "14px",
+              overflow: "hidden",
+              boxShadow: "0 1px 4px rgba(15,31,53,0.04)",
+            }}
+          >
+            <div style={{ padding: "13px 14px" }}>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  padding: "5px 0",
-                  borderBottom: "1px solid #E8EDF2",
+                  marginBottom: "7px",
+                  fontSize: "10px",
+                  color: "#6f8091",
                 }}
               >
-                <span style={{ color: "#38A169", fontSize: "10px" }}>
-                  Descuento
-                </span>
-                <span style={{ color: "#38A169", fontSize: "10px" }}>
-                  − ${discount.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+                <span>Subtotal</span>
+                <span style={{ color: "#213246", fontWeight: 600 }}>
+                  {formatMoney(subtotal)}
                 </span>
               </div>
-            )}
+
+              {tax > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "7px",
+                    fontSize: "10px",
+                    color: "#6f8091",
+                  }}
+                >
+                  <span>IVA ({tax}%)</span>
+                  <span style={{ color: "#213246", fontWeight: 600 }}>
+                    {formatMoney(taxAmount)}
+                  </span>
+                </div>
+              )}
+
+              {discount > 0 && (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "10px",
+                    color: "#6f8091",
+                  }}
+                >
+                  <span>Descuento</span>
+                  <span style={{ color: "#16a34a", fontWeight: 600 }}>
+                    − {formatMoney(discount)}
+                  </span>
+                </div>
+              )}
+            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "10px 12px",
-                marginTop: "8px",
-                background:
-                  "linear-gradient(135deg, #1C2B3A 0%, #243447 100%)",
-                borderRadius: "8px",
+                padding: "12px 14px",
+                background: "linear-gradient(135deg, #102033 0%, #1c2b3a 100%)",
               }}
             >
               <span
                 style={{
-                  color: "#C9A96E",
-                  fontSize: "9px",
-                  letterSpacing: "0.12em",
+                  color: "#d9bf88",
+                  fontSize: "8px",
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
                   textTransform: "uppercase",
-                  fontWeight: "600",
                 }}
               >
                 Total
               </span>
               <span
                 style={{
-                  color: "#E8C97A",
-                  fontSize: "16px",
-                  fontWeight: "700",
-                  letterSpacing: "-0.01em",
+                  color: "#e8c97a",
+                  fontSize: "17px",
+                  fontWeight: 800,
                 }}
               >
-                ${(safeData.total || 0).toLocaleString("es-MX", {
-                  minimumFractionDigits: 2,
-                })}
+                {formatMoney(finalTotal)}
               </span>
             </div>
           </div>
         </div>
 
-        {safeData.notes && (
-          <div
-            style={{
-              marginTop: "20px",
-              padding: "12px 14px",
-              background: "#F7F9FB",
-              borderRadius: "8px",
-              border: "1px solid #E8EDF2",
-            }}
-          >
-            <p
-              style={{
-                color: "#C9A96E",
-                fontSize: "8px",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                margin: "0 0 5px",
-                fontWeight: "600",
-              }}
-            >
-              Notas
-            </p>
-            <p
-              style={{
-                color: "#718096",
-                fontSize: "9.5px",
-                lineHeight: "1.6",
-                margin: 0,
-              }}
-            >
-              {safeData.notes}
-            </p>
-          </div>
-        )}
-
         <div
           style={{
-            marginTop: "28px",
-            paddingTop: "14px",
-            borderTop: "1px solid #E8EDF2",
+            marginTop: "auto",
+            paddingTop: "16px",
+            borderTop: "1px solid #e6ebf1",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
@@ -815,22 +762,25 @@ export default function TemplateModerna({ data }: Props) {
         >
           <p
             style={{
-              color: "#CBD5E0",
+              color: "#a0acb7",
               fontSize: "8px",
               margin: 0,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
             }}
           >
-            Este documento es válido por 30 días a partir de la fecha de emisión.
+            {safeData.validUntil
+              ? `Este documento es válido hasta ${safeData.validUntil}.`
+              : "Documento comercial listo para compartir."}
           </p>
+
           <p
             style={{
-              color: "#C9A96E",
+              color: "#c9a96e",
               fontSize: "8px",
               margin: 0,
-              letterSpacing: "0.1em",
+              letterSpacing: "0.12em",
               textTransform: "uppercase",
-              fontWeight: "600",
+              fontWeight: 700,
             }}
           >
             {safeData.companyName || "Tu Empresa"}

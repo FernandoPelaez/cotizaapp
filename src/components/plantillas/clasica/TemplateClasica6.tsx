@@ -14,6 +14,9 @@ type TemplateData = {
   title?: string
   clientName?: string
   clientEmail?: string
+  clientPhone?: string
+  clientAddress?: string
+  clientRFC?: string
   companyName?: string
   companyLogo?: string
   date?: string
@@ -25,18 +28,23 @@ type TemplateData = {
   products?: ProductItem[]
   total?: number
   subtotal?: number
+  validUntil?: string
+  description?: string
 }
 
 type Props = {
   data?: TemplateData
 }
 
-const defaultData: Required<
-  Pick<
-    TemplateData,
-    "title" | "clientName" | "companyName" | "services" | "products" | "total" | "subtotal"
-  >
-> = {
+const defaultData: {
+  title: string
+  clientName: string
+  companyName: string
+  services: ServiceItem[]
+  products: ProductItem[]
+  total: number
+  subtotal: number
+} = {
   title: "Cotización demo",
   clientName: "Cliente ejemplo",
   companyName: "Tu Empresa",
@@ -104,192 +112,697 @@ export default function TemplateClasica6({ data }: Props) {
   const taxAmount = subtotal * (tax / 100)
   const finalTotal = Number(safeData.total ?? subtotal + taxAmount - discount)
 
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <div
-      style={{ width: "595px", minHeight: "842px" }}
-      className="bg-white text-[#111827] rounded-2xl border border-gray-200 overflow-hidden font-sans"
+      style={{
+        width: 595,
+        minHeight: 842,
+        background: "#f0f4f8",
+        color: "#0f2744",
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
-      {/* Header */}
-      <div className="px-10 pt-10 pb-8 border-b border-gray-200">
-        <div className="flex justify-between items-start gap-6">
+      {/* ── HEADER con layout asimétrico ── */}
+      <div
+        style={{
+          display: "flex",
+          minHeight: 148,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        {/* Bloque izquierdo oscuro */}
+        <div
+          style={{
+            width: 340,
+            background: "#0f2744",
+            padding: "26px 26px 22px 30px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            position: "relative",
+            overflow: "hidden",
+            flexShrink: 0,
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -35,
+              left: -20,
+              width: 110,
+              height: 110,
+              borderRadius: "50%",
+              background: "rgba(56,189,248,0.07)",
+              pointerEvents: "none",
+            }}
+          />
+
           <div>
-            <p className="text-[10px] uppercase tracking-[0.35em] text-gray-400 font-semibold mb-3">
-              Cotización profesional
-            </p>
-            <h1 className="text-3xl font-bold text-gray-900 leading-tight">
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                marginBottom: 10,
+              }}
+            >
+              <div
+                style={{
+                  width: 18,
+                  height: 2,
+                  borderRadius: 999,
+                  background: "#38bdf8",
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 8,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.22em",
+                  color: "#7dd3fc",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Cotización profesional
+              </span>
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 24,
+                fontWeight: 800,
+                letterSpacing: "-0.025em",
+                lineHeight: 1.1,
+                color: "#ffffff",
+                maxWidth: 270,
+              }}
+            >
               {safeData.title || "Cotización"}
             </h1>
-            <p className="text-sm text-gray-500 mt-2">
-              Documento claro, elegante y listo para compartir
-            </p>
+
+            {safeData.description ? (
+              <p
+                style={{
+                  margin: "7px 0 0",
+                  fontSize: 10,
+                  lineHeight: 1.6,
+                  color: "rgba(255,255,255,0.48)",
+                  maxWidth: 270,
+                }}
+              >
+                {safeData.description}
+              </p>
+            ) : null}
           </div>
 
-          <div className="text-right shrink-0">
-            <p className="text-sm font-semibold text-gray-900">
+          <div
+            style={{
+              marginTop: 12,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              flexWrap: "wrap",
+              fontSize: 9,
+            }}
+          >
+            <span
+              style={{
+                background: "rgba(56,189,248,0.15)",
+                border: "1px solid rgba(56,189,248,0.25)",
+                borderRadius: 5,
+                padding: "2px 8px",
+                fontWeight: 700,
+                color: "#7dd3fc",
+              }}
+            >
+              {safeData.docNumber || "COT-001"}
+            </span>
+            <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+            <span style={{ color: "rgba(255,255,255,0.45)" }}>{today}</span>
+            {safeData.validUntil && (
+              <>
+                <span style={{ color: "rgba(255,255,255,0.3)" }}>·</span>
+                <span style={{ color: "rgba(255,255,255,0.45)" }}>
+                  Vigencia: {safeData.validUntil}
+                </span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Bloque derecho claro */}
+        <div
+          style={{
+            flex: 1,
+            background: "#1e4069",
+            padding: "22px 24px 18px 20px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              bottom: -25,
+              right: -15,
+              width: 90,
+              height: 90,
+              borderRadius: "50%",
+              background: "rgba(56,189,248,0.06)",
+              pointerEvents: "none",
+            }}
+          />
+
+          {safeData.companyLogo ? (
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 13,
+                background: "#ffffff",
+                border: "1.5px solid rgba(56,189,248,0.3)",
+                padding: 6,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                overflow: "hidden",
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+                flexShrink: 0,
+              }}
+            >
+              <img
+                src={safeData.companyLogo}
+                alt="Logo"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "100%",
+                  objectFit: "contain",
+                  display: "block",
+                }}
+              />
+            </div>
+          ) : (
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 13,
+                background: "linear-gradient(135deg, #38bdf8, #0284c7)",
+                color: "#ffffff",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 17,
+                fontWeight: 800,
+                boxShadow: "0 4px 14px rgba(0,0,0,0.2)",
+                flexShrink: 0,
+              }}
+            >
+              {initials}
+            </div>
+          )}
+
+          <div style={{ textAlign: "right" }}>
+            <div
+              style={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#ffffff",
+                lineHeight: 1.2,
+              }}
+            >
               {safeData.companyName || "Tu Empresa"}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">
-              {safeData.docNumber || "#COT-001"}
-            </p>
-            <p className="text-xs text-gray-500 mt-1">{today}</p>
+            </div>
+            <div
+              style={{
+                marginTop: 4,
+                fontSize: 9,
+                color: "rgba(255,255,255,0.45)",
+                lineHeight: 1.6,
+              }}
+            >
+              <div>Documento comercial</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Cliente */}
-      <div className="px-10 py-6">
-        <div className="flex justify-between items-start gap-6">
-          <div className="flex-1">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-2">
-              Cliente
-            </p>
-            <p className="text-lg font-semibold text-gray-900">
+      {/* ── CLIENTE + RESUMEN ── */}
+      <div
+        style={{
+          padding: "14px 24px 12px",
+          display: "grid",
+          gridTemplateColumns: "1.15fr 0.85fr",
+          gap: 12,
+        }}
+      >
+        {/* Cliente */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #cbd5e1",
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(15,39,68,0.06)",
+          }}
+        >
+          <div
+            style={{
+              padding: "8px 14px",
+              background: "#e0f2fe",
+              borderBottom: "1px solid #bae6fd",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+            }}
+          >
+            <div
+              style={{
+                width: 3,
+                height: 13,
+                borderRadius: 999,
+                background: "#0284c7",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: "#0369a1",
+              }}
+            >
+              Datos del cliente
+            </span>
+          </div>
+          <div style={{ padding: "12px 14px" }}>
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 700,
+                color: "#0f2744",
+                marginBottom: 6,
+              }}
+            >
               {safeData.clientName || "Cliente ejemplo"}
-            </p>
-            {safeData.clientEmail ? (
-              <p className="text-sm text-gray-500 mt-1">{safeData.clientEmail}</p>
+            </div>
+            <div style={{ fontSize: 9.5, lineHeight: 1.75, color: "#475569" }}>
+              {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+              {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+              {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+              {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+              {!safeData.clientEmail &&
+                !safeData.clientPhone &&
+                !safeData.clientAddress && (
+                  <div style={{ color: "#94a3b8" }}>
+                    Sin datos de contacto adicionales.
+                  </div>
+                )}
+            </div>
+          </div>
+        </div>
+
+        {/* Resumen */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #cbd5e1",
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(15,39,68,0.06)",
+          }}
+        >
+          <div
+            style={{
+              padding: "8px 14px",
+              background: "#0f2744",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+            }}
+          >
+            <div
+              style={{
+                width: 3,
+                height: 13,
+                borderRadius: 999,
+                background: "#38bdf8",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: "#7dd3fc",
+              }}
+            >
+              Resumen
+            </span>
+          </div>
+          <div
+            style={{
+              padding: "12px 14px",
+              display: "grid",
+              gap: 6,
+              fontSize: 10.5,
+              color: "#475569",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Servicios</span>
+              <strong style={{ color: "#0f2744" }}>{services.length}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Productos</span>
+              <strong style={{ color: "#0f2744" }}>{products.length}</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>IVA</span>
+              <strong style={{ color: "#0f2744" }}>{tax}%</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Descuento</span>
+              <strong style={{ color: "#0f2744" }}>{formatCurrency(discount)}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── TABLA ── */}
+      <div style={{ padding: "0 24px 12px" }}>
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #cbd5e1",
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(15,39,68,0.06)",
+          }}
+        >
+          {/* Thead */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2fr 1fr 0.5fr 1fr 1fr",
+              gap: 8,
+              padding: "9px 14px",
+              background: "#0f2744",
+              fontSize: 8.5,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.13em",
+              color: "#7dd3fc",
+            }}
+          >
+            <div>Concepto</div>
+            <div>Detalle</div>
+            <div style={{ textAlign: "center" }}>Cant.</div>
+            <div style={{ textAlign: "right" }}>Precio</div>
+            <div style={{ textAlign: "right" }}>Total</div>
+          </div>
+
+          {items.length > 0 ? (
+            items.map((item, i) => (
+              <div
+                key={`${item.type}-${i}`}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2fr 1fr 0.5fr 1fr 1fr",
+                  gap: 8,
+                  padding: "11px 14px",
+                  borderTop: i === 0 ? "none" : "1px solid #f1f5f9",
+                  background: i % 2 === 0 ? "#ffffff" : "#f8fafc",
+                  fontSize: 11,
+                  alignItems: "center",
+                }}
+              >
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#0f2744",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  {item.name}
+                </div>
+                <div style={{ fontSize: 9.5, color: "#64748b" }}>
+                  {item.description || (
+                    <span style={{ color: "#cbd5e1" }}>Sin desc.</span>
+                  )}
+                </div>
+                <div style={{ textAlign: "center", color: "#64748b" }}>
+                  {item.quantity}
+                </div>
+                <div style={{ textAlign: "right", color: "#64748b" }}>
+                  {formatCurrency(item.price)}
+                </div>
+                <div
+                  style={{
+                    textAlign: "right",
+                    fontWeight: 700,
+                    color: "#0284c7",
+                  }}
+                >
+                  {formatCurrency(item.price * item.quantity)}
+                </div>
+              </div>
+            ))
+          ) : (
+            <div
+              style={{
+                padding: "22px 14px",
+                textAlign: "center",
+                fontSize: 11,
+                color: "#94a3b8",
+              }}
+            >
+              No hay conceptos agregados en esta cotización.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── NOTAS + TOTALES ── */}
+      <div
+        style={{
+          padding: "0 24px 14px",
+          display: "grid",
+          gridTemplateColumns: "1fr 210px",
+          gap: 12,
+          alignItems: "start",
+        }}
+      >
+        {/* Notas */}
+        <div>
+          <p
+            style={{
+              fontSize: 8,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.2em",
+              color: "#94a3b8",
+              marginBottom: 7,
+            }}
+          >
+            Notas
+          </p>
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1px solid #cbd5e1",
+              borderRadius: 10,
+              padding: "12px 14px",
+              minHeight: 60,
+              boxShadow: "0 1px 4px rgba(15,39,68,0.05)",
+            }}
+          >
+            {safeData.notes ? (
+              <p
+                style={{
+                  fontSize: 10,
+                  lineHeight: 1.7,
+                  color: "#475569",
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {safeData.notes}
+              </p>
             ) : (
-              <p className="text-sm text-gray-400 mt-1">
-                Sin correo registrado
+              <p style={{ fontSize: 10, color: "#94a3b8", fontStyle: "italic" }}>
+                Sin observaciones
               </p>
             )}
           </div>
-
-          <div className="w-48 border border-gray-200 rounded-xl p-4 bg-gray-50">
-            <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-3">
-              Resumen
-            </p>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Servicios</span>
-                <span className="font-medium">{services.length}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Productos</span>
-                <span className="font-medium">{products.length}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>IVA</span>
-                <span className="font-medium">{tax}%</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Descuento</span>
-                <span className="font-medium">{formatCurrency(discount)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Tabla */}
-      <div className="px-10">
-        <div className="border border-gray-200 rounded-2xl overflow-hidden">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="text-left px-4 py-3 text-gray-700 font-semibold uppercase text-[11px] tracking-wider">
-                  Concepto
-                </th>
-                <th className="text-left px-4 py-3 text-gray-700 font-semibold uppercase text-[11px] tracking-wider">
-                  Detalle
-                </th>
-                <th className="text-center px-4 py-3 text-gray-700 font-semibold uppercase text-[11px] tracking-wider">
-                  Cant.
-                </th>
-                <th className="text-right px-4 py-3 text-gray-700 font-semibold uppercase text-[11px] tracking-wider">
-                  Precio
-                </th>
-                <th className="text-right px-4 py-3 text-gray-700 font-semibold uppercase text-[11px] tracking-wider">
-                  Total
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, i) => (
-                  <tr
-                    key={`${item.type}-${i}`}
-                    className={`border-b border-gray-100 ${
-                      i % 2 === 0 ? "bg-white" : "bg-gray-50/40"
-                    }`}
-                  >
-                    <td className="px-4 py-4 font-medium text-gray-900">
-                      {item.name}
-                    </td>
-                    <td className="px-4 py-4 text-gray-500">
-                      {item.description || (
-                        <span className="text-gray-400">Sin descripción</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-4 text-center text-gray-500">
-                      {item.quantity}
-                    </td>
-                    <td className="px-4 py-4 text-right text-gray-500">
-                      {formatCurrency(item.price)}
-                    </td>
-                    <td className="px-4 py-4 text-right font-semibold text-gray-900">
-                      {formatCurrency(item.price * item.quantity)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-gray-400">
-                    No hay conceptos agregados en esta cotización.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
         </div>
 
         {/* Totales */}
-        <div className="flex justify-end mt-6">
-          <div className="w-64 border border-gray-200 rounded-2xl p-5 bg-white">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-gray-600">
-                <span>Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-
-              {tax > 0 && (
-                <div className="flex justify-between text-gray-600">
-                  <span>IVA ({tax}%)</span>
-                  <span>{formatCurrency(taxAmount)}</span>
-                </div>
-              )}
-
-              {discount > 0 && (
-                <div className="flex justify-between text-emerald-600">
-                  <span>Descuento</span>
-                  <span>- {formatCurrency(discount)}</span>
-                </div>
-              )}
-
-              <div className="pt-3 mt-3 border-t border-gray-200 flex justify-between text-base font-bold text-gray-900">
-                <span>Total</span>
-                <span>{formatCurrency(finalTotal)}</span>
-              </div>
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #cbd5e1",
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 1px 4px rgba(15,39,68,0.06)",
+          }}
+        >
+          <div style={{ padding: "12px 14px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 6,
+                paddingBottom: 6,
+                borderBottom: "1px solid #f1f5f9",
+                fontSize: 10.5,
+                color: "#64748b",
+              }}
+            >
+              <span>Subtotal</span>
+              <span style={{ fontWeight: 600, color: "#0f2744" }}>
+                {formatCurrency(subtotal)}
+              </span>
             </div>
+
+            {tax > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                  paddingBottom: 6,
+                  borderBottom: "1px solid #f1f5f9",
+                  fontSize: 10.5,
+                  color: "#64748b",
+                }}
+              >
+                <span>IVA ({tax}%)</span>
+                <span style={{ fontWeight: 600, color: "#0f2744" }}>
+                  {formatCurrency(taxAmount)}
+                </span>
+              </div>
+            )}
+
+            {discount > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 10.5,
+                  color: "#64748b",
+                }}
+              >
+                <span>Descuento</span>
+                <span style={{ fontWeight: 600, color: "#16a34a" }}>
+                  − {formatCurrency(discount)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* Total destacado */}
+          <div
+            style={{
+              padding: "12px 14px",
+              background: "#0f2744",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 2,
+                background: "linear-gradient(90deg, #0284c7, #38bdf8, #7dd3fc)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                right: -14,
+                bottom: -14,
+                width: 52,
+                height: 52,
+                borderRadius: "50%",
+                background: "rgba(56,189,248,0.07)",
+              }}
+            />
+            <span
+              style={{
+                fontSize: 9.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.2em",
+                color: "#7dd3fc",
+              }}
+            >
+              Total
+            </span>
+            <span style={{ fontSize: 17, fontWeight: 800, color: "#ffffff" }}>
+              {formatCurrency(finalTotal)}
+            </span>
           </div>
         </div>
       </div>
 
-      <div className="px-10 mt-8 pb-10">
-        <p className="text-[10px] uppercase tracking-[0.25em] text-gray-400 font-semibold mb-2">
-          Notas
-        </p>
-
-        <div className="border border-dashed border-gray-300 rounded-2xl p-4 min-h-[70px] bg-gray-50">
-          {safeData.notes ? (
-            <p className="text-sm text-gray-600 whitespace-pre-line leading-6">
-              {safeData.notes}
-            </p>
-          ) : (
-            <p className="text-sm text-gray-400 italic">Sin observaciones</p>
-          )}
+      {/* ── FOOTER ── */}
+      <div
+        style={{
+          marginTop: "auto",
+          background: "#0f2744",
+          padding: "10px 24px",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <span style={{ fontSize: 9, color: "#7dd3fc", fontWeight: 600 }}>
+          {safeData.companyName || "Tu Empresa"}
+        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+          {[6, 14, 6].map((w, i) => (
+            <div
+              key={i}
+              style={{
+                width: w,
+                height: 2,
+                borderRadius: 999,
+                background: i === 1 ? "#38bdf8" : "rgba(56,189,248,0.35)",
+              }}
+            />
+          ))}
         </div>
+        <span style={{ fontSize: 9, color: "rgba(255,255,255,0.4)" }}>
+          Documento generado digitalmente
+        </span>
       </div>
     </div>
   )

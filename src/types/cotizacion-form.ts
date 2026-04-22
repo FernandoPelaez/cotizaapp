@@ -13,10 +13,12 @@ export type Product = {
 
 export type TemplateData = {
   title: string
+  description?: string
   clientName: string
   clientEmail: string
   clientPhone: string
   clientAddress?: string
+  clientRFC?: string
   companyName: string
   companyLogo?: string
   services: Service[]
@@ -26,6 +28,7 @@ export type TemplateData = {
   subtotal: number
   total: number
   notes: string
+  validUntil?: string
   docNumber?: string
   date?: string
 }

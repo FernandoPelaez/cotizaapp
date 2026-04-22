@@ -24,6 +24,16 @@ import type {
   Toast,
 } from "@/types/cotizacion-form"
 
+type ProfileResponseWithVisualData = ProfileResponse & {
+  user?: {
+    profileType?: ProfileType | null
+    profile?: {
+      businessName?: string | null
+      logoUrl?: string | null
+    } | null
+  }
+}
+
 export default function CotizacionForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -49,6 +59,7 @@ export default function CotizacionForm() {
   const [clientAddress, setClientAddress] = useState("")
   const [clientRFC, setClientRFC] = useState("")
   const [companyName, setCompanyName] = useState("")
+  const [companyLogo, setCompanyLogo] = useState("")
   const [services, setServices] = useState<Service[]>([{ name: "", price: 0 }])
   const [products, setProducts] = useState<Product[]>([])
   const [discount, setDiscount] = useState(0)
@@ -60,6 +71,7 @@ export default function CotizacionForm() {
   const showToast = (message: string, type: Toast["type"] = "success") => {
     const id = Date.now()
     setToasts((prev) => [...prev, { id, message, type }])
+
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
     }, type === "success" ? 1800 : 3000)
@@ -92,13 +104,26 @@ export default function CotizacionForm() {
     const fetchProfile = async () => {
       try {
         const res = await fetch("/api/user/profile", { cache: "no-store" })
-        const data: ProfileResponse = await res.json()
+        const data = (await res.json()) as ProfileResponseWithVisualData
 
         const resolvedProfileType =
           data.user?.profileType ?? data.profileType ?? null
 
-        if (res.ok && resolvedProfileType) {
-          setProfileType(resolvedProfileType)
+        const profileBusinessName = data.user?.profile?.businessName?.trim() ?? ""
+        const profileLogoUrl = data.user?.profile?.logoUrl?.trim() ?? ""
+
+        if (res.ok) {
+          if (resolvedProfileType) {
+            setProfileType(resolvedProfileType)
+          }
+
+          if (profileBusinessName) {
+            setCompanyName((prev) => prev.trim() || profileBusinessName)
+          }
+
+          if (profileLogoUrl) {
+            setCompanyLogo(profileLogoUrl)
+          }
         }
       } catch (error) {
         console.error("Error cargando perfil", error)
@@ -146,8 +171,13 @@ export default function CotizacionForm() {
     value: string
   ) => {
     const updated = [...services]
-    if (field === "name") updated[index].name = value
-    else updated[index].price = cleanNumber(value)
+
+    if (field === "name") {
+      updated[index].name = value
+    } else {
+      updated[index].price = cleanNumber(value)
+    }
+
     setServices(updated)
   }
 
@@ -158,9 +188,13 @@ export default function CotizacionForm() {
   ) => {
     const updated = [...products]
 
-    if (field === "name") updated[index].name = value
-    else if (field === "quantity") updated[index].quantity = cleanNumber(value)
-    else updated[index].price = cleanNumber(value)
+    if (field === "name") {
+      updated[index].name = value
+    } else if (field === "quantity") {
+      updated[index].quantity = cleanNumber(value)
+    } else {
+      updated[index].price = cleanNumber(value)
+    }
 
     setProducts(updated)
   }
@@ -195,18 +229,24 @@ export default function CotizacionForm() {
     (acc, p) => acc + p.quantity * p.price,
     0
   )
+
   const subtotal = servicesTotal + productsTotal
   const taxableBase = Math.max(0, subtotal - discount)
   const taxAmount = taxableBase * (tax / 100)
   const total = taxableBase + taxAmount
 
+  const resolvedCompanyName = companyName.trim() || "Tu Empresa"
+
   const templateData: TemplateData = {
     title,
+    description,
     clientName,
     clientEmail,
     clientPhone,
     clientAddress,
-    companyName: companyName || "Tu Empresa",
+    clientRFC,
+    companyName: resolvedCompanyName,
+    companyLogo: companyLogo || undefined,
     services: validServices,
     products: validProducts,
     discount,
@@ -214,6 +254,7 @@ export default function CotizacionForm() {
     subtotal,
     total,
     notes,
+    validUntil: validUntil || undefined,
     date: new Date().toLocaleDateString("es-MX"),
   }
 
@@ -296,6 +337,7 @@ export default function CotizacionForm() {
             "error"
           )
         }
+
         return
       }
 
@@ -331,7 +373,7 @@ export default function CotizacionForm() {
   const showProductsSection = profileType !== "independiente"
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4 min-h-screen bg-[#f0f2f5] items-start">
+    <div className="grid min-h-screen grid-cols-1 items-start gap-4 bg-[#f0f2f5] p-4 lg:grid-cols-2">
       <QuoteLimitModal
         open={limitModal.open}
         title={limitModal.title}
@@ -341,10 +383,10 @@ export default function CotizacionForm() {
 
       <QuoteCenteredToast toasts={toasts} />
 
-      <div className="bg-white border border-neutral-200 rounded-2xl overflow-hidden max-w-[520px] w-full justify-self-end">
-        <div className="px-4 pt-3 pb-0 border-b border-neutral-100">
-          <div className="flex items-center justify-between mb-2.5">
-            <h2 className="text-[13px] font-semibold text-neutral-900 tracking-tight">
+      <div className="w-full max-w-[520px] justify-self-end overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+        <div className="border-b border-neutral-100 px-4 pb-0 pt-3">
+          <div className="mb-2.5 flex items-center justify-between">
+            <h2 className="text-[13px] font-semibold tracking-tight text-neutral-900">
               Nueva cotización
             </h2>
 
@@ -362,15 +404,15 @@ export default function CotizacionForm() {
             </div>
           </div>
 
-          <div className="flex -mb-px">
+          <div className="-mb-px flex">
             {["Información", "Conceptos y totales"].map((tab, i) => (
               <span
                 key={tab}
                 onClick={() => setStep(i + 1)}
-                className={`px-3 py-1.5 text-[11px] font-medium border-b-2 cursor-pointer transition-colors ${
+                className={`cursor-pointer border-b-2 px-3 py-1.5 text-[11px] font-medium transition-colors ${
                   step === i + 1
-                    ? "text-blue-600 border-blue-600"
-                    : "text-neutral-400 border-transparent hover:text-neutral-500"
+                    ? "border-blue-600 text-blue-600"
+                    : "border-transparent text-neutral-400 hover:text-neutral-500"
                 }`}
               >
                 {tab}

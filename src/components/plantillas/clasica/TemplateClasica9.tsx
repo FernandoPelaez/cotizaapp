@@ -1,51 +1,42 @@
-type ServiceItem = {
-  name: string
-  description?: string
-  price: number
-}
-
-type ProductItem = {
-  name: string
-  quantity: number
-  price: number
-}
-
-type TemplateData = {
-  title?: string
-  clientName?: string
-  clientEmail?: string
-  companyName?: string
-  date?: string
-  docNumber?: string
-  discount?: number
-  tax?: number
-  notes?: string
-  services?: ServiceItem[]
-  products?: ProductItem[]
-  total?: number
-  subtotal?: number
-}
+import type { TemplateData } from "@/types/cotizacion-form"
 
 type Props = {
   data?: TemplateData
 }
 
-const defaultData: Required<
-  Pick<
-    TemplateData,
-    "title" | "clientName" | "companyName" | "services" | "products" | "total" | "subtotal"
-  >
-> = {
+type QuoteItem = {
+  id: string
+  type: "service" | "product"
+  name: string
+  description?: string
+  quantity: number
+  price: number
+  amount: number
+}
+
+const defaultData: TemplateData = {
   title: "Cotización demo",
+  description: "Documento comercial personalizado para presentar una propuesta clara y profesional.",
   clientName: "Cliente ejemplo",
+  clientEmail: "cliente@correo.com",
+  clientPhone: "+52 667 123 4567",
+  clientAddress: "Los Mochis, Sinaloa",
+  clientRFC: "XAXX010101000",
   companyName: "Tu Empresa",
+  companyLogo: undefined,
   services: [
-    { name: "Servicio 1", description: "Descripción breve del servicio", price: 500 },
-    { name: "Servicio 2", description: "Descripción breve del servicio", price: 800 },
+    { name: "Servicio 1", price: 500 },
+    { name: "Servicio 2", price: 800 },
   ],
   products: [{ name: "Producto 1", quantity: 2, price: 150 }],
-  total: 1600,
+  discount: 0,
+  tax: 16,
   subtotal: 1600,
+  total: 1856,
+  notes: "Gracias por considerar nuestra propuesta.",
+  validUntil: new Date().toISOString().slice(0, 10),
+  docNumber: "COT-001",
+  date: new Date().toLocaleDateString("es-MX"),
 }
 
 function formatCurrency(value: number) {
@@ -53,7 +44,31 @@ function formatCurrency(value: number) {
     style: "currency",
     currency: "MXN",
     minimumFractionDigits: 2,
-  }).format(value)
+  }).format(value || 0)
+}
+
+function buildItems(data: TemplateData): QuoteItem[] {
+  const serviceItems: QuoteItem[] = (data.services ?? []).map((service, index) => ({
+    id: `service-${index}`,
+    type: "service",
+    name: service.name || `Servicio ${index + 1}`,
+    description: undefined,
+    quantity: 1,
+    price: Number(service.price || 0),
+    amount: Number(service.price || 0),
+  }))
+
+  const productItems: QuoteItem[] = (data.products ?? []).map((product, index) => ({
+    id: `product-${index}`,
+    type: "product",
+    name: product.name || `Producto ${index + 1}`,
+    description: undefined,
+    quantity: Number(product.quantity || 0),
+    price: Number(product.price || 0),
+    amount: Number(product.quantity || 0) * Number(product.price || 0),
+  }))
+
+  return [...serviceItems, ...productItems]
 }
 
 export default function TemplateClasica9({ data }: Props) {
@@ -64,224 +79,594 @@ export default function TemplateClasica9({ data }: Props) {
     products: data?.products ?? defaultData.products,
   }
 
-  const today =
-    safeData.date ||
-    new Date().toLocaleDateString("es-MX", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    })
+  const items = buildItems(safeData)
 
-  const services = safeData.services ?? []
-  const products = safeData.products ?? []
-
-  const items = [
-    ...services.map((service) => ({
-      type: "service" as const,
-      name: service.name,
-      description: service.description,
-      quantity: 1,
-      price: Number(service.price || 0),
-    })),
-    ...products.map((product) => ({
-      type: "product" as const,
-      name: product.name,
-      description: "",
-      quantity: Number(product.quantity || 0),
-      price: Number(product.price || 0),
-    })),
-  ]
-
-  const calculatedSubtotal = items.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  )
+  const calculatedSubtotal =
+    items.length > 0
+      ? items.reduce((acc, item) => acc + item.amount, 0)
+      : Number(safeData.subtotal || 0)
 
   const subtotal = Number(safeData.subtotal ?? calculatedSubtotal)
   const tax = Number(safeData.tax ?? 0)
   const discount = Number(safeData.discount ?? 0)
-  const taxAmount = subtotal * (tax / 100)
-  const finalTotal = Number(safeData.total ?? subtotal + taxAmount - discount)
+  const taxableBase = Math.max(0, subtotal - discount)
+  const taxAmount = taxableBase * (tax / 100)
+  const finalTotal = Number(safeData.total ?? taxableBase + taxAmount)
+
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div
-      style={{ width: "595px", minHeight: "842px" }}
-      className="bg-[#faf8f5] font-sans text-[#3d3028] overflow-hidden rounded-2xl border border-[#eadfce]"
+      style={{
+        width: 595,
+        minHeight: 842,
+        background: "#fff8fa",
+        color: "#4a2033",
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        overflow: "hidden",
+        borderRadius: 18,
+        border: "1px solid #f4d7df",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+      }}
     >
-      {/* HEADER centrado */}
-      <div className="px-10 pt-10 pb-7 text-center border-b border-[#e8e0d5] bg-[#fcfbf9]">
-        <p className="text-[9px] tracking-[0.45em] uppercase text-[#b99872] font-semibold mb-3">
-          — Boutique —
-        </p>
+      <div
+        style={{
+          position: "absolute",
+          top: -40,
+          right: -30,
+          width: 140,
+          height: 140,
+          borderRadius: "50%",
+          background: "rgba(236,72,153,0.08)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: -30,
+          top: 160,
+          width: 90,
+          height: 90,
+          borderRadius: "50%",
+          background: "rgba(244,114,182,0.08)",
+        }}
+      />
 
-        <h1 className="text-4xl font-light tracking-[0.18em] text-[#3d3028] uppercase leading-tight">
-          {safeData.title || "Cotización"}
-        </h1>
+      <div
+        style={{
+          position: "relative",
+          padding: "30px 34px 22px",
+          background: "linear-gradient(135deg, #fff6f9 0%, #fff9fb 100%)",
+          borderBottom: "1px solid #f2d7df",
+        }}
+      >
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1.15fr 0.85fr",
+            gap: 18,
+            alignItems: "start",
+          }}
+        >
+          <div>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 8,
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  width: 30,
+                  height: 4,
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, #ec4899, #f9a8d4)",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 9,
+                  fontWeight: 800,
+                  letterSpacing: "0.18em",
+                  textTransform: "uppercase",
+                  color: "#be185d",
+                }}
+              >
+                Propuesta de servicios
+              </span>
+            </div>
 
-        <p className="text-[10px] text-[#c4a882] mt-3 tracking-[0.2em] uppercase">
-          {today} · {safeData.docNumber || "#COT-001"}
-        </p>
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 31,
+                fontWeight: 800,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.08,
+                color: "#4a2033",
+              }}
+            >
+              {safeData.title || "Cotización"}
+            </h1>
 
-        <p className="text-xs font-semibold text-[#3d3028] mt-2">
-          {safeData.companyName || "Tu Empresa"}
-        </p>
-      </div>
-
-      {/* CLIENTE */}
-      <div className="px-10 py-6 text-center border-b border-[#e8e0d5] bg-[#faf8f5]">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-[#c4a882] mb-2">
-          Preparado con cariño para
-        </p>
-
-        <p className="text-2xl font-light text-[#3d3028] italic">
-          {safeData.clientName || "Cliente ejemplo"}
-        </p>
-
-        {safeData.clientEmail ? (
-          <p className="text-xs text-[#c4a882] mt-1">{safeData.clientEmail}</p>
-        ) : (
-          <p className="text-xs text-[#d2bca1] mt-1">Sin correo registrado</p>
-        )}
-      </div>
-
-      {/* RESUMEN */}
-      <div className="px-10 pt-5">
-        <div className="grid grid-cols-4 gap-3 text-center">
-          <div className="rounded-xl border border-[#e8e0d5] bg-white px-3 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[#c4a882]">Servicios</p>
-            <p className="mt-1 text-base font-medium">{services.length}</p>
+            {safeData.description ? (
+              <p
+                style={{
+                  marginTop: 10,
+                  maxWidth: 320,
+                  fontSize: 11,
+                  lineHeight: 1.75,
+                  color: "#8b5b70",
+                }}
+              >
+                {safeData.description}
+              </p>
+            ) : null}
           </div>
-          <div className="rounded-xl border border-[#e8e0d5] bg-white px-3 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[#c4a882]">Productos</p>
-            <p className="mt-1 text-base font-medium">{products.length}</p>
-          </div>
-          <div className="rounded-xl border border-[#e8e0d5] bg-white px-3 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[#c4a882]">IVA</p>
-            <p className="mt-1 text-base font-medium">{tax}%</p>
-          </div>
-          <div className="rounded-xl border border-[#e8e0d5] bg-white px-3 py-3">
-            <p className="text-[10px] uppercase tracking-wider text-[#c4a882]">Descuento</p>
-            <p className="mt-1 text-sm font-medium">{formatCurrency(discount)}</p>
-          </div>
-        </div>
-      </div>
 
-      {/* TABLA */}
-      <div className="px-10 pt-6">
-        <div className="overflow-hidden rounded-2xl border border-[#eadfce] bg-white">
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b border-[#c4a882] bg-[#fcfbf9]">
-                <th className="text-left px-4 py-3 text-[#c4a882] font-normal text-[11px] uppercase tracking-[0.22em]">
-                  Concepto
-                </th>
-                <th className="text-left px-4 py-3 text-[#c4a882] font-normal text-[11px] uppercase tracking-[0.22em]">
-                  Detalle
-                </th>
-                <th className="text-center px-4 py-3 text-[#c4a882] font-normal text-[11px] uppercase tracking-[0.22em]">
-                  Cant.
-                </th>
-                <th className="text-right px-4 py-3 text-[#c4a882] font-normal text-[11px] uppercase tracking-[0.22em]">
-                  Precio
-                </th>
-                <th className="text-right px-4 py-3 text-[#c4a882] font-normal text-[11px] uppercase tracking-[0.22em]">
-                  Total
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {items.length > 0 ? (
-                items.map((item, i) => (
-                  <tr
-                    key={`${item.type}-${i}`}
-                    className={`border-b border-[#efe8df] ${
-                      i % 2 === 0 ? "bg-white" : "bg-[#fdfbf9]"
-                    }`}
-                  >
-                    <td className="py-3 px-4 font-light text-[#3d3028]">
-                      {item.name}
-                    </td>
-                    <td className="py-3 px-4 text-[#8a7060]">
-                      {item.description || (
-                        <span className="text-[#ccb7a1]">Sin descripción</span>
-                      )}
-                    </td>
-                    <td className="py-3 px-4 text-center text-[#c4a882]">
-                      {item.quantity}
-                    </td>
-                    <td className="py-3 px-4 text-right text-[#c4a882]">
-                      {formatCurrency(item.price)}
-                    </td>
-                    <td className="py-3 px-4 text-right font-medium text-[#3d3028]">
-                      {formatCurrency(item.price * item.quantity)}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-[#c4a882]">
-                    No hay conceptos agregados en esta cotización.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* TOTALES */}
-        <div className="flex justify-end mt-6">
-          <div className="w-56 rounded-2xl border border-[#eadfce] bg-white p-5">
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between text-[#c4a882] font-light">
-                <span>Subtotal</span>
-                <span>{formatCurrency(subtotal)}</span>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+              gap: 10,
+              textAlign: "right",
+            }}
+          >
+            {safeData.companyLogo ? (
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: "#ffffff",
+                  border: "1px solid #f0d7df",
+                  boxShadow: "0 8px 18px rgba(190,24,93,0.08)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  padding: 7,
+                }}
+              >
+                <img
+                  src={safeData.companyLogo}
+                  alt="Logo de la empresa"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
               </div>
+            ) : (
+              <div
+                style={{
+                  width: 64,
+                  height: 64,
+                  borderRadius: 18,
+                  background: "linear-gradient(135deg, #ec4899, #f472b6)",
+                  color: "#ffffff",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: 19,
+                  fontWeight: 800,
+                  boxShadow: "0 8px 18px rgba(190,24,93,0.12)",
+                }}
+              >
+                {initials}
+              </div>
+            )}
 
-              {tax > 0 && (
-                <div className="flex justify-between text-[#c4a882] font-light">
-                  <span>IVA ({tax}%)</span>
-                  <span>{formatCurrency(taxAmount)}</span>
-                </div>
-              )}
-
-              {discount > 0 && (
-                <div className="flex justify-between text-emerald-700 font-light">
-                  <span>Descuento</span>
-                  <span>− {formatCurrency(discount)}</span>
-                </div>
-              )}
-
-              <div className="border-t border-[#c4a882] pt-3 mt-3 flex justify-between font-semibold text-[#3d3028] text-base">
-                <span>Total</span>
-                <span>{formatCurrency(finalTotal)}</span>
+            <div>
+              <div
+                style={{
+                  fontSize: 17,
+                  fontWeight: 700,
+                  color: "#4a2033",
+                  lineHeight: 1.25,
+                }}
+              >
+                {safeData.companyName || "Tu Empresa"}
+              </div>
+              <div
+                style={{
+                  marginTop: 5,
+                  fontSize: 10,
+                  lineHeight: 1.7,
+                  color: "#9b6b7f",
+                }}
+              >
+                <div>{safeData.docNumber || "COT-001"}</div>
+                <div>{safeData.date || new Date().toLocaleDateString("es-MX")}</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="px-10 mt-6 text-center">
-        <p className="text-[10px] uppercase tracking-[0.28em] text-[#c4a882] mb-2">
-          — Notas —
-        </p>
+      <div
+        style={{
+          padding: "16px 34px 12px",
+          display: "grid",
+          gridTemplateColumns: "1.15fr 0.85fr",
+          gap: 12,
+        }}
+      >
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #f1dce4",
+            borderRadius: 16,
+            padding: "16px 18px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#d14d86",
+              marginBottom: 8,
+            }}
+          >
+            Cliente
+          </div>
 
-        <div className="min-h-[72px] rounded-2xl border border-[#eadfce] bg-white px-5 py-4">
-          {safeData.notes ? (
-            <p className="text-sm text-[#8a7060] font-light italic whitespace-pre-line leading-6">
-              {safeData.notes}
-            </p>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: "#4a2033",
+              marginBottom: 8,
+            }}
+          >
+            {safeData.clientName || "Cliente ejemplo"}
+          </div>
+
+          <div
+            style={{
+              fontSize: 10,
+              lineHeight: 1.8,
+              color: "#8b5b70",
+            }}
+          >
+            {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+            {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+            {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+            {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+
+            {!safeData.clientEmail &&
+              !safeData.clientPhone &&
+              !safeData.clientAddress &&
+              !safeData.clientRFC && (
+                <div style={{ color: "#d1a0b1" }}>Sin datos de contacto adicionales.</div>
+              )}
+          </div>
+        </div>
+
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #f1dce4",
+            borderRadius: 16,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              padding: "10px 14px",
+              background: "#fff2f7",
+              borderBottom: "1px solid #f4d9e2",
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#d14d86",
+            }}
+          >
+            Resumen
+          </div>
+
+          <div
+            style={{
+              padding: "12px 14px",
+              display: "grid",
+              gap: 7,
+              fontSize: 10,
+              color: "#8b5b70",
+            }}
+          >
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Servicios</span>
+              <strong style={{ color: "#4a2033" }}>
+                {safeData.services?.length ?? 0}
+              </strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Productos</span>
+              <strong style={{ color: "#4a2033" }}>
+                {safeData.products?.length ?? 0}
+              </strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>IVA</span>
+              <strong style={{ color: "#4a2033" }}>{tax}%</strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Descuento</span>
+              <strong style={{ color: "#4a2033" }}>
+                {formatCurrency(discount)}
+              </strong>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span>Vigencia</span>
+              <strong style={{ color: "#4a2033" }}>
+                {safeData.validUntil || "—"}
+              </strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ padding: "0 34px 12px" }}>
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #f1dce4",
+            borderRadius: 16,
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "2.2fr 0.8fr 0.6fr 1fr 1fr",
+              gap: 8,
+              padding: "11px 14px",
+              background: "linear-gradient(90deg, #fff3f7, #fff9fb)",
+              borderBottom: "1px solid #f2d7df",
+              fontSize: 8.5,
+              fontWeight: 800,
+              textTransform: "uppercase",
+              letterSpacing: "0.15em",
+              color: "#cf5d8b",
+            }}
+          >
+            <div>Concepto</div>
+            <div>Tipo</div>
+            <div style={{ textAlign: "center" }}>Cant.</div>
+            <div style={{ textAlign: "right" }}>Precio</div>
+            <div style={{ textAlign: "right" }}>Total</div>
+          </div>
+
+          {items.length > 0 ? (
+            items.map((item, i) => (
+              <div
+                key={item.id}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.2fr 0.8fr 0.6fr 1fr 1fr",
+                  gap: 8,
+                  padding: "12px 14px",
+                  borderTop: i === 0 ? "none" : "1px solid #fae8ee",
+                  background: i % 2 === 0 ? "#ffffff" : "#fffbfd",
+                  fontSize: 10.5,
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ color: "#4a2033", fontWeight: 600, lineHeight: 1.35 }}>
+                  {item.name}
+                </div>
+                <div style={{ color: "#9a6070", fontSize: 9.5 }}>
+                  {item.type === "service" ? "Servicio" : "Producto"}
+                </div>
+                <div style={{ textAlign: "center", color: "#9a6070" }}>
+                  {item.quantity}
+                </div>
+                <div style={{ textAlign: "right", color: "#9a6070" }}>
+                  {formatCurrency(item.price)}
+                </div>
+                <div style={{ textAlign: "right", color: "#4a2033", fontWeight: 700 }}>
+                  {formatCurrency(item.amount)}
+                </div>
+              </div>
+            ))
           ) : (
-            <p className="text-sm text-[#ccb7a1] font-light italic">Sin observaciones</p>
+            <div
+              style={{
+                padding: "24px 14px",
+                textAlign: "center",
+                fontSize: 11,
+                color: "#d8a0b2",
+              }}
+            >
+              No hay conceptos agregados en esta cotización.
+            </div>
           )}
         </div>
       </div>
 
-      {/* FOOTER */}
-      <div className="mt-8 px-10 pb-8 text-center">
-        <p className="text-[10px] tracking-[0.32em] uppercase text-[#c4a882]">
-          ✦ Gracias por elegirnos ✦
-        </p>
+      <div
+        style={{
+          padding: "0 34px 14px",
+          display: "grid",
+          gridTemplateColumns: "1fr 210px",
+          gap: 12,
+          alignItems: "start",
+        }}
+      >
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #f1dce4",
+            borderRadius: 16,
+            padding: "16px 18px",
+          }}
+        >
+          <div
+            style={{
+              fontSize: 9,
+              fontWeight: 800,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "#d14d86",
+              marginBottom: 8,
+            }}
+          >
+            Notas y condiciones
+          </div>
+
+          {safeData.notes ? (
+            <p
+              style={{
+                fontSize: 10,
+                color: "#8b5b70",
+                lineHeight: 1.8,
+                whiteSpace: "pre-line",
+              }}
+            >
+              {safeData.notes}
+            </p>
+          ) : (
+            <p
+              style={{
+                fontSize: 10,
+                color: "#d1a0b1",
+                fontStyle: "italic",
+              }}
+            >
+              Sin observaciones
+            </p>
+          )}
+        </div>
+
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1px solid #f1dce4",
+            borderRadius: 16,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ padding: "14px 14px 12px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 7,
+                fontSize: 10,
+                color: "#9a6070",
+              }}
+            >
+              <span>Subtotal</span>
+              <span style={{ color: "#4a2033", fontWeight: 600 }}>
+                {formatCurrency(subtotal)}
+              </span>
+            </div>
+
+            {discount > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 7,
+                  fontSize: 10,
+                  color: "#9a6070",
+                }}
+              >
+                <span>Descuento</span>
+                <span style={{ color: "#16a34a", fontWeight: 600 }}>
+                  − {formatCurrency(discount)}
+                </span>
+              </div>
+            )}
+
+            {tax > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  fontSize: 10,
+                  color: "#9a6070",
+                }}
+              >
+                <span>IVA ({tax}%)</span>
+                <span style={{ color: "#4a2033", fontWeight: 600 }}>
+                  {formatCurrency(taxAmount)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              padding: "13px 14px",
+              background: "linear-gradient(135deg, #ec4899, #d946ef)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              color: "#ffffff",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 9.5,
+                fontWeight: 800,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+              }}
+            >
+              Total
+            </span>
+            <span
+              style={{
+                fontSize: 16,
+                fontWeight: 800,
+              }}
+            >
+              {formatCurrency(finalTotal)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: "auto",
+          padding: "18px 34px 22px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            borderTop: "1px solid #f2d7df",
+            paddingTop: 12,
+          }}
+        >
+          <p
+            style={{
+              fontSize: 9,
+              letterSpacing: "0.24em",
+              textTransform: "uppercase",
+              color: "#cf6c8d",
+              margin: 0,
+            }}
+          >
+            ✦ Gracias por elegirnos ✦
+          </p>
+        </div>
       </div>
     </div>
   )

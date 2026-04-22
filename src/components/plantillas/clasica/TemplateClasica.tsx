@@ -1,284 +1,958 @@
-const defaultData = {
-  title: "Cotización demo",
-  clientName: "Cliente ejemplo",
-  clientEmail: undefined as string | undefined,
-  clientPhone: undefined as string | undefined,
-  clientAddress: undefined as string | undefined,
-  companyName: "Tu Empresa",
-  companyEmail: undefined as string | undefined,
-  companyPhone: undefined as string | undefined,
-  companyAddress: undefined as string | undefined,
-  companyWeb: undefined as string | undefined,
-  docNumber: "#COT-001",
-  date: undefined as string | undefined,
-  discount: 0,
-  tax: 0,
-  notes: undefined as string | undefined,
-  services: [
-    { name: "Servicio 1", description: undefined as string | undefined, price: 500 },
-    { name: "Servicio 2", description: undefined as string | undefined, price: 800 },
-  ],
-  products: [
-    { name: "Producto 1", quantity: 2, price: 150 },
-  ],
-  total: 1100,
-  subtotal: 1100,
-}
+import type { TemplateData } from "@/types/cotizacion-form"
 
 type Props = {
-  data?: {
-    title: string
-    clientName: string
-    clientEmail?: string
-    clientPhone?: string
-    clientAddress?: string
-    companyName?: string
-    companyEmail?: string
-    companyPhone?: string
-    companyAddress?: string
-    companyWeb?: string
-    docNumber?: string
-    date?: string
-    discount?: number
-    tax?: number
-    notes?: string
-    services: { name: string; description?: string; price: number }[]
-    products: { name: string; quantity: number; price: number }[]
-    total: number
-    subtotal?: number
-  }
+  data?: TemplateData
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 2,
+  }).format(value || 0)
+}
+
+const defaultData: TemplateData = {
+  title: "Cotización demo",
+  description: "Documento de referencia para propuesta comercial.",
+  clientName: "Cliente ejemplo",
+  clientEmail: "cliente@correo.com",
+  clientPhone: "+52 667 123 4567",
+  clientAddress: "Los Mochis, Sinaloa",
+  clientRFC: "XAXX010101000",
+  companyName: "Tu Empresa",
+  companyLogo: undefined,
+  services: [
+    { name: "Servicio 1", price: 500 },
+    { name: "Servicio 2", price: 800 },
+  ],
+  products: [{ name: "Producto 1", quantity: 2, price: 150 }],
+  discount: 0,
+  tax: 16,
+  subtotal: 1600,
+  total: 1856,
+  notes: "Gracias por considerar nuestra propuesta.",
+  validUntil: new Date().toISOString().slice(0, 10),
+  docNumber: "COT-001",
+  date: new Date().toLocaleDateString("es-MX"),
 }
 
 export default function TemplateClasica({ data }: Props) {
-  const safeData = {
-  ...defaultData,
-  ...data,
-}
+  const safeData: TemplateData = {
+    ...defaultData,
+    ...data,
+    services: data?.services ?? defaultData.services,
+    products: data?.products ?? defaultData.products,
+  }
 
-  const today = safeData.date ?? new Date().toLocaleDateString("es-MX", {
-    day: "2-digit", month: "long", year: "numeric",
-  })
+  const subtotal =
+    safeData.subtotal ??
+    [
+      ...safeData.services.map((s) => ({ price: s.price as number })),
+      ...safeData.products.map((p) => ({
+        price: (p.price as number) * (p.quantity as number),
+      })),
+    ].reduce((acc, item) => acc + (item.price || 0), 0)
 
-  const subtotal = safeData.subtotal ?? safeData.total
-  const tax = safeData.tax ?? 0
   const discount = safeData.discount ?? 0
-  const taxAmount = subtotal * (tax / 100)
+  const tax = safeData.tax ?? 0
+  const taxableBase = Math.max(0, subtotal - discount)
+  const taxAmount = taxableBase * (tax / 100)
+  const total = safeData.total ?? taxableBase + taxAmount
+
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div
       id="template-clasica"
-      style={{ width: "595px", minHeight: "842px" }}
-      className="bg-white relative overflow-hidden font-sans text-[#1a1a2e]"
+      style={{
+        width: 595,
+        minHeight: 842,
+        background: "#f8faff",
+        color: "#1a1a2e",
+        fontFamily:
+          "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        display: "flex",
+        flexDirection: "column",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
-
-      {/* Decoración top-right */}
-      <div className="absolute top-0 right-0 w-44 h-44 pointer-events-none">
-        <svg viewBox="0 0 180 180" fill="none" className="w-full h-full">
-          <circle cx="180" cy="0" r="140" fill="#1e3a8a" fillOpacity="0.08"/>
-          <circle cx="180" cy="0" r="100" fill="#1e3a8a" fillOpacity="0.08"/>
-          <circle cx="180" cy="0" r="60"  fill="#1e3a8a" fillOpacity="0.1"/>
+      {/* Decoración top-right — detrás del contenido, z-index 0 */}
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 176,
+          height: 176,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <svg viewBox="0 0 180 180" fill="none" style={{ width: "100%", height: "100%" }}>
+          <circle cx="180" cy="0" r="140" fill="#1e3a8a" fillOpacity="0.06" />
+          <circle cx="180" cy="0" r="100" fill="#1e3a8a" fillOpacity="0.06" />
+          <circle cx="180" cy="0" r="60" fill="#1e3a8a" fillOpacity="0.08" />
         </svg>
       </div>
 
       {/* Decoración bottom-left */}
-      <div className="absolute bottom-0 left-0 w-40 h-40 pointer-events-none">
-        <svg viewBox="0 0 160 160" fill="none" className="w-full h-full">
-          <circle cx="0" cy="160" r="120" fill="#1e3a8a" fillOpacity="0.07"/>
-          <circle cx="0" cy="160" r="80"  fill="#1e3a8a" fillOpacity="0.07"/>
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: 160,
+          height: 160,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <svg viewBox="0 0 160 160" fill="none" style={{ width: "100%", height: "100%" }}>
+          <circle cx="0" cy="160" r="120" fill="#1e3a8a" fillOpacity="0.05" />
+          <circle cx="0" cy="160" r="80" fill="#1e3a8a" fillOpacity="0.05" />
         </svg>
       </div>
 
-      {/* Header */}
-      <div className="px-10 pt-9 pb-7 relative z-10">
-        <div className="flex items-center gap-2.5 mb-5">
-          <div className="w-9 h-9 bg-[#1e3a8a] rounded-lg flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5z"/>
-              <path d="M2 17l10 5 10-5"/>
-              <path d="M2 12l10 5 10-5"/>
-            </svg>
+      {/* ── HEADER ── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          padding: "28px 36px 22px",
+        }}
+      >
+        {/* Top row: logo/empresa + fecha */}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+            gap: 12,
+          }}
+        >
+          {/* Logo + nombre */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+            {safeData.companyLogo ? (
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "#ffffff",
+                  border: "1.5px solid #dbeafe",
+                  boxShadow: "0 4px 12px rgba(30,58,138,0.1)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  overflow: "hidden",
+                  padding: 6,
+                  flexShrink: 0,
+                }}
+              >
+                <img
+                  src={safeData.companyLogo}
+                  alt="Logo de la empresa"
+                  style={{
+                    maxWidth: "100%",
+                    maxHeight: "100%",
+                    objectFit: "contain",
+                    display: "block",
+                  }}
+                />
+              </div>
+            ) : (
+              <div
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 14,
+                  background: "linear-gradient(135deg, #1e3a8a, #2563eb)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#ffffff",
+                  fontSize: 16,
+                  fontWeight: 800,
+                  flexShrink: 0,
+                  boxShadow: "0 4px 12px rgba(30,58,138,0.25)",
+                }}
+              >
+                {initials}
+              </div>
+            )}
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 700,
+                  color: "#1e3a8a",
+                  lineHeight: 1.2,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {safeData.companyName || "Tu Empresa"}
+              </div>
+              <div
+                style={{
+                  fontSize: 10,
+                  color: "#6b7280",
+                  marginTop: 2,
+                  fontWeight: 500,
+                }}
+              >
+                {safeData.docNumber ?? "COT-001"}
+              </div>
+            </div>
           </div>
-          <span className="text-[15px] font-semibold text-[#1e3a8a]">
-            {safeData.companyName || "Tu Empresa"}
+
+          {/* Fecha — con flexShrink: 0 para que no se comprima ni se salga */}
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1.5px solid #dbeafe",
+              borderRadius: 10,
+              padding: "7px 14px",
+              boxShadow: "0 2px 8px rgba(30,58,138,0.07)",
+              flexShrink: 0,
+              minWidth: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: "#93c5fd",
+                marginBottom: 2,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Fecha
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#1e3a8a",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {safeData.date || new Date().toLocaleDateString("es-MX")}
+            </div>
+          </div>
+        </div>
+
+        {/* Title row */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+            gap: 16,
+          }}
+        >
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 7,
+                marginBottom: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 22,
+                  height: 3,
+                  borderRadius: 999,
+                  background: "linear-gradient(90deg, #1e3a8a, #3b82f6)",
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.18em",
+                  color: "#1e3a8a",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Cotización de servicios
+              </span>
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontSize: 28,
+                fontWeight: 800,
+                letterSpacing: "-0.03em",
+                lineHeight: 1.1,
+                color: "#1a1a2e",
+              }}
+            >
+              {safeData.title || "Documento comercial"}
+            </h1>
+
+            {safeData.description ? (
+              <p
+                style={{
+                  margin: "8px 0 0",
+                  maxWidth: 310,
+                  fontSize: 11,
+                  lineHeight: 1.65,
+                  color: "#6b7280",
+                }}
+              >
+                {safeData.description}
+              </p>
+            ) : null}
+          </div>
+
+          {/* Vigencia */}
+          <div
+            style={{
+              minWidth: 130,
+              maxWidth: 150,
+              background: "#ffffff",
+              border: "1.5px solid #dbeafe",
+              borderRadius: 12,
+              padding: "11px 14px",
+              boxShadow: "0 2px 8px rgba(30,58,138,0.07)",
+              flexShrink: 0,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 8,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.14em",
+                color: "#93c5fd",
+                marginBottom: 4,
+                whiteSpace: "nowrap",
+              }}
+            >
+              Vigencia
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#1a1a2e",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {safeData.validUntil || "Sin definir"}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ACCENT BAR */}
+      <div
+        style={{
+          height: 3,
+          background: "linear-gradient(90deg, #1e3a8a 0%, #3b82f6 60%, #93c5fd 100%)",
+          margin: "0 36px",
+          borderRadius: 999,
+          position: "relative",
+          zIndex: 10,
+        }}
+      />
+
+      {/* ── CLIENTE + EMISOR ── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          padding: "14px 36px 12px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: 12,
+        }}
+      >
+        {/* Cliente */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1.5px solid #dbeafe",
+            borderRadius: 14,
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+          }}
+        >
+          <div
+            style={{
+              padding: "9px 14px",
+              background: "linear-gradient(90deg, #eff6ff, #f0f9ff)",
+              borderBottom: "1px solid #dbeafe",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+            }}
+          >
+            <div
+              style={{
+                width: 3,
+                height: 13,
+                borderRadius: 999,
+                background: "#1e3a8a",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.16em",
+                color: "#1e3a8a",
+              }}
+            >
+              Datos del cliente
+            </span>
+          </div>
+          <div style={{ padding: "12px 14px" }}>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: "#1a1a2e",
+                marginBottom: 6,
+              }}
+            >
+              {safeData.clientName || "Sin cliente"}
+            </div>
+            <div style={{ fontSize: 10, lineHeight: 1.75, color: "#4b5563" }}>
+              {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+              {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+              {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+              {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+            </div>
+          </div>
+        </div>
+
+        {/* Emisor */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1.5px solid #dbeafe",
+            borderRadius: 14,
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+          }}
+        >
+          <div
+            style={{
+              padding: "9px 14px",
+              background: "linear-gradient(90deg, #1e3a8a, #2563eb)",
+              display: "flex",
+              alignItems: "center",
+              gap: 7,
+            }}
+          >
+            <div
+              style={{
+                width: 3,
+                height: 13,
+                borderRadius: 999,
+                background: "#93c5fd",
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.16em",
+                color: "#bfdbfe",
+              }}
+            >
+              Datos del emisor
+            </span>
+          </div>
+          <div style={{ padding: "12px 14px" }}>
+            <div
+              style={{
+                fontSize: 14,
+                fontWeight: 700,
+                color: "#1a1a2e",
+                marginBottom: 6,
+              }}
+            >
+              {safeData.companyName || "Tu Empresa"}
+            </div>
+            <div style={{ fontSize: 10, lineHeight: 1.75, color: "#4b5563" }}>
+              <div>Documento: {safeData.docNumber ?? "COT-001"}</div>
+              <div>
+                Fecha: {safeData.date || new Date().toLocaleDateString("es-MX")}
+              </div>
+              {safeData.validUntil && (
+                <div>Vigencia: {safeData.validUntil}</div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── TABLA SERVICIOS ── */}
+      {safeData.services.length > 0 && (
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            padding: "0 36px 10px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+                color: "#1e3a8a",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Servicios
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "linear-gradient(90deg, #dbeafe, transparent)",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1.5px solid #dbeafe",
+              borderRadius: 12,
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2.4fr 0.5fr 1fr 1fr",
+                gap: 10,
+                padding: "9px 14px",
+                background: "linear-gradient(90deg, #1e3a8a, #2563eb)",
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                color: "#bfdbfe",
+              }}
+            >
+              <div>Descripción</div>
+              <div style={{ textAlign: "center" }}>Cant.</div>
+              <div style={{ textAlign: "right" }}>Precio</div>
+              <div style={{ textAlign: "right" }}>Subtotal</div>
+            </div>
+
+            {safeData.services.map((service, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.4fr 0.5fr 1fr 1fr",
+                  gap: 10,
+                  padding: "11px 14px",
+                  borderTop: i === 0 ? "none" : "1px solid #eff6ff",
+                  background: i % 2 === 0 ? "#ffffff" : "#f8faff",
+                  fontSize: 11,
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: 600, color: "#1a1a2e", lineHeight: 1.35 }}>
+                    {service.name || "-"}
+                  </div>
+                </div>
+                <div style={{ textAlign: "center", color: "#6b7280" }}>1</div>
+                <div style={{ textAlign: "right", color: "#6b7280" }}>
+                  {formatMoney(service.price || 0)}
+                </div>
+                <div
+                  style={{
+                    textAlign: "right",
+                    fontWeight: 700,
+                    color: "#1e3a8a",
+                  }}
+                >
+                  {formatMoney(service.price || 0)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── TABLA PRODUCTOS ── */}
+      {safeData.products.length > 0 && (
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            padding: "0 36px 10px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              marginBottom: 8,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+                color: "#1e3a8a",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Productos
+            </span>
+            <div
+              style={{
+                flex: 1,
+                height: 1,
+                background: "linear-gradient(90deg, #dbeafe, transparent)",
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              background: "#ffffff",
+              border: "1.5px solid #dbeafe",
+              borderRadius: 12,
+              overflow: "hidden",
+              boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "2.4fr 0.5fr 1fr 1fr",
+                gap: 10,
+                padding: "9px 14px",
+                background: "linear-gradient(90deg, #1e3a8a, #2563eb)",
+                fontSize: 8.5,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                color: "#bfdbfe",
+              }}
+            >
+              <div>Producto</div>
+              <div style={{ textAlign: "center" }}>Cantidad</div>
+              <div style={{ textAlign: "right" }}>Precio unit.</div>
+              <div style={{ textAlign: "right" }}>Subtotal</div>
+            </div>
+
+            {safeData.products.map((product, i) => (
+              <div
+                key={i}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.4fr 0.5fr 1fr 1fr",
+                  gap: 10,
+                  padding: "11px 14px",
+                  borderTop: i === 0 ? "none" : "1px solid #eff6ff",
+                  background: i % 2 === 0 ? "#ffffff" : "#f8faff",
+                  fontSize: 11,
+                  alignItems: "center",
+                }}
+              >
+                <div style={{ fontWeight: 600, color: "#1a1a2e" }}>
+                  {product.name || "-"}
+                </div>
+                <div style={{ textAlign: "center", color: "#6b7280" }}>
+                  {product.quantity}
+                </div>
+                <div style={{ textAlign: "right", color: "#6b7280" }}>
+                  {formatMoney(product.price || 0)}
+                </div>
+                <div
+                  style={{
+                    textAlign: "right",
+                    fontWeight: 700,
+                    color: "#1e3a8a",
+                  }}
+                >
+                  {formatMoney((product.price || 0) * (product.quantity || 0))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── NOTAS + TOTALES ── */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 10,
+          padding: "0 36px 12px",
+          display: "grid",
+          gridTemplateColumns: "1fr 200px",
+          gap: 12,
+          alignItems: "start",
+        }}
+      >
+        {/* Notas */}
+        {safeData.notes ? (
+          <div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                marginBottom: 8,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: 8.5,
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.18em",
+                  color: "#1e3a8a",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Condiciones
+              </span>
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: "linear-gradient(90deg, #dbeafe, transparent)",
+                }}
+              />
+            </div>
+            <div
+              style={{
+                background: "#ffffff",
+                border: "1.5px solid #dbeafe",
+                borderRadius: 12,
+                padding: "12px 14px",
+                fontSize: 10,
+                lineHeight: 1.75,
+                color: "#4b5563",
+                whiteSpace: "pre-wrap",
+                boxShadow: "0 2px 8px rgba(30,58,138,0.05)",
+              }}
+            >
+              {safeData.notes}
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+
+        {/* Totales */}
+        <div
+          style={{
+            background: "#ffffff",
+            border: "1.5px solid #dbeafe",
+            borderRadius: 12,
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(30,58,138,0.06)",
+          }}
+        >
+          <div style={{ padding: "12px 14px" }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 6,
+                fontSize: 10.5,
+                color: "#4b5563",
+                borderBottom: "1px solid #f1f5f9",
+                paddingBottom: 6,
+              }}
+            >
+              <span>Subtotal</span>
+              <span style={{ fontWeight: 600, color: "#1a1a2e" }}>
+                {formatMoney(subtotal)}
+              </span>
+            </div>
+
+            {tax > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                  fontSize: 10.5,
+                  color: "#4b5563",
+                  borderBottom: "1px solid #f1f5f9",
+                  paddingBottom: 6,
+                }}
+              >
+                <span>Impuestos ({tax}%)</span>
+                <span style={{ fontWeight: 600, color: "#1a1a2e" }}>
+                  {formatMoney(taxAmount)}
+                </span>
+              </div>
+            )}
+
+            {discount > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  marginBottom: 6,
+                  fontSize: 10.5,
+                  color: "#4b5563",
+                  borderBottom: "1px solid #f1f5f9",
+                  paddingBottom: 6,
+                }}
+              >
+                <span>Descuento</span>
+                <span style={{ fontWeight: 600, color: "#16a34a" }}>
+                  - {formatMoney(discount)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div
+            style={{
+              padding: "13px 14px",
+              background: "linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: 2,
+                background: "linear-gradient(90deg, #3b82f6, #93c5fd)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                right: -16,
+                bottom: -16,
+                width: 60,
+                height: 60,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.06)",
+              }}
+            />
+            <span
+              style={{
+                fontSize: 9,
+                fontWeight: 800,
+                textTransform: "uppercase",
+                letterSpacing: "0.18em",
+                color: "#93c5fd",
+              }}
+            >
+              Total
+            </span>
+            <span
+              style={{
+                fontSize: 19,
+                fontWeight: 800,
+                color: "#ffffff",
+              }}
+            >
+              {formatMoney(total)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* ── FOOTER ── */}
+      <div
+        style={{
+          marginTop: "auto",
+          position: "relative",
+          zIndex: 10,
+          padding: "12px 36px 20px",
+        }}
+      >
+        <div
+          style={{
+            paddingTop: 10,
+            borderTop: "1px solid #dbeafe",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            fontSize: 9,
+            color: "#94a3b8",
+          }}
+        >
+          <div style={{ display: "flex", gap: 14, alignItems: "center" }}>
+            <span style={{ fontWeight: 600, color: "#6b7280" }}>
+              {safeData.companyName || "Tu Empresa"}
+            </span>
+            {safeData.validUntil && (
+              <span>Vigencia: {safeData.validUntil}</span>
+            )}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
+            {[8, 16, 8].map((w, i) => (
+              <div
+                key={i}
+                style={{
+                  width: w,
+                  height: 2,
+                  borderRadius: 999,
+                  background: i === 1 ? "#3b82f6" : "#bfdbfe",
+                }}
+              />
+            ))}
+          </div>
+
+          <span>
+            {safeData.date || new Date().toLocaleDateString("es-MX")}
           </span>
         </div>
-        <div className="flex justify-between items-end">
-          <div>
-            <h1 className="text-[32px] font-bold text-[#1a1a2e] leading-tight">
-              Cotización de<br />Servicios
-            </h1>
-            <p className="text-[13px] text-gray-500 mt-1">
-              {safeData.title || "Documento comercial"} · Válido por 30 días
-            </p>
-          </div>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2">
-            <span className="text-[11px] font-semibold text-blue-500 tracking-wide">
-              {safeData.docNumber ?? "#COT-001"}
-            </span>
-          </div>
-        </div>
       </div>
-
-      {/* Meta: cliente + emisor */}
-      <div className="grid grid-cols-2 px-10 pb-7 relative z-10">
-        <div className="pr-6">
-          <p className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest mb-2">
-            Datos del Cliente
-          </p>
-          <p className="text-[13px] font-semibold text-[#1a1a2e] mb-1">
-            {safeData.clientName || "Sin cliente"}
-          </p>
-          {safeData.clientAddress && <p className="text-[12px] text-gray-600">{safeData.clientAddress}</p>}
-          {safeData.clientPhone   && <p className="text-[12px] text-gray-600">{safeData.clientPhone}</p>}
-          {safeData.clientEmail   && <p className="text-[12px] text-gray-600">{safeData.clientEmail}</p>}
-        </div>
-        <div>
-          <p className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest mb-2">
-            Datos del Emisor
-          </p>
-          <p className="text-[13px] font-semibold text-[#1a1a2e] mb-1">
-            {safeData.companyName || "Tu Empresa"}
-          </p>
-          {safeData.companyAddress && <p className="text-[12px] text-gray-600">{safeData.companyAddress}</p>}
-          {safeData.companyPhone   && <p className="text-[12px] text-gray-600">{safeData.companyPhone}</p>}
-          {safeData.companyEmail   && <p className="text-[12px] text-gray-600">{safeData.companyEmail}</p>}
-        </div>
-      </div>
-
-      {safeData.services.length > 0 && (
-        <div className="px-10 relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest">Servicios</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-          <table className="w-full text-[12px] border-collapse">
-            <thead>
-              <tr className="bg-[#1e3a8a]">
-                <th className="text-left text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Descripción</th>
-                <th className="text-center text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Cant.</th>
-                <th className="text-right text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Precio</th>
-                <th className="text-right text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {safeData.services.map((s, i) => (
-                <tr key={i} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
-                  <td className="px-3.5 py-2.5 font-medium text-[#1a1a2e]">
-                    {s.name || "-"}
-                    {s.description && (
-                      <span className="block text-[10px] text-gray-400 font-normal">{s.description}</span>
-                    )}
-                  </td>
-                  <td className="px-3.5 py-2.5 text-center text-gray-600">1</td>
-                  <td className="px-3.5 py-2.5 text-right text-gray-600">${(s.price || 0).toFixed(2)}</td>
-                  <td className="px-3.5 py-2.5 text-right font-semibold text-[#1a1a2e]">${(s.price || 0).toFixed(2)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Tabla Productos */}
-      {safeData.products.length > 0 && (
-        <div className="px-10 mt-4 relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <span className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest">Productos</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-          <table className="w-full text-[12px] border-collapse">
-            <thead>
-              <tr className="bg-[#1e3a8a]">
-                <th className="text-left text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Producto</th>
-                <th className="text-center text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Cantidad</th>
-                <th className="text-right text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Precio unit.</th>
-                <th className="text-right text-white font-semibold text-[11px] uppercase tracking-wider px-3.5 py-2.5">Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              {safeData.products.map((p, i) => (
-                <tr key={i} className={i % 2 === 1 ? "bg-slate-50" : "bg-white"}>
-                  <td className="px-3.5 py-2.5 font-medium text-[#1a1a2e]">{p.name || "-"}</td>
-                  <td className="px-3.5 py-2.5 text-center text-gray-600">{p.quantity}</td>
-                  <td className="px-3.5 py-2.5 text-right text-gray-600">${(p.price || 0).toFixed(2)}</td>
-                  <td className="px-3.5 py-2.5 text-right font-semibold text-[#1a1a2e]">
-                    ${((p.price || 0) * (p.quantity || 0)).toFixed(2)}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* Totales */}
-      <div className="flex justify-end px-10 mt-5 relative z-10">
-        <div className="w-56">
-          <div className="flex justify-between py-1.5 border-b border-gray-100">
-            <span className="text-[12px] text-gray-500">Subtotal</span>
-            <span className="text-[12px] font-semibold text-gray-700">${subtotal.toFixed(2)}</span>
-          </div>
-          {tax > 0 && (
-            <div className="flex justify-between py-1.5 border-b border-gray-100">
-              <span className="text-[12px] text-gray-500">Impuestos ({tax}%)</span>
-              <span className="text-[12px] font-semibold text-gray-700">${taxAmount.toFixed(2)}</span>
-            </div>
-          )}
-          {discount > 0 && (
-            <div className="flex justify-between py-1.5 border-b border-gray-100">
-              <span className="text-[12px] text-gray-500">Descuento</span>
-              <span className="text-[12px] font-semibold text-emerald-600">- ${discount.toFixed(2)}</span>
-            </div>
-          )}
-          <div className="flex justify-between items-center bg-[#1e3a8a] rounded-lg px-4 py-3 mt-2.5">
-            <span className="text-[11px] text-blue-300 uppercase tracking-wider font-semibold">Total</span>
-            <span className="text-[20px] font-bold text-white">${(safeData.total || 0).toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Condiciones */}
-      {safeData.notes && (
-        <div className="px-10 mt-6 relative z-10">
-          <p className="text-[10px] font-bold text-[#1e3a8a] uppercase tracking-widest mb-2">Condiciones</p>
-          <p className="text-[11px] text-gray-500 leading-relaxed">{safeData.notes}</p>
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="relative z-10 px-10 py-4 bg-slate-50 border-t border-gray-100 flex justify-between items-center mt-10">
-        <div className="flex gap-5">
-          {safeData.companyPhone && (
-            <span className="flex items-center gap-1.5 text-[10px] text-gray-400">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8a19.79 19.79 0 01-3.07-8.67A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z"/>
-              </svg>
-              {safeData.companyPhone}
-            </span>
-          )}
-          {safeData.companyEmail && (
-            <span className="flex items-center gap-1.5 text-[10px] text-gray-400">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-                <polyline points="22,6 12,13 2,6"/>
-              </svg>
-              {safeData.companyEmail}
-            </span>
-          )}
-          {safeData.companyWeb && (
-            <span className="flex items-center gap-1.5 text-[10px] text-gray-400">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>
-              </svg>
-              {safeData.companyWeb}
-            </span>
-          )}
-        </div>
-        <span className="text-[10px] text-gray-400">{today}</span>
-      </div>
-
     </div>
   )
 }

@@ -73,7 +73,6 @@ export default function PlanesPage() {
       style={{ fontFamily: "'Sora', sans-serif" }}
     >
 
-      {/* ─── Encabezado ────*/}
       <div>
         <h1
           className="text-2xl font-bold tracking-tight mb-1"

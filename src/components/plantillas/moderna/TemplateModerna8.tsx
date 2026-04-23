@@ -1,92 +1,169 @@
 type ServiceItem = {
-  name: string
+  name?: string
   description?: string
-  price: number
+  price?: number
 }
 
 type ProductItem = {
-  name: string
-  quantity: number
-  price: number
+  name?: string
+  quantity?: number
+  price?: number
+}
+
+type TemplateDataInput = {
+  title?: string
+  description?: string
+  clientName?: string
+  clientEmail?: string
+  clientPhone?: string
+  clientAddress?: string
+  clientRFC?: string
+  companyName?: string
+  companyLogo?: string
+  logoUrl?: string
+  companyEmail?: string
+  companyPhone?: string
+  companyAddress?: string
+  companyWeb?: string
+  docNumber?: string
+  date?: string
+  validUntil?: string
+  discount?: number
+  tax?: number
+  notes?: string
+  services?: ServiceItem[]
+  products?: ProductItem[]
+  total?: number
+  subtotal?: number
 }
 
 type Props = {
-  data: {
-    title?: string
-    clientName?: string
-    clientEmail?: string
-    clientPhone?: string
-    clientAddress?: string
-    companyName?: string
-    companyEmail?: string
-    companyPhone?: string
-    companyAddress?: string
-    companyWeb?: string
-    docNumber?: string
-    date?: string
-    discount?: number
-    tax?: number
-    notes?: string
-    logoUrl?: string
-    services?: ServiceItem[]
-    products?: ProductItem[]
-    total?: number
-    subtotal?: number
-  }
+  data?: TemplateDataInput
+}
+
+type QuoteItem = {
+  id: string
+  type: "service" | "product"
+  name: string
+  quantity: number
+  price: number
+  amount: number
+  detail?: string
+}
+
+const defaultData: TemplateDataInput = {
+  title: "Cotización",
+  description: "Documento comercial con una propuesta clara, elegante y profesional.",
+  clientName: "Cliente ejemplo",
+  clientEmail: "cliente@correo.com",
+  clientPhone: "+52 667 123 4567",
+  clientAddress: "Los Mochis, Sinaloa",
+  clientRFC: "XAXX010101000",
+  companyName: "Tu empresa",
+  companyLogo: undefined,
+  logoUrl: undefined,
+  companyEmail: "contacto@tuempresa.com",
+  companyPhone: "+52 667 123 4567",
+  companyAddress: "Los Mochis, Sinaloa",
+  companyWeb: "www.tuempresa.com",
+  docNumber: "COT-001",
+  date: new Date().toLocaleDateString("es-MX"),
+  validUntil: new Date().toISOString().slice(0, 10),
+  discount: 0,
+  tax: 16,
+  notes: "Gracias por considerar nuestra propuesta.",
+  services: [
+    { name: "Servicio 1", description: "Detalle del servicio", price: 500 },
+    { name: "Servicio 2", description: "Detalle del servicio", price: 800 },
+  ],
+  products: [{ name: "Producto 1", quantity: 2, price: 150 }],
+  total: 1856,
+  subtotal: 1600,
+}
+
+const palette = {
+  pageBg: "#f7f2eb",
+  pageBgSoft: "#efe7dc",
+  surface: "#fffdf9",
+  surfaceSoft: "#faf5ee",
+  beige50: "#f6efe6",
+  beige100: "#eadfce",
+  beige200: "#dbc9af",
+  beige300: "#c9ad8b",
+  taupe400: "#b19072",
+  taupe500: "#9a7b61",
+  brown600: "#725946",
+  brown700: "#5c4738",
+  brown800: "#443329",
+  ink: "#3d3027",
+  inkSoft: "#76665a",
+  muted: "#a39283",
+  border: "#eadfce",
+  borderSoft: "#f1e8dc",
+  success: "#2f7d55",
+}
+
+function formatCurrency(value: number) {
+  return `$${Number(value || 0).toLocaleString("es-MX", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`
+}
+
+function buildItems(data: TemplateDataInput): QuoteItem[] {
+  const serviceItems: QuoteItem[] = (data.services ?? []).map((service, index) => ({
+    id: `service-${index}`,
+    type: "service",
+    name: service.name || `Servicio ${index + 1}`,
+    quantity: 1,
+    price: Number(service.price || 0),
+    amount: Number(service.price || 0),
+    detail: service.description || "Servicio",
+  }))
+
+  const productItems: QuoteItem[] = (data.products ?? []).map((product, index) => ({
+    id: `product-${index}`,
+    type: "product",
+    name: product.name || `Producto ${index + 1}`,
+    quantity: Number(product.quantity || 0),
+    price: Number(product.price || 0),
+    amount: Number(product.quantity || 0) * Number(product.price || 0),
+    detail: "Producto",
+  }))
+
+  return [...serviceItems, ...productItems]
 }
 
 export default function TemplateModernaZ({ data }: Props) {
-  const safeServices = Array.isArray(data.services) ? data.services : []
-  const safeProducts = Array.isArray(data.products) ? data.products : []
+  const safeData: TemplateDataInput = {
+    ...defaultData,
+    ...data,
+    services: data?.services ?? defaultData.services,
+    products: data?.products ?? defaultData.products,
+  }
 
-  const companyName = data.companyName?.trim() || "Tu empresa"
-  const clientName = data.clientName?.trim() || "Cliente"
-  const documentTitle = data.title?.trim() || "Cotización"
-  const today = data.date?.trim() || "Sin fecha"
+  const items = buildItems(safeData)
 
-  const allItems = [
-    ...safeServices.map((service) => ({
-      name: service.name || "Servicio",
-      description: service.description,
-      qty: 1,
-      price: Number(service.price || 0),
-      total: Number(service.price || 0),
-    })),
-    ...safeProducts.map((product) => ({
-      name: product.name || "Producto",
-      description: undefined,
-      qty: Number(product.quantity || 0),
-      price: Number(product.price || 0),
-      total: Number(product.quantity || 0) * Number(product.price || 0),
-    })),
-  ]
+  const calculatedSubtotal =
+    items.length > 0
+      ? items.reduce((acc, item) => acc + item.amount, 0)
+      : Number(safeData.subtotal || 0)
 
-  const calculatedSubtotal = allItems.reduce((acc, item) => acc + item.total, 0)
-  const subtotal = Number(data.subtotal ?? calculatedSubtotal)
-  const tax = Number(data.tax ?? 0)
-  const discount = Number(data.discount ?? 0)
-  const taxAmount = subtotal * (tax / 100)
+  const subtotal = Number(safeData.subtotal ?? calculatedSubtotal)
+  const tax = Number(safeData.tax ?? 0)
+  const discount = Number(safeData.discount ?? 0)
+  const taxableBase = Math.max(0, subtotal - discount)
+  const taxAmount = taxableBase * (tax / 100)
+  const finalTotal = Number(safeData.total ?? taxableBase + taxAmount)
 
-  const finalTotal =
-    typeof data.total === "number"
-      ? data.total
-      : Math.max(subtotal + taxAmount - discount, 0)
-
-  const hasItems = allItems.length > 0
+  const hasItems = items.length > 0
   const showTax = tax > 0
   const showDiscount = discount > 0
-
-  const formatCurrency = (value: number) =>
-    `$${Number(value || 0).toLocaleString("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`
-
-  const INDIGO = "#3D52A0"
-  const INDIGO_DARK = "#1E2D6B"
-  const INDIGO_LIGHT = "#D8E0F5"
-  const INDIGO_PALE = "#EEF1FB"
-  const BG = "#F5F7FF"
+  const resolvedLogo = safeData.companyLogo || safeData.logoUrl
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div
@@ -94,63 +171,45 @@ export default function TemplateModernaZ({ data }: Props) {
       style={{
         width: "595px",
         minHeight: "842px",
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-        backgroundColor: BG,
+        fontFamily:
+          "Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        background: `linear-gradient(180deg, ${palette.pageBg} 0%, ${palette.pageBgSoft} 100%)`,
         position: "relative",
         overflow: "hidden",
+        color: palette.ink,
       }}
     >
       <div
         style={{
           position: "absolute",
-          top: "-60px",
-          left: "-60px",
-          width: "220px",
-          height: "220px",
+          top: -80,
+          right: -55,
+          width: 210,
+          height: 210,
           borderRadius: "50%",
-          background: INDIGO_LIGHT,
-          opacity: 0.6,
-          zIndex: 0,
+          background: "rgba(201, 173, 139, 0.14)",
         }}
       />
       <div
         style={{
           position: "absolute",
-          top: "-20px",
-          left: "120px",
-          width: "110px",
-          height: "110px",
+          top: 70,
+          left: -40,
+          width: 115,
+          height: 115,
           borderRadius: "50%",
-          background: INDIGO_LIGHT,
-          opacity: 0.35,
-          zIndex: 0,
-        }}
-      />
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: "-50px",
-          right: "-50px",
-          width: "180px",
-          height: "180px",
-          borderRadius: "50%",
-          background: INDIGO_LIGHT,
-          opacity: 0.5,
-          zIndex: 0,
+          background: "rgba(219, 201, 175, 0.16)",
         }}
       />
       <div
         style={{
           position: "absolute",
-          bottom: "60px",
-          right: "100px",
-          width: "80px",
-          height: "80px",
+          bottom: -60,
+          right: -25,
+          width: 150,
+          height: 150,
           borderRadius: "50%",
-          background: INDIGO_LIGHT,
-          opacity: 0.3,
-          zIndex: 0,
+          background: "rgba(154, 123, 97, 0.08)",
         }}
       />
 
@@ -158,785 +217,840 @@ export default function TemplateModernaZ({ data }: Props) {
         style={{
           position: "relative",
           zIndex: 1,
-          padding: "38px 40px 28px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: "16px",
+          padding: "18px",
         }}
       >
-        <div style={{ minWidth: 0 }}>
-          <p
-            style={{
-              color: INDIGO_DARK,
-              fontSize: "36px",
-              fontWeight: "800",
-              margin: "0 0 4px",
-              letterSpacing: "-0.04em",
-              lineHeight: "1",
-              wordBreak: "break-word",
-            }}
-          >
-            {documentTitle.toUpperCase()}
-          </p>
-          {data.docNumber && (
-            <p
-              style={{
-                color: INDIGO,
-                fontSize: "10px",
-                fontWeight: "600",
-                margin: 0,
-                letterSpacing: "0.1em",
-                opacity: 0.6,
-              }}
-            >
-              N° {data.docNumber}
-            </p>
-          )}
-        </div>
-
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexShrink: 0 }}>
+        <div
+          style={{
+            minHeight: "806px",
+            display: "flex",
+            flexDirection: "column",
+            background: palette.surface,
+            border: `1px solid ${palette.border}`,
+            borderRadius: "26px",
+            overflow: "hidden",
+            boxShadow: "0 18px 44px rgba(68, 51, 41, 0.10)",
+          }}
+        >
           <div
             style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "10px",
+              background: `linear-gradient(135deg, ${palette.brown800} 0%, ${palette.brown700} 45%, ${palette.taupe500} 100%)`,
+              padding: "22px 22px 18px",
+              position: "relative",
               overflow: "hidden",
-              border: `1.5px solid ${INDIGO_LIGHT}`,
-              background: "#FFFFFF",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flexShrink: 0,
             }}
           >
-            {data.logoUrl ? (
-              <img
-                src={data.logoUrl}
-                alt="Logo"
-                style={{ width: "100%", height: "100%", objectFit: "contain" }}
-              />
-            ) : (
-              <svg
-                width="26"
-                height="26"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke={INDIGO}
-                strokeWidth="1.5"
-              >
-                <rect x="3" y="3" width="7" height="7" rx="1" />
-                <rect x="14" y="3" width="7" height="7" rx="1" />
-                <rect x="3" y="14" width="7" height="7" rx="1" />
-                <rect x="14" y="14" width="7" height="7" rx="1" />
-              </svg>
-            )}
-          </div>
-
-          <div style={{ textAlign: "right", minWidth: 0 }}>
-            <p
+            <div
               style={{
-                color: INDIGO_DARK,
-                fontSize: "14px",
-                fontWeight: "800",
-                margin: "0 0 2px",
-                letterSpacing: "-0.01em",
-                wordBreak: "break-word",
+                position: "absolute",
+                top: -26,
+                right: -14,
+                width: 110,
+                height: 110,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.08)",
+              }}
+            />
+            <div
+              style={{
+                position: "absolute",
+                bottom: -24,
+                left: 90,
+                width: 86,
+                height: 86,
+                borderRadius: "50%",
+                background: "rgba(255,255,255,0.05)",
+              }}
+            />
+
+            <div
+              style={{
+                position: "relative",
+                zIndex: 1,
+                display: "grid",
+                gridTemplateColumns: "1.12fr 0.88fr",
+                gap: 18,
+                alignItems: "start",
               }}
             >
-              {companyName}
-            </p>
-            {data.companyWeb && (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  justifyContent: "flex-end",
-                  marginBottom: "1px",
-                }}
-              >
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={INDIGO}
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-                </svg>
-                <span
+              <div>
+                <div
                   style={{
-                    color: INDIGO,
-                    fontSize: "8.5px",
-                    fontWeight: "600",
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 8,
+                    marginBottom: 10,
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 28,
+                      height: 4,
+                      borderRadius: 999,
+                      background: `linear-gradient(90deg, ${palette.beige200} 0%, #ffffff 100%)`,
+                    }}
+                  />
+                  <span
+                    style={{
+                      fontSize: "8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.82)",
+                    }}
+                  >
+                    Propuesta ejecutiva
+                  </span>
+                </div>
+
+                <h1
+                  style={{
+                    margin: 0,
+                    color: "#ffffff",
+                    fontSize: 30,
+                    lineHeight: 1.02,
+                    fontWeight: 800,
+                    letterSpacing: "-0.03em",
+                    maxWidth: 310,
                     wordBreak: "break-word",
                   }}
                 >
-                  {data.companyWeb}
-                </span>
+                  {safeData.title || "Cotización"}
+                </h1>
+
+                {safeData.description ? (
+                  <p
+                    style={{
+                      margin: "10px 0 0",
+                      color: "rgba(255,255,255,0.78)",
+                      fontSize: "9.8px",
+                      lineHeight: 1.72,
+                      maxWidth: 300,
+                    }}
+                  >
+                    {safeData.description}
+                  </p>
+                ) : null}
               </div>
-            )}
-            {data.companyAddress && (
+
               <div
                 style={{
                   display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  justifyContent: "flex-end",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: 10,
                 }}
               >
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={INDIGO}
-                  strokeWidth="2"
+                {resolvedLogo ? (
+                  <div
+                    style={{
+                      width: 68,
+                      height: 68,
+                      borderRadius: 18,
+                      background: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      padding: 8,
+                      boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={resolvedLogo}
+                      alt="Logo de la empresa"
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: 68,
+                      height: 68,
+                      borderRadius: 18,
+                      background: `linear-gradient(135deg, ${palette.beige300} 0%, ${palette.taupe500} 100%)`,
+                      color: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 20,
+                      fontWeight: 800,
+                      boxShadow: "0 10px 24px rgba(0,0,0,0.14)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {initials}
+                  </div>
+                )}
+
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      color: "#ffffff",
+                      fontSize: 17,
+                      fontWeight: 800,
+                      lineHeight: 1.18,
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {safeData.companyName || "Tu empresa"}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 5,
+                      fontSize: "9px",
+                      lineHeight: 1.65,
+                      color: "rgba(255,255,255,0.72)",
+                    }}
+                  >
+                    <div>{safeData.docNumber || "COT-001"}</div>
+                    <div>{safeData.date || new Date().toLocaleDateString("es-MX")}</div>
+                    {safeData.validUntil ? <div>Vigencia: {safeData.validUntil}</div> : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: "14px 16px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 12,
+              flex: 1,
+            }}
+          >
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1.08fr 0.92fr",
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  background: palette.surfaceSoft,
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  padding: "13px 14px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    letterSpacing: "0.16em",
+                    textTransform: "uppercase",
+                    color: palette.taupe500,
+                    marginBottom: 8,
+                  }}
                 >
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
+                  Cliente
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 800,
+                    color: palette.ink,
+                    marginBottom: 6,
+                    lineHeight: 1.2,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {safeData.clientName || "Cliente"}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "9.2px",
+                    lineHeight: 1.7,
+                    color: palette.inkSoft,
+                  }}
+                >
+                  {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+                  {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+                  {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+                  {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    background: palette.beige50,
+                    border: `1px solid ${palette.beige100}`,
+                    borderRadius: 16,
+                    padding: "13px 12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "7.8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: palette.brown700,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Resumen
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 6,
+                      fontSize: "9px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Conceptos</span>
+                      <strong style={{ color: palette.ink }}>{items.length}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>IVA</span>
+                      <strong style={{ color: palette.ink }}>{tax}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Descuento</span>
+                      <strong style={{ color: palette.ink }}>{formatCurrency(discount)}</strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: "#ffffff",
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 16,
+                    padding: "13px 12px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "7.8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                      color: palette.taupe500,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Contacto
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 6,
+                      fontSize: "8.8px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    {safeData.companyPhone ? <div>{safeData.companyPhone}</div> : null}
+                    {safeData.companyEmail ? <div>{safeData.companyEmail}</div> : null}
+                    {safeData.companyWeb ? <div>{safeData.companyWeb}</div> : null}
+                    {safeData.companyAddress ? <div>{safeData.companyAddress}</div> : null}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 174px",
+                gap: 12,
+                alignItems: "stretch",
+              }}
+            >
+              <div
+                style={{
+                  background: palette.beige50,
+                  border: `1px solid ${palette.beige100}`,
+                  borderRadius: 16,
+                  padding: "11px 13px",
+                }}
+              >
+                <p
+                  style={{
+                    margin: 0,
+                    color: palette.ink,
+                    fontSize: "9px",
+                    lineHeight: 1.7,
+                  }}
+                >
+                  Esta plantilla fue rediseñada con una línea más cálida, elegante y
+                  profesional, usando una paleta beige sobria para que la propuesta se
+                  vea seria, limpia y con mejor presencia visual.
+                </p>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 16,
+                  padding: "14px 12px",
+                  background: `linear-gradient(135deg, ${palette.taupe500} 0%, ${palette.brown700} 100%)`,
+                  color: "#ffffff",
+                  position: "relative",
+                  overflow: "hidden",
+                  boxShadow: "0 12px 24px rgba(68, 51, 41, 0.14)",
+                  textAlign: "center",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: -18,
+                    right: -18,
+                    width: 84,
+                    height: 84,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.09)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "relative",
+                    zIndex: 1,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "7.6px",
+                      fontWeight: 800,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.82)",
+                      marginBottom: 6,
+                    }}
+                  >
+                    Total final
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      letterSpacing: "-0.03em",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {formatCurrency(finalTotal)}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 8,
+                      display: "inline-block",
+                      background: "rgba(255,255,255,0.12)",
+                      borderRadius: 999,
+                      padding: "4px 10px",
+                      fontSize: "7.3px",
+                      color: "rgba(255,255,255,0.82)",
+                    }}
+                  >
+                    {showTax ? `Incluye IVA ${tax}%` : "Monto final"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 16,
+                overflow: "hidden",
+                border: `1px solid ${palette.border}`,
+                background: "#ffffff",
+                boxShadow: "0 1px 4px rgba(68, 51, 41, 0.03)",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.15fr 0.8fr 0.55fr 1fr 1fr",
+                  gap: 8,
+                  padding: "10px 13px",
+                  background: `linear-gradient(135deg, ${palette.brown800} 0%, ${palette.brown700} 55%, ${palette.taupe500} 100%)`,
+                  color: "rgba(255,255,255,0.9)",
+                  fontSize: "8px",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                }}
+              >
+                <div>Concepto</div>
+                <div>Tipo</div>
+                <div style={{ textAlign: "center" }}>Cant.</div>
+                <div style={{ textAlign: "right" }}>Precio</div>
+                <div style={{ textAlign: "right" }}>Importe</div>
+              </div>
+
+              {hasItems ? (
+                items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2.15fr 0.8fr 0.55fr 1fr 1fr",
+                      gap: 8,
+                      padding: "10px 13px",
+                      borderTop: index === 0 ? "none" : `1px solid ${palette.borderSoft}`,
+                      background: index % 2 === 0 ? "#ffffff" : palette.beige50,
+                      fontSize: "9.4px",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          color: palette.ink,
+                          fontWeight: 700,
+                          lineHeight: 1.35,
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {item.name}
+                      </div>
+                      {item.detail ? (
+                        <div
+                          style={{
+                            color: palette.muted,
+                            fontSize: "8px",
+                            marginTop: 3,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {item.detail}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div
+                      style={{
+                        color: palette.inkSoft,
+                        fontSize: "8.6px",
+                      }}
+                    >
+                      {item.type === "service" ? "Servicio" : "Producto"}
+                    </div>
+
+                    <div style={{ textAlign: "center", color: palette.inkSoft }}>
+                      {item.quantity}
+                    </div>
+
+                    <div style={{ textAlign: "right", color: palette.inkSoft }}>
+                      {formatCurrency(item.price)}
+                    </div>
+
+                    <div
+                      style={{
+                        textAlign: "right",
+                        color: palette.brown700,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {formatCurrency(item.amount)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: "22px 14px",
+                    textAlign: "center",
+                    color: palette.muted,
+                    fontSize: "9.5px",
+                  }}
+                >
+                  No hay conceptos registrados en esta cotización.
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 210px",
+                gap: 12,
+                alignItems: "start",
+              }}
+            >
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  padding: "13px 14px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: palette.taupe500,
+                    marginBottom: 8,
+                  }}
+                >
+                  Notas y condiciones
+                </div>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "9.2px",
+                    lineHeight: 1.7,
+                    color: palette.inkSoft,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {safeData.notes || "Sin observaciones adicionales."}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  boxShadow: "0 10px 22px rgba(68, 51, 41, 0.05)",
+                }}
+              >
+                <div style={{ padding: "12px 13px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 7,
+                      fontSize: "9.5px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    <span>Subtotal</span>
+                    <span style={{ color: palette.ink, fontWeight: 700 }}>
+                      {formatCurrency(subtotal)}
+                    </span>
+                  </div>
+
+                  {showTax && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: 7,
+                        fontSize: "9.5px",
+                        color: palette.inkSoft,
+                      }}
+                    >
+                      <span>IVA ({tax}%)</span>
+                      <span style={{ color: palette.ink, fontWeight: 700 }}>
+                        {formatCurrency(taxAmount)}
+                      </span>
+                    </div>
+                  )}
+
+                  {showDiscount && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "9.5px",
+                        color: palette.inkSoft,
+                      }}
+                    >
+                      <span>Descuento</span>
+                      <span style={{ color: palette.success, fontWeight: 700 }}>
+                        − {formatCurrency(discount)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "11px 13px",
+                    background: `linear-gradient(135deg, ${palette.taupe500} 0%, ${palette.brown700} 100%)`,
+                  }}
+                >
+                  <span
+                    style={{
+                      color: "rgba(255,255,255,0.86)",
+                      fontSize: "8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total final
+                  </span>
+                  <span
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "17px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {formatCurrency(finalTotal)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: "auto",
+                paddingTop: 12,
+                borderTop: `1px solid ${palette.borderSoft}`,
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                gap: 12,
+              }}
+            >
+              <p
+                style={{
+                  color: palette.muted,
+                  fontSize: "7.8px",
+                  margin: 0,
+                  letterSpacing: "0.04em",
+                }}
+              >
+                {safeData.validUntil
+                  ? `Este documento es válido hasta ${safeData.validUntil}.`
+                  : "Documento comercial listo para compartir."}
+              </p>
+
+              <div style={{ textAlign: "right" }}>
+                <div
+                  style={{
+                    width: 120,
+                    height: 1,
+                    background: palette.beige200,
+                    marginLeft: "auto",
+                    marginBottom: 6,
+                  }}
+                />
+                <p
+                  style={{
+                    color: palette.brown700,
+                    fontSize: "8.4px",
+                    fontWeight: 700,
+                    margin: "0 0 2px",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {safeData.companyName || "Tu empresa"}
+                </p>
+                <p
+                  style={{
+                    color: palette.muted,
+                    fontSize: "7.4px",
+                    margin: 0,
+                  }}
+                >
+                  Firma autorizada
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              borderTop: `1px solid ${palette.border}`,
+              background: `linear-gradient(135deg, ${palette.brown800} 0%, ${palette.brown700} 55%, ${palette.taupe500} 100%)`,
+              padding: "11px 18px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: 12,
+              flexWrap: "wrap",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: 14,
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              {safeData.companyPhone ? (
                 <span
                   style={{
-                    color: "#7A86B0",
+                    color: "rgba(255,255,255,0.8)",
                     fontSize: "8px",
                     wordBreak: "break-word",
                   }}
                 >
-                  {data.companyAddress}
+                  {safeData.companyPhone}
                 </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+              ) : null}
 
-      <div
-        style={{
-          position: "relative",
-          zIndex: 1,
-          padding: "0 40px 24px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-end",
-          borderBottom: `1.5px solid ${INDIGO_LIGHT}`,
-          marginBottom: "22px",
-          paddingBottom: "22px",
-          gap: "16px",
-        }}
-      >
-        <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ display: "flex", gap: "20px" }}>
-            <div style={{ display: "flex", gap: "6px", minWidth: 0 }}>
-              <span
-                style={{
-                  color: INDIGO_DARK,
-                  fontSize: "9px",
-                  fontWeight: "700",
-                  minWidth: "44px",
-                }}
-              >
-                Nombre:
-              </span>
-              <span
-                style={{
-                  color: "#3C4A6E",
-                  fontSize: "9px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {clientName}
-              </span>
-            </div>
-          </div>
-
-          {data.clientEmail && (
-            <div style={{ display: "flex", gap: "6px", marginTop: "3px", minWidth: 0 }}>
-              <span
-                style={{
-                  color: INDIGO_DARK,
-                  fontSize: "9px",
-                  fontWeight: "700",
-                  minWidth: "44px",
-                }}
-              >
-                Email:
-              </span>
-              <span
-                style={{
-                  color: "#3C4A6E",
-                  fontSize: "9px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.clientEmail}
-              </span>
-            </div>
-          )}
-
-          {data.clientPhone && (
-            <div style={{ display: "flex", gap: "6px", marginTop: "3px" }}>
-              <span
-                style={{
-                  color: INDIGO_DARK,
-                  fontSize: "9px",
-                  fontWeight: "700",
-                  minWidth: "44px",
-                }}
-              >
-                Tel:
-              </span>
-              <span style={{ color: "#3C4A6E", fontSize: "9px" }}>{data.clientPhone}</span>
-            </div>
-          )}
-
-          {data.clientAddress && (
-            <div style={{ display: "flex", gap: "6px", marginTop: "3px", minWidth: 0 }}>
-              <span
-                style={{
-                  color: INDIGO_DARK,
-                  fontSize: "9px",
-                  fontWeight: "700",
-                  minWidth: "44px",
-                }}
-              >
-                Dirección:
-              </span>
-              <span
-                style={{
-                  color: "#3C4A6E",
-                  fontSize: "9px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.clientAddress}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <span style={{ color: INDIGO_DARK, fontSize: "9px", fontWeight: "700" }}>
-            Fecha:{" "}
-          </span>
-          <span style={{ color: "#3C4A6E", fontSize: "9px" }}>{today}</span>
-        </div>
-      </div>
-
-      <div style={{ position: "relative", zIndex: 1, padding: "0 40px 160px" }}>
-        <div
-          style={{
-            borderRadius: "14px",
-            overflow: "hidden",
-            marginBottom: "20px",
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "36px 1fr 60px 80px 90px",
-              background: INDIGO_LIGHT,
-              padding: "10px 16px",
-              alignItems: "center",
-            }}
-          >
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "8px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              No
-            </span>
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "8px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-              }}
-            >
-              Servicio / Producto
-            </span>
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "8px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              Cant.
-            </span>
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "8px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "right",
-              }}
-            >
-              Precio
-            </span>
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "8px",
-                letterSpacing: "0.1em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "right",
-              }}
-            >
-              Total
-            </span>
-          </div>
-
-          {hasItems ? (
-            allItems.map((item, index) => (
-              <div
-                key={`${item.name}-${index}`}
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "36px 1fr 60px 80px 90px",
-                  padding: "11px 16px",
-                  background: index % 2 === 0 ? "#FFFFFF" : INDIGO_PALE,
-                  borderBottom:
-                    index < allItems.length - 1 ? `1px solid ${INDIGO_LIGHT}` : "none",
-                  alignItems: "center",
-                }}
-              >
+              {safeData.companyEmail ? (
                 <span
                   style={{
-                    color: INDIGO,
-                    fontSize: "9px",
-                    fontWeight: "700",
-                    textAlign: "center",
-                    background: INDIGO_PALE,
-                    borderRadius: "50%",
-                    width: "20px",
-                    height: "20px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    margin: "0 auto",
+                    color: "rgba(255,255,255,0.8)",
+                    fontSize: "8px",
+                    wordBreak: "break-word",
                   }}
                 >
-                  {index + 1}
+                  {safeData.companyEmail}
                 </span>
+              ) : null}
 
-                <div style={{ minWidth: 0 }}>
-                  <span
-                    style={{
-                      color: INDIGO_DARK,
-                      fontSize: "10.5px",
-                      fontWeight: "600",
-                      display: "block",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {item.name || "-"}
-                  </span>
-                  {item.description && (
-                    <span
-                      style={{
-                        color: "#9AAABF",
-                        fontSize: "8px",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {item.description}
-                    </span>
-                  )}
-                </div>
-
+              {safeData.companyWeb ? (
                 <span
                   style={{
-                    color: "#7A86B0",
-                    fontSize: "10.5px",
-                    textAlign: "center",
+                    color: "rgba(255,255,255,0.8)",
+                    fontSize: "8px",
+                    wordBreak: "break-word",
                   }}
                 >
-                  {item.qty}
+                  {safeData.companyWeb}
                 </span>
-
-                <span
-                  style={{
-                    color: "#7A86B0",
-                    fontSize: "10.5px",
-                    textAlign: "right",
-                  }}
-                >
-                  {formatCurrency(item.price)}
-                </span>
-
-                <span
-                  style={{
-                    color: INDIGO_DARK,
-                    fontSize: "10.5px",
-                    fontWeight: "700",
-                    textAlign: "right",
-                  }}
-                >
-                  {formatCurrency(item.total)}
-                </span>
-              </div>
-            ))
-          ) : (
-            <div
-              style={{
-                padding: "18px 16px",
-                background: "#FFFFFF",
-                textAlign: "center",
-              }}
-            >
-              <span style={{ color: "#7A86B0", fontSize: "10px" }}>
-                No hay conceptos registrados en esta cotización.
-              </span>
+              ) : null}
             </div>
-          )}
-        </div>
 
-        <div style={{ display: "flex", gap: "12px", marginBottom: "22px" }}>
-          <div
-            style={{
-              flex: 1,
-              background: INDIGO_LIGHT,
-              borderRadius: "40px",
-              padding: "14px 24px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <span style={{ color: INDIGO_DARK, fontSize: "10px", fontWeight: "700" }}>
-              Subtotal
-            </span>
-            <span
-              style={{
-                color: INDIGO_DARK,
-                fontSize: "14px",
-                fontWeight: "800",
-                textAlign: "right",
-              }}
-            >
-              {formatCurrency(subtotal)}
-            </span>
-          </div>
-
-          <div
-            style={{
-              flex: 1,
-              background: INDIGO,
-              borderRadius: "40px",
-              padding: "14px 24px",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <span
-              style={{
-                color: "rgba(255,255,255,0.75)",
-                fontSize: "10px",
-                fontWeight: "700",
-              }}
-            >
-              {showTax ? `Total (IVA ${tax}%)` : "Total"}
-            </span>
-            <span
-              style={{
-                color: "#FFFFFF",
-                fontSize: "14px",
-                fontWeight: "800",
-                textAlign: "right",
-              }}
-            >
-              {formatCurrency(finalTotal)}
-            </span>
-          </div>
-        </div>
-
-        {showDiscount && (
-          <div
-            style={{
-              background: "#E8F5EE",
-              borderRadius: "10px",
-              padding: "10px 20px",
-              display: "flex",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-              border: "1px solid #C3E5D0",
-              gap: "10px",
-            }}
-          >
-            <span style={{ color: "#2D6A4F", fontSize: "10px", fontWeight: "600" }}>
-              Descuento aplicado
-            </span>
-            <span
-              style={{
-                color: "#2D6A4F",
-                fontSize: "10px",
-                fontWeight: "700",
-                textAlign: "right",
-              }}
-            >
-              - {formatCurrency(discount)}
-            </span>
-          </div>
-        )}
-
-        <div style={{ display: "flex", gap: "20px", alignItems: "flex-start" }}>
-          <div style={{ width: "160px", flexShrink: 0 }}>
-            <div
-              style={{
-                height: "44px",
-                borderBottom: `1px solid ${INDIGO_LIGHT}`,
-                marginBottom: "6px",
-              }}
-            />
             <p
               style={{
-                color: "#7A86B0",
-                fontSize: "8px",
-                fontWeight: "600",
+                color: "rgba(255,255,255,0.58)",
+                fontSize: "7.5px",
                 margin: 0,
-                letterSpacing: "0.06em",
-                textTransform: "uppercase",
+                letterSpacing: "0.04em",
+                textAlign: "right",
               }}
             >
-              Firma
+              Válido por 30 días · {safeData.date || new Date().toLocaleDateString("es-MX")}
             </p>
           </div>
-
-          {data.notes ? (
-            <div style={{ flex: 1 }}>
-              <p
-                style={{
-                  color: INDIGO_DARK,
-                  fontSize: "10px",
-                  fontWeight: "800",
-                  margin: "0 0 6px",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                Notas y condiciones
-              </p>
-              <p
-                style={{
-                  color: "#4A5C7A",
-                  fontSize: "9px",
-                  lineHeight: "1.7",
-                  margin: 0,
-                  wordBreak: "break-word",
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {data.notes}
-              </p>
-            </div>
-          ) : (
-            (data.companyPhone || data.companyEmail || data.companyAddress) && (
-              <div style={{ flex: 1 }}>
-                <p
-                  style={{
-                    color: INDIGO_DARK,
-                    fontSize: "10px",
-                    fontWeight: "800",
-                    margin: "0 0 6px",
-                  }}
-                >
-                  Datos de contacto
-                </p>
-                {data.companyPhone && (
-                  <p style={{ color: "#4A5C7A", fontSize: "9px", margin: "0 0 2px" }}>
-                    {data.companyPhone}
-                  </p>
-                )}
-                {data.companyEmail && (
-                  <p
-                    style={{
-                      color: "#4A5C7A",
-                      fontSize: "9px",
-                      margin: "0 0 2px",
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {data.companyEmail}
-                  </p>
-                )}
-                {data.companyAddress && (
-                  <p
-                    style={{
-                      color: "#4A5C7A",
-                      fontSize: "9px",
-                      margin: 0,
-                      wordBreak: "break-word",
-                    }}
-                  >
-                    {data.companyAddress}
-                  </p>
-                )}
-              </div>
-            )
-          )}
         </div>
-      </div>
-
-      <div
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1,
-          background: "#FFFFFF",
-          borderTop: `1.5px solid ${INDIGO_LIGHT}`,
-          padding: "13px 40px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "16px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            gap: "18px",
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          {data.companyPhone && (
-            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: INDIGO_PALE,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={INDIGO}
-                  strokeWidth="2"
-                >
-                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 8.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z" />
-                </svg>
-              </div>
-              <span style={{ color: "#4A5C7A", fontSize: "8px" }}>{data.companyPhone}</span>
-            </div>
-          )}
-
-          {data.companyEmail && (
-            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: INDIGO_PALE,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={INDIGO}
-                  strokeWidth="2"
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-              </div>
-              <span
-                style={{
-                  color: "#4A5C7A",
-                  fontSize: "8px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.companyEmail}
-              </span>
-            </div>
-          )}
-
-          {data.companyWeb && (
-            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: INDIGO_PALE,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke={INDIGO}
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-                </svg>
-              </div>
-              <span
-                style={{
-                  color: "#4A5C7A",
-                  fontSize: "8px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.companyWeb}
-              </span>
-            </div>
-          )}
-        </div>
-
-        <p
-          style={{
-            color: "#B0BAD4",
-            fontSize: "7.5px",
-            margin: 0,
-            letterSpacing: "0.04em",
-            flexShrink: 0,
-          }}
-        >
-          Válido 30 días · {today}
-        </p>
       </div>
     </div>
   )

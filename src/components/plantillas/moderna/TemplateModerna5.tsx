@@ -1,86 +1,160 @@
-type ServiceItem = {
-  name: string
+type TemplateDataInput = {
+  title?: string
   description?: string
-  price: number
-}
-
-type ProductItem = {
-  name: string
-  quantity: number
-  price: number
+  clientName?: string
+  clientEmail?: string
+  clientPhone?: string
+  clientAddress?: string
+  clientRFC?: string
+  companyName?: string
+  companyLogo?: string
+  companyEmail?: string
+  companyPhone?: string
+  companyAddress?: string
+  companyWeb?: string
+  docNumber?: string
+  date?: string
+  validUntil?: string
+  discount?: number
+  tax?: number
+  notes?: string
+  services?: Array<{
+    name?: string
+    description?: string
+    price?: number
+  }>
+  products?: Array<{
+    name?: string
+    quantity?: number
+    price?: number
+  }>
+  total?: number
+  subtotal?: number
 }
 
 type Props = {
-  data: {
-    title?: string
-    clientName?: string
-    clientEmail?: string
-    clientPhone?: string
-    clientAddress?: string
-    companyName?: string
-    companyEmail?: string
-    companyPhone?: string
-    companyAddress?: string
-    companyWeb?: string
-    docNumber?: string
-    date?: string
-    discount?: number
-    tax?: number
-    notes?: string
-    services?: ServiceItem[]
-    products?: ProductItem[]
-    total?: number
-    subtotal?: number
-  }
+  data?: TemplateDataInput
+}
+
+type QuoteItem = {
+  id: string
+  type: "service" | "product"
+  name: string
+  quantity: number
+  price: number
+  amount: number
+  detail?: string
+}
+
+const defaultData: TemplateDataInput = {
+  title: "Cotización",
+  description: "Documento comercial con una propuesta clara, moderna y profesional.",
+  clientName: "Cliente ejemplo",
+  clientEmail: "cliente@correo.com",
+  clientPhone: "+52 667 123 4567",
+  clientAddress: "Los Mochis, Sinaloa",
+  clientRFC: "XAXX010101000",
+  companyName: "Tu empresa",
+  companyLogo: undefined,
+  companyEmail: "contacto@tuempresa.com",
+  companyPhone: "+52 667 123 4567",
+  companyAddress: "Los Mochis, Sinaloa",
+  companyWeb: "www.tuempresa.com",
+  docNumber: "COT-001",
+  date: new Date().toLocaleDateString("es-MX"),
+  validUntil: new Date().toISOString().slice(0, 10),
+  discount: 0,
+  tax: 16,
+  notes: "Gracias por considerar nuestra propuesta.",
+  services: [
+    { name: "Servicio 1", description: "Detalle del servicio", price: 500 },
+    { name: "Servicio 2", description: "Detalle del servicio", price: 800 },
+  ],
+  products: [{ name: "Producto 1", quantity: 2, price: 150 }],
+  total: 1856,
+  subtotal: 1600,
+}
+
+const palette = {
+  pageBg: "#f4f9ff",
+  pageBgSoft: "#eef6ff",
+  surface: "#ffffff",
+  surfaceSoft: "#f8fbff",
+  sky50: "#eef7ff",
+  sky100: "#dceefe",
+  sky200: "#bfdffd",
+  sky300: "#8cc7fb",
+  blue400: "#4ca4f3",
+  blue500: "#2387e2",
+  blue600: "#176dc0",
+  navy700: "#154a82",
+  navy800: "#11385f",
+  ink: "#18324d",
+  inkSoft: "#5f748b",
+  muted: "#94a3b8",
+  border: "#dbe9f6",
+  borderSoft: "#eaf2f9",
+  success: "#16a34a",
+}
+
+function formatMoney(value: number) {
+  return new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    minimumFractionDigits: 2,
+  }).format(value || 0)
+}
+
+function buildItems(data: TemplateDataInput): QuoteItem[] {
+  const serviceItems: QuoteItem[] = (data.services ?? []).map((service, index) => ({
+    id: `service-${index}`,
+    type: "service",
+    name: service.name || `Servicio ${index + 1}`,
+    quantity: 1,
+    price: Number(service.price || 0),
+    amount: Number(service.price || 0),
+    detail: service.description || "Servicio",
+  }))
+
+  const productItems: QuoteItem[] = (data.products ?? []).map((product, index) => ({
+    id: `product-${index}`,
+    type: "product",
+    name: product.name || `Producto ${index + 1}`,
+    quantity: Number(product.quantity || 0),
+    price: Number(product.price || 0),
+    amount: Number(product.quantity || 0) * Number(product.price || 0),
+    detail: "Producto",
+  }))
+
+  return [...serviceItems, ...productItems]
 }
 
 export default function TemplateModerna4({ data }: Props) {
-  const safeServices = Array.isArray(data.services) ? data.services : []
-  const safeProducts = Array.isArray(data.products) ? data.products : []
+  const safeData: TemplateDataInput = {
+    ...defaultData,
+    ...data,
+    services: data?.services ?? defaultData.services,
+    products: data?.products ?? defaultData.products,
+  }
 
-  const companyName = data.companyName?.trim() || "Tu empresa"
-  const clientName = data.clientName?.trim() || "Cliente"
-  const documentTitle = data.title?.trim() || "Cotización"
-  const today = data.date?.trim() || "Sin fecha"
+  const items = buildItems(safeData)
 
-  const allItems = [
-    ...safeServices.map((service) => ({
-      name: service.name || "Servicio",
-      description: service.description,
-      qty: 1,
-      price: Number(service.price || 0),
-      total: Number(service.price || 0),
-    })),
-    ...safeProducts.map((product) => ({
-      name: product.name || "Producto",
-      description: undefined,
-      qty: Number(product.quantity || 0),
-      price: Number(product.price || 0),
-      total: Number(product.quantity || 0) * Number(product.price || 0),
-    })),
-  ]
+  const calculatedSubtotal =
+    items.length > 0
+      ? items.reduce((acc, item) => acc + item.amount, 0)
+      : Number(safeData.subtotal || 0)
 
-  const calculatedSubtotal = allItems.reduce((acc, item) => acc + item.total, 0)
-  const subtotal = Number(data.subtotal ?? calculatedSubtotal)
-  const tax = Number(data.tax ?? 0)
-  const discount = Number(data.discount ?? 0)
-  const taxAmount = subtotal * (tax / 100)
+  const subtotal = Number(safeData.subtotal ?? calculatedSubtotal)
+  const discount = Number(safeData.discount ?? 0)
+  const tax = Number(safeData.tax ?? 0)
+  const taxableBase = Math.max(0, subtotal - discount)
+  const taxAmount = taxableBase * (tax / 100)
+  const finalTotal = Number(safeData.total ?? taxableBase + taxAmount)
 
-  const finalTotal =
-    typeof data.total === "number"
-      ? data.total
-      : Math.max(subtotal + taxAmount - discount, 0)
-
-  const hasItems = allItems.length > 0
-  const showTax = tax > 0
-  const showDiscount = discount > 0
-  const totalLabel = showTax ? "Total con IVA" : "Total"
-
-  const formatCurrency = (value: number) =>
-    `$${Number(value || 0).toLocaleString("es-MX", {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`
+  const initials = String(safeData.companyName || "TE")
+    .trim()
+    .slice(0, 2)
+    .toUpperCase()
 
   return (
     <div
@@ -88,1025 +162,887 @@ export default function TemplateModerna4({ data }: Props) {
       style={{
         width: "595px",
         minHeight: "842px",
-        fontFamily: "'Segoe UI', system-ui, sans-serif",
-        backgroundColor: "#FFFFFF",
+        fontFamily:
+          "Inter, 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
+        background: `linear-gradient(180deg, ${palette.pageBg} 0%, ${palette.pageBgSoft} 100%)`,
         position: "relative",
         overflow: "hidden",
-        color: "#1A5276",
+        color: palette.ink,
       }}
     >
-      {/* Franja lateral izquierda decorativa */}
+      <div
+        style={{
+          position: "absolute",
+          top: -70,
+          right: -55,
+          width: 200,
+          height: 200,
+          borderRadius: "50%",
+          background: "rgba(35, 135, 226, 0.09)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          top: 40,
+          right: 30,
+          width: 110,
+          height: 110,
+          borderRadius: "50%",
+          background: "rgba(140, 199, 251, 0.15)",
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          bottom: -55,
+          left: -35,
+          width: 165,
+          height: 165,
+          borderRadius: "50%",
+          background: "rgba(35, 135, 226, 0.08)",
+        }}
+      />
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
-          width: "5px",
-          height: "100%",
-          background: "linear-gradient(180deg, #1A5276 0%, #2E86C1 50%, #AED6F1 100%)",
+          width: "100%",
+          height: "6px",
+          background: `linear-gradient(90deg, ${palette.sky300} 0%, ${palette.blue500} 50%, ${palette.navy700} 100%)`,
         }}
       />
 
-      {/* Forma decorativa superior derecha */}
       <div
         style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: "200px",
-          height: "160px",
-          overflow: "hidden",
-          zIndex: 0,
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            top: "-60px",
-            right: "-60px",
-            width: "220px",
-            height: "220px",
-            borderRadius: "50%",
-            background: "#EBF5FB",
-          }}
-        />
-        <div
-          style={{
-            position: "absolute",
-            top: "-20px",
-            right: "20px",
-            width: "120px",
-            height: "120px",
-            borderRadius: "50%",
-            background: "#D6EAF8",
-            opacity: 0.6,
-          }}
-        />
-      </div>
-
-      {/* HEADER */}
-      <div
-        style={{
-          padding: "30px 36px 22px 46px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
           position: "relative",
           zIndex: 1,
-          gap: "20px",
+          padding: "18px",
         }}
       >
-        {/* Logo + empresa */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div
-            style={{
-              width: "52px",
-              height: "52px",
-              borderRadius: "14px",
-              background: "#1A5276",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "10px",
-              flexShrink: 0,
-            }}
-          >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="#FFFFFF"
-              strokeWidth="1.8"
-            >
-              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-            </svg>
-          </div>
-
-          <p
-            style={{
-              color: "#1A5276",
-              fontSize: "17px",
-              fontWeight: "800",
-              margin: "0 0 2px",
-              letterSpacing: "-0.02em",
-              wordBreak: "break-word",
-            }}
-          >
-            {companyName}
-          </p>
-
-          <p
-            style={{
-              color: "#2E86C1",
-              fontSize: "8.5px",
-              margin: "0 0 6px",
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              fontWeight: "600",
-            }}
-          >
-            Propuesta comercial
-          </p>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-            {data.companyPhone && (
-              <span
-                style={{
-                  color: "#6B7280",
-                  fontSize: "8.5px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  wordBreak: "break-word",
-                }}
-              >
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2E86C1"
-                  strokeWidth="2"
-                >
-                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 8.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z" />
-                </svg>
-                {data.companyPhone}
-              </span>
-            )}
-
-            {data.companyEmail && (
-              <span
-                style={{
-                  color: "#6B7280",
-                  fontSize: "8.5px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  wordBreak: "break-word",
-                }}
-              >
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2E86C1"
-                  strokeWidth="2"
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-                {data.companyEmail}
-              </span>
-            )}
-
-            {data.companyWeb && (
-              <span
-                style={{
-                  color: "#2E86C1",
-                  fontSize: "8.5px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                  fontWeight: "600",
-                  wordBreak: "break-word",
-                }}
-              >
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#2E86C1"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-                </svg>
-                {data.companyWeb}
-              </span>
-            )}
-
-            {data.companyAddress && (
-              <span
-                style={{
-                  color: "#6B7280",
-                  fontSize: "8.5px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.companyAddress}
-              </span>
-            )}
-          </div>
-        </div>
-
-        {/* Título documento */}
-        <div style={{ textAlign: "right", paddingTop: "6px", flexShrink: 0 }}>
-          <div
-            style={{
-              background: "#1A5276",
-              borderRadius: "10px",
-              padding: "12px 20px",
-              marginBottom: "10px",
-              display: "inline-block",
-              maxWidth: "220px",
-            }}
-          >
-            <p
-              style={{
-                color: "#FFFFFF",
-                fontSize: "18px",
-                fontWeight: "800",
-                margin: 0,
-                letterSpacing: "0.04em",
-                wordBreak: "break-word",
-              }}
-            >
-              {documentTitle.toUpperCase()}
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "flex-end",
-              gap: "4px",
-            }}
-          >
-            {data.docNumber && (
-              <div
-                style={{
-                  background: "#EBF5FB",
-                  borderRadius: "6px",
-                  padding: "4px 10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "5px",
-                }}
-              >
-                <span
-                  style={{
-                    color: "#2E86C1",
-                    fontSize: "8px",
-                    letterSpacing: "0.1em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  No.
-                </span>
-                <span
-                  style={{
-                    color: "#1A5276",
-                    fontSize: "11px",
-                    fontWeight: "700",
-                  }}
-                >
-                  {data.docNumber}
-                </span>
-              </div>
-            )}
-            <span style={{ color: "#9CA3AF", fontSize: "8.5px" }}>{today}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Línea separadora elegante */}
-      <div
-        style={{
-          margin: "0 36px 0 46px",
-          height: "1px",
-          background: "linear-gradient(90deg, #1A5276 0%, #AED6F1 60%, transparent 100%)",
-        }}
-      />
-
-      {/* CUERPO */}
-      <div
-        style={{
-          padding: "20px 36px 110px 46px",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        {/* Bloque cliente + resumen */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "22px" }}>
-          {/* Info cliente */}
-          <div
-            style={{
-              flex: 1,
-              background: "#F8FAFC",
-              border: "1px solid #D6EAF8",
-              borderRadius: "10px",
-              padding: "16px 18px",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-                marginBottom: "10px",
-              }}
-            >
-              <div
-                style={{
-                  width: "20px",
-                  height: "20px",
-                  borderRadius: "50%",
-                  background: "#1A5276",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexShrink: 0,
-                }}
-              >
-                <svg
-                  width="10"
-                  height="10"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#fff"
-                  strokeWidth="2.5"
-                >
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </div>
-              <span
-                style={{
-                  color: "#1A5276",
-                  fontSize: "8px",
-                  letterSpacing: "0.16em",
-                  textTransform: "uppercase",
-                  fontWeight: "700",
-                }}
-              >
-                Datos del cliente
-              </span>
-            </div>
-
-            <p
-              style={{
-                color: "#1A5276",
-                fontSize: "14px",
-                fontWeight: "800",
-                margin: "0 0 5px",
-                lineHeight: "1.2",
-                wordBreak: "break-word",
-              }}
-            >
-              {clientName}
-            </p>
-
-            {data.clientEmail && (
-              <p
-                style={{
-                  color: "#6B7280",
-                  fontSize: "9px",
-                  margin: "0 0 2px",
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.clientEmail}
-              </p>
-            )}
-            {data.clientPhone && (
-              <p style={{ color: "#6B7280", fontSize: "9px", margin: "0 0 2px" }}>
-                {data.clientPhone}
-              </p>
-            )}
-            {data.clientAddress && (
-              <p
-                style={{
-                  color: "#6B7280",
-                  fontSize: "9px",
-                  margin: 0,
-                  wordBreak: "break-word",
-                }}
-              >
-                {data.clientAddress}
-              </p>
-            )}
-          </div>
-
-          {/* Total hero */}
-          <div
-            style={{
-              width: "165px",
-              background: "#1A5276",
-              borderRadius: "12px",
-              padding: "18px 16px",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              textAlign: "center",
-              position: "relative",
-              overflow: "hidden",
-              flexShrink: 0,
-            }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                bottom: "-25px",
-                right: "-25px",
-                width: "90px",
-                height: "90px",
-                borderRadius: "50%",
-                background: "rgba(46,134,193,0.3)",
-              }}
-            />
-            <div
-              style={{
-                position: "absolute",
-                top: "-15px",
-                left: "-15px",
-                width: "60px",
-                height: "60px",
-                borderRadius: "50%",
-                background: "rgba(174,214,241,0.15)",
-              }}
-            />
-
-            <p
-              style={{
-                color: "rgba(255,255,255,0.5)",
-                fontSize: "7.5px",
-                letterSpacing: "0.2em",
-                textTransform: "uppercase",
-                margin: "0 0 6px",
-                position: "relative",
-                zIndex: 1,
-                fontWeight: "600",
-              }}
-            >
-              Total a pagar
-            </p>
-
-            <p
-              style={{
-                color: "#FFFFFF",
-                fontSize: "24px",
-                fontWeight: "800",
-                margin: 0,
-                lineHeight: "1",
-                letterSpacing: "-0.02em",
-                position: "relative",
-                zIndex: 1,
-                wordBreak: "break-word",
-              }}
-            >
-              {formatCurrency(finalTotal)}
-            </p>
-
-            <p
-              style={{
-                color: "rgba(255,255,255,0.35)",
-                fontSize: "8px",
-                margin: "3px 0 0",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              MXN
-            </p>
-
-            <div
-              style={{
-                width: "35px",
-                height: "1px",
-                background: "rgba(174,214,241,0.5)",
-                margin: "10px auto",
-                position: "relative",
-                zIndex: 1,
-              }}
-            />
-
-            <div
-              style={{
-                background: "rgba(46,134,193,0.4)",
-                borderRadius: "20px",
-                padding: "3px 10px",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              <p
-                style={{
-                  color: "rgba(255,255,255,0.6)",
-                  fontSize: "7.5px",
-                  margin: 0,
-                  letterSpacing: "0.06em",
-                }}
-              >
-                {showTax ? `Incluye IVA ${tax}%` : "Monto final"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Mensaje personalizado */}
         <div
           style={{
-            background: "#EBF5FB",
-            borderLeft: "3px solid #2E86C1",
-            borderRadius: "0 8px 8px 0",
-            padding: "10px 14px",
-            marginBottom: "20px",
-            display: "flex",
-            gap: "8px",
-            alignItems: "flex-start",
-          }}
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#2E86C1"
-            strokeWidth="2"
-            style={{ flexShrink: 0, marginTop: "1px" }}
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="8" x2="12" y2="12" />
-            <line x1="12" y1="16" x2="12.01" y2="16" />
-          </svg>
-          <p style={{ color: "#1A5276", fontSize: "9px", lineHeight: "1.7", margin: 0 }}>
-            Estimado(a) <strong>{clientName}</strong>, a continuación se presenta el
-            detalle de los conceptos incluidos en esta cotización. Esta propuesta
-            tiene vigencia de <strong>30 días naturales</strong>.
-          </p>
-        </div>
-
-        {/* TABLA */}
-        <div
-          style={{
-            borderRadius: "10px",
+            background: palette.surface,
+            border: `1px solid ${palette.border}`,
+            borderRadius: "24px",
             overflow: "hidden",
-            border: "1px solid #D6EAF8",
+            boxShadow: "0 18px 42px rgba(17, 56, 95, 0.09)",
           }}
         >
-          {/* Header tabla */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "1fr 50px 88px 88px",
-              background: "#1A5276",
-              padding: "10px 16px",
-              alignItems: "center",
+              gridTemplateColumns: "1.1fr 0.9fr",
+              background: `linear-gradient(135deg, ${palette.sky50} 0%, #ffffff 58%, ${palette.surfaceSoft} 100%)`,
             }}
           >
-            <span
+            <div
               style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: "8px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: "700",
+                padding: "22px 22px 18px",
+                borderRight: `1px solid ${palette.borderSoft}`,
               }}
             >
-              Descripción
-            </span>
-            <span
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: "8px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              Cant.
-            </span>
-            <span
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: "8px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "right",
-              }}
-            >
-              Precio unit.
-            </span>
-            <span
-              style={{
-                color: "rgba(255,255,255,0.85)",
-                fontSize: "8px",
-                letterSpacing: "0.14em",
-                textTransform: "uppercase",
-                fontWeight: "700",
-                textAlign: "right",
-              }}
-            >
-              Total
-            </span>
-          </div>
-
-          {/* Filas */}
-          {hasItems ? (
-            allItems.map((item, index) => (
               <div
-                key={`${item.name}-${index}`}
                 style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 50px 88px 88px",
-                  padding: "11px 16px",
-                  background: index % 2 === 0 ? "#FFFFFF" : "#F8FBFE",
-                  borderBottom:
-                    index < allItems.length - 1 ? "1px solid #EBF5FB" : "none",
+                  display: "inline-flex",
                   alignItems: "center",
+                  gap: 8,
+                  marginBottom: 10,
                 }}
               >
-                <div style={{ minWidth: 0 }}>
-                  <span
+                <div
+                  style={{
+                    width: 28,
+                    height: 4,
+                    borderRadius: 999,
+                    background: `linear-gradient(90deg, ${palette.blue400}, ${palette.navy700})`,
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    color: palette.blue600,
+                  }}
+                >
+                  Propuesta comercial
+                </span>
+              </div>
+
+              <h1
+                style={{
+                  margin: 0,
+                  fontSize: 28,
+                  lineHeight: 1.04,
+                  fontWeight: 800,
+                  letterSpacing: "-0.03em",
+                  color: palette.ink,
+                  maxWidth: 300,
+                  wordBreak: "break-word",
+                }}
+              >
+                {safeData.title || "Cotización"}
+              </h1>
+
+              {safeData.description ? (
+                <p
+                  style={{
+                    margin: "10px 0 0",
+                    maxWidth: 300,
+                    fontSize: "9.8px",
+                    lineHeight: 1.7,
+                    color: palette.inkSoft,
+                  }}
+                >
+                  {safeData.description}
+                </p>
+              ) : null}
+
+              <div
+                style={{
+                  marginTop: 14,
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    background: palette.surfaceSoft,
+                    border: `1px solid ${palette.border}`,
+                    borderRadius: 16,
+                    padding: "12px 13px",
+                  }}
+                >
+                  <div
                     style={{
-                      color: "#1A5276",
-                      fontSize: "10.5px",
-                      fontWeight: "600",
-                      display: "block",
+                      fontSize: "7.8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: palette.blue600,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Documento
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 6,
+                      fontSize: "9px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Folio</span>
+                      <strong style={{ color: palette.ink, textAlign: "right" }}>
+                        {safeData.docNumber || "COT-001"}
+                      </strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Fecha</span>
+                      <strong style={{ color: palette.ink, textAlign: "right" }}>
+                        {safeData.date || new Date().toLocaleDateString("es-MX")}
+                      </strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Vigencia</span>
+                      <strong style={{ color: palette.ink, textAlign: "right" }}>
+                        {safeData.validUntil || "—"}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    background: palette.sky50,
+                    border: `1px solid ${palette.sky100}`,
+                    borderRadius: 16,
+                    padding: "12px 13px",
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: "7.8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.15em",
+                      textTransform: "uppercase",
+                      color: palette.navy700,
+                      marginBottom: 8,
+                    }}
+                  >
+                    Resumen
+                  </div>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: 6,
+                      fontSize: "9px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Conceptos</span>
+                      <strong style={{ color: palette.ink }}>{items.length}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>IVA</span>
+                      <strong style={{ color: palette.ink }}>{tax}%</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", gap: 8 }}>
+                      <span>Descuento</span>
+                      <strong style={{ color: palette.ink }}>
+                        {formatMoney(discount)}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                padding: "22px 22px 18px",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                gap: 12,
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: 10,
+                }}
+              >
+                {safeData.companyLogo ? (
+                  <div
+                    style={{
+                      width: 66,
+                      height: 66,
+                      borderRadius: 18,
+                      background: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      overflow: "hidden",
+                      padding: 8,
+                      border: `1px solid ${palette.border}`,
+                      boxShadow: "0 10px 22px rgba(17, 56, 95, 0.09)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    <img
+                      src={safeData.companyLogo}
+                      alt="Logo de la empresa"
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "contain",
+                        display: "block",
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div
+                    style={{
+                      width: 66,
+                      height: 66,
+                      borderRadius: 18,
+                      background: `linear-gradient(135deg, ${palette.blue500} 0%, ${palette.navy700} 100%)`,
+                      color: "#ffffff",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 19,
+                      fontWeight: 800,
+                      boxShadow: "0 10px 22px rgba(23, 109, 192, 0.18)",
+                      flexShrink: 0,
+                    }}
+                  >
+                    {initials}
+                  </div>
+                )}
+
+                <div style={{ textAlign: "right" }}>
+                  <div
+                    style={{
+                      fontSize: 17,
+                      fontWeight: 800,
+                      color: palette.ink,
+                      lineHeight: 1.18,
                       wordBreak: "break-word",
                     }}
                   >
-                    {item.name || "-"}
-                  </span>
-                  {item.description && (
-                    <span
+                    {safeData.companyName || "Tu empresa"}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 5,
+                      fontSize: "9px",
+                      lineHeight: 1.65,
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    {safeData.companyEmail ? <div>{safeData.companyEmail}</div> : null}
+                    {safeData.companyPhone ? <div>{safeData.companyPhone}</div> : null}
+                    {safeData.companyAddress ? <div>{safeData.companyAddress}</div> : null}
+                    {safeData.companyWeb ? <div>{safeData.companyWeb}</div> : null}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  borderRadius: 18,
+                  padding: "15px 15px 14px",
+                  background: `linear-gradient(135deg, ${palette.navy800} 0%, ${palette.navy700} 42%, ${palette.blue500} 100%)`,
+                  color: "#fff",
+                  position: "relative",
+                  overflow: "hidden",
+                  boxShadow: "0 14px 28px rgba(17, 56, 95, 0.14)",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -18,
+                    right: -10,
+                    width: 78,
+                    height: 78,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.08)",
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: -20,
+                    left: 30,
+                    width: 72,
+                    height: 72,
+                    borderRadius: "50%",
+                    background: "rgba(255,255,255,0.05)",
+                  }}
+                />
+
+                <div style={{ position: "relative", zIndex: 1 }}>
+                  <div
+                    style={{
+                      fontSize: "7.8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.18em",
+                      textTransform: "uppercase",
+                      color: "rgba(255,255,255,0.78)",
+                      marginBottom: 7,
+                    }}
+                  >
+                    Total final
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 23,
+                      fontWeight: 800,
+                      lineHeight: 1,
+                      letterSpacing: "-0.03em",
+                      color: "#ffffff",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {formatMoney(finalTotal)}
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 9,
+                      display: "inline-block",
+                      background: "rgba(255,255,255,0.12)",
+                      borderRadius: 999,
+                      padding: "4px 10px",
+                      fontSize: "7.4px",
+                      color: "rgba(255,255,255,0.82)",
+                    }}
+                  >
+                    {tax > 0 ? `Incluye IVA ${tax}%` : "Monto final"}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ padding: "14px 18px 16px" }}>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1.15fr 0.85fr",
+                gap: 12,
+                marginBottom: 12,
+              }}
+            >
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  padding: "13px 14px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: palette.blue600,
+                    marginBottom: 8,
+                  }}
+                >
+                  Cliente
+                </div>
+
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 800,
+                    color: palette.ink,
+                    marginBottom: 6,
+                    lineHeight: 1.2,
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {safeData.clientName || "Cliente"}
+                </div>
+
+                <div
+                  style={{
+                    fontSize: "9.2px",
+                    lineHeight: 1.7,
+                    color: palette.inkSoft,
+                  }}
+                >
+                  {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
+                  {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
+                  {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
+                  {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+                </div>
+              </div>
+
+              <div
+                style={{
+                  background: palette.sky50,
+                  border: `1px solid ${palette.sky100}`,
+                  borderRadius: 16,
+                  padding: "13px 14px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: palette.navy700,
+                    marginBottom: 8,
+                  }}
+                >
+                  Mensaje
+                </div>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "9px",
+                    lineHeight: 1.7,
+                    color: palette.ink,
+                  }}
+                >
+                  Estimado(a) <strong>{safeData.clientName || "Cliente"}</strong>, aquí se
+                  presenta el detalle de esta cotización en un formato claro,
+                  profesional y listo para compartir.
+                </p>
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 16,
+                overflow: "hidden",
+                border: `1px solid ${palette.border}`,
+                background: "#ffffff",
+                boxShadow: "0 1px 4px rgba(17, 56, 95, 0.03)",
+              }}
+            >
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "2.1fr 0.8fr 0.55fr 1fr 1fr",
+                  gap: 8,
+                  padding: "10px 13px",
+                  background: `linear-gradient(135deg, ${palette.navy800} 0%, ${palette.navy700} 58%, ${palette.blue500} 100%)`,
+                  color: "rgba(255,255,255,0.88)",
+                  fontSize: "8px",
+                  fontWeight: 800,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.14em",
+                }}
+              >
+                <div>Concepto</div>
+                <div>Tipo</div>
+                <div style={{ textAlign: "center" }}>Cant.</div>
+                <div style={{ textAlign: "right" }}>Precio</div>
+                <div style={{ textAlign: "right" }}>Importe</div>
+              </div>
+
+              {items.length > 0 ? (
+                items.map((item, index) => (
+                  <div
+                    key={item.id}
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "2.1fr 0.8fr 0.55fr 1fr 1fr",
+                      gap: 8,
+                      padding: "10px 13px",
+                      borderTop: index === 0 ? "none" : `1px solid ${palette.borderSoft}`,
+                      background: index % 2 === 0 ? "#ffffff" : palette.sky50,
+                      fontSize: "9.5px",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <div
+                        style={{
+                          color: palette.ink,
+                          fontWeight: 700,
+                          lineHeight: 1.35,
+                          wordBreak: "break-word",
+                        }}
+                      >
+                        {item.name}
+                      </div>
+                      {item.detail ? (
+                        <div
+                          style={{
+                            color: palette.muted,
+                            fontSize: "8px",
+                            marginTop: 3,
+                            wordBreak: "break-word",
+                          }}
+                        >
+                          {item.detail}
+                        </div>
+                      ) : null}
+                    </div>
+
+                    <div
                       style={{
-                        color: "#9CA3AF",
-                        fontSize: "8px",
-                        wordBreak: "break-word",
+                        color: palette.inkSoft,
+                        fontSize: "8.6px",
                       }}
                     >
-                      {item.description}
+                      {item.type === "service" ? "Servicio" : "Producto"}
+                    </div>
+
+                    <div style={{ textAlign: "center", color: palette.inkSoft }}>
+                      {item.quantity}
+                    </div>
+
+                    <div style={{ textAlign: "right", color: palette.inkSoft }}>
+                      {formatMoney(item.price)}
+                    </div>
+
+                    <div
+                      style={{
+                        textAlign: "right",
+                        color: palette.blue600,
+                        fontWeight: 800,
+                      }}
+                    >
+                      {formatMoney(item.amount)}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div
+                  style={{
+                    padding: "22px 14px",
+                    textAlign: "center",
+                    color: palette.muted,
+                    fontSize: "9.5px",
+                  }}
+                >
+                  No hay conceptos registrados en esta cotización.
+                </div>
+              )}
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 210px",
+                gap: 12,
+                marginTop: 14,
+                alignItems: "start",
+              }}
+            >
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  padding: "13px 14px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.16em",
+                    color: palette.blue600,
+                    marginBottom: 8,
+                  }}
+                >
+                  Notas
+                </div>
+
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: "9.2px",
+                    lineHeight: 1.7,
+                    color: palette.inkSoft,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                >
+                  {safeData.notes || "Sin observaciones adicionales."}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  background: "#ffffff",
+                  border: `1px solid ${palette.border}`,
+                  borderRadius: 16,
+                  overflow: "hidden",
+                  boxShadow: "0 10px 22px rgba(17, 56, 95, 0.05)",
+                }}
+              >
+                <div style={{ padding: "12px 13px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginBottom: 7,
+                      fontSize: "9.5px",
+                      color: palette.inkSoft,
+                    }}
+                  >
+                    <span>Subtotal</span>
+                    <span style={{ color: palette.ink, fontWeight: 700 }}>
+                      {formatMoney(subtotal)}
                     </span>
+                  </div>
+
+                  {tax > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginBottom: 7,
+                        fontSize: "9.5px",
+                        color: palette.inkSoft,
+                      }}
+                    >
+                      <span>IVA ({tax}%)</span>
+                      <span style={{ color: palette.ink, fontWeight: 700 }}>
+                        {formatMoney(taxAmount)}
+                      </span>
+                    </div>
+                  )}
+
+                  {discount > 0 && (
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        fontSize: "9.5px",
+                        color: palette.inkSoft,
+                      }}
+                    >
+                      <span>Descuento</span>
+                      <span style={{ color: palette.success, fontWeight: 700 }}>
+                        − {formatMoney(discount)}
+                      </span>
+                    </div>
                   )}
                 </div>
 
-                <span
+                <div
                   style={{
-                    color: "#6B7280",
-                    fontSize: "10.5px",
-                    textAlign: "center",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    padding: "11px 13px",
+                    background: `linear-gradient(135deg, ${palette.blue500} 0%, ${palette.navy700} 100%)`,
                   }}
                 >
-                  {item.qty}
-                </span>
-
-                <span
-                  style={{
-                    color: "#6B7280",
-                    fontSize: "10.5px",
-                    textAlign: "right",
-                  }}
-                >
-                  {formatCurrency(item.price)}
-                </span>
-
-                <span
-                  style={{
-                    color: "#1A5276",
-                    fontSize: "10.5px",
-                    fontWeight: "700",
-                    textAlign: "right",
-                  }}
-                >
-                  {formatCurrency(item.total)}
-                </span>
+                  <span
+                    style={{
+                      color: "rgba(255,255,255,0.86)",
+                      fontSize: "8px",
+                      fontWeight: 800,
+                      letterSpacing: "0.14em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    Total final
+                  </span>
+                  <span
+                    style={{
+                      color: "#ffffff",
+                      fontSize: "17px",
+                      fontWeight: 800,
+                    }}
+                  >
+                    {formatMoney(finalTotal)}
+                  </span>
+                </div>
               </div>
-            ))
-          ) : (
-            <div
-              style={{
-                padding: "18px 16px",
-                background: "#FFFFFF",
-                textAlign: "center",
-              }}
-            >
-              <span style={{ color: "#9CA3AF", fontSize: "10px" }}>
-                No hay conceptos registrados en esta cotización.
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* TOTALES */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "14px" }}>
-          <div style={{ width: "220px" }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                padding: "5px 12px",
-                borderBottom: "1px solid #EBF5FB",
-              }}
-            >
-              <span style={{ color: "#9CA3AF", fontSize: "10px" }}>Subtotal</span>
-              <span
-                style={{
-                  color: "#1A5276",
-                  fontSize: "10px",
-                  fontWeight: "600",
-                }}
-              >
-                {formatCurrency(subtotal)}
-              </span>
             </div>
 
-            {showTax && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "5px 12px",
-                  borderBottom: showDiscount ? "1px dashed #D6EAF8" : "none",
-                }}
-              >
-                <span style={{ color: "#9CA3AF", fontSize: "10px" }}>
-                  IVA ({tax}%)
-                </span>
-                <span
-                  style={{
-                    color: "#1A5276",
-                    fontSize: "10px",
-                    fontWeight: "600",
-                  }}
-                >
-                  {formatCurrency(taxAmount)}
-                </span>
-              </div>
-            )}
-
-            {showDiscount && (
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  padding: "5px 12px",
-                  borderBottom: "1px solid #EBF5FB",
-                }}
-              >
-                <span style={{ color: "#0F6E56", fontSize: "10px" }}>Descuento</span>
-                <span
-                  style={{
-                    color: "#0F6E56",
-                    fontSize: "10px",
-                    fontWeight: "600",
-                  }}
-                >
-                  - {formatCurrency(discount)}
-                </span>
-              </div>
-            )}
-
             <div
               style={{
+                marginTop: 15,
+                paddingTop: 12,
+                borderTop: `1px solid ${palette.borderSoft}`,
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
-                padding: "12px 14px",
-                marginTop: "8px",
-                background: "#1A5276",
-                borderRadius: "8px",
+                gap: 12,
               }}
             >
-              <span
-                style={{
-                  color: "rgba(255,255,255,0.65)",
-                  fontSize: "9px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: "700",
-                }}
-              >
-                {totalLabel}
-              </span>
-              <span
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: "17px",
-                  fontWeight: "800",
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                {formatCurrency(finalTotal)}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* NOTAS */}
-        {data.notes && (
-          <div
-            style={{
-              marginTop: "18px",
-              background: "#F8FBFE",
-              borderRadius: "10px",
-              border: "1px solid #D6EAF8",
-              padding: "13px 16px",
-              display: "flex",
-              gap: "10px",
-              alignItems: "flex-start",
-            }}
-          >
-            <div
-              style={{
-                width: "22px",
-                height: "22px",
-                borderRadius: "6px",
-                background: "#2E86C1",
-                flexShrink: 0,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <svg
-                width="11"
-                height="11"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#fff"
-                strokeWidth="2.5"
-              >
-                <path d="M12 20h9" />
-                <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-              </svg>
-            </div>
-            <div>
               <p
                 style={{
-                  color: "#1A5276",
-                  fontSize: "7.5px",
-                  letterSpacing: "0.14em",
-                  textTransform: "uppercase",
-                  fontWeight: "700",
-                  margin: "0 0 4px",
-                }}
-              >
-                Notas y condiciones
-              </p>
-              <p
-                style={{
-                  color: "#4B6B8A",
-                  fontSize: "9.5px",
-                  lineHeight: "1.65",
+                  color: palette.muted,
+                  fontSize: "7.8px",
                   margin: 0,
-                  wordBreak: "break-word",
-                  whiteSpace: "pre-wrap",
+                  letterSpacing: "0.04em",
                 }}
               >
-                {data.notes}
+                {safeData.validUntil
+                  ? `Este documento es válido hasta ${safeData.validUntil}.`
+                  : "Documento comercial listo para compartir."}
               </p>
+
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <div
+                  style={{
+                    width: 16,
+                    height: 2,
+                    borderRadius: 999,
+                    background: palette.blue500,
+                  }}
+                />
+                <p
+                  style={{
+                    color: palette.navy700,
+                    fontSize: "8px",
+                    margin: 0,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    fontWeight: 700,
+                  }}
+                >
+                  {safeData.companyName || "Tu empresa"}
+                </p>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Firma */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
-          <div style={{ textAlign: "center", width: "160px" }}>
-            <div
-              style={{
-                height: "1px",
-                background: "#D6EAF8",
-                marginBottom: "6px",
-              }}
-            />
-            <p
-              style={{
-                color: "#1A5276",
-                fontSize: "9px",
-                fontWeight: "600",
-                margin: "0 0 2px",
-                wordBreak: "break-word",
-              }}
-            >
-              {companyName}
-            </p>
-            <p style={{ color: "#9CA3AF", fontSize: "8px", margin: 0 }}>Firma y sello</p>
-          </div>
-        </div>
-      </div>
-
-      {/* FOOTER */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
-        <div
-          style={{
-            height: "3px",
-            background: "linear-gradient(90deg, #1A5276 0%, #2E86C1 50%, #AED6F1 100%)",
-          }}
-        />
-        <div
-          style={{
-            background: "#1A5276",
-            padding: "14px 36px 14px 46px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: "12px",
-          }}
-        >
           <div
             style={{
+              borderTop: `1px solid ${palette.border}`,
+              background: `linear-gradient(135deg, ${palette.navy800} 0%, ${palette.navy700} 58%, ${palette.blue500} 100%)`,
+              padding: "11px 18px",
               display: "flex",
+              justifyContent: "space-between",
               alignItems: "center",
-              gap: "16px",
+              gap: "12px",
               flexWrap: "wrap",
             }}
           >
-            {data.companyPhone && (
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth="2"
-                >
-                  <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.09 8.81a19.79 19.79 0 01-3.07-8.63A2 2 0 012 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 7.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 14.92z" />
-                </svg>
+            <div
+              style={{
+                display: "flex",
+                gap: "14px",
+                flexWrap: "wrap",
+                alignItems: "center",
+              }}
+            >
+              {safeData.companyPhone ? (
                 <span
                   style={{
-                    color: "rgba(255,255,255,0.5)",
+                    color: "rgba(255,255,255,0.8)",
                     fontSize: "8px",
                     wordBreak: "break-word",
                   }}
                 >
-                  {data.companyPhone}
+                  {safeData.companyPhone}
                 </span>
-              </div>
-            )}
+              ) : null}
 
-            {data.companyEmail && (
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth="2"
-                >
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
+              {safeData.companyEmail ? (
                 <span
                   style={{
-                    color: "rgba(255,255,255,0.5)",
+                    color: "rgba(255,255,255,0.8)",
                     fontSize: "8px",
                     wordBreak: "break-word",
                   }}
                 >
-                  {data.companyEmail}
+                  {safeData.companyEmail}
                 </span>
-              </div>
-            )}
+              ) : null}
 
-            {data.companyWeb && (
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                <svg
-                  width="9"
-                  height="9"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(255,255,255,0.5)"
-                  strokeWidth="2"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" />
-                </svg>
+              {safeData.companyWeb ? (
                 <span
                   style={{
-                    color: "rgba(255,255,255,0.5)",
+                    color: "rgba(255,255,255,0.8)",
                     fontSize: "8px",
                     wordBreak: "break-word",
                   }}
                 >
-                  {data.companyWeb}
+                  {safeData.companyWeb}
                 </span>
-              </div>
-            )}
+              ) : null}
+            </div>
+
+            <p
+              style={{
+                color: "rgba(255,255,255,0.58)",
+                fontSize: "7.5px",
+                margin: 0,
+                letterSpacing: "0.04em",
+                textAlign: "right",
+              }}
+            >
+              Documento válido por 30 días ·{" "}
+              {safeData.date || new Date().toLocaleDateString("es-MX")}
+            </p>
           </div>
-
-          <p
-            style={{
-              color: "rgba(255,255,255,0.25)",
-              fontSize: "7.5px",
-              margin: 0,
-              letterSpacing: "0.04em",
-              textAlign: "right",
-            }}
-          >
-            Documento válido por 30 días · {today}
-          </p>
         </div>
       </div>
     </div>

@@ -26,6 +26,25 @@ async function expirePendingQuotes(userId: string) {
   })
 }
 
+function mapDbPlanToDashboardPlan(
+  planName?: string | null
+): "free" | "pro" | "premium" {
+  const normalizedPlanName = planName?.trim().toLowerCase() ?? ""
+
+  if (!normalizedPlanName) return "free"
+  if (
+    normalizedPlanName.includes("premium") ||
+    normalizedPlanName.includes("empresa")
+  ) {
+    return "premium"
+  }
+  if (normalizedPlanName.includes("pro")) {
+    return "pro"
+  }
+
+  return "free"
+}
+
 export async function getDashboardData() {
   const session = await getServerSession(authOptions)
   const userId = (session?.user as { id?: string } | undefined)?.id
@@ -93,13 +112,16 @@ export async function getDashboardData() {
     }),
   ])
 
-  const plan: "free" | "pro" =
-    user?.plan?.name?.toLowerCase().includes("pro") ? "pro" : "free"
+  const plan = mapDbPlanToDashboardPlan(user?.plan?.name)
+
+  const cotizacionesMax =
+    user?.plan?.maxQuotes ??
+    (plan === "free" ? user?.trialQuotesLimit ?? 5 : 0)
 
   const userConfig: UserConfig = {
     plan,
     cotizacionesUsadas: user?.quotesUsed ?? 0,
-    cotizacionesMax: user?.plan?.maxQuotes ?? user?.trialQuotesLimit ?? 10,
+    cotizacionesMax,
     plantillaActivaNombre:
       user?.profile?.defaultTemplate?.name ?? "Sin plantilla activa",
     historialTotal: quotes.length,

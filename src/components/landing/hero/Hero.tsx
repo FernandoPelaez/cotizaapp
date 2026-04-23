@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useRef, useState } from "react"
+import { motion } from "framer-motion"
 
 const plantillas = [
   {
@@ -243,16 +244,28 @@ function Typewriter({ canStart }: { canStart: boolean }) {
   )
 }
 
+const leftVariants = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.14, delayChildren: 0.15 },
+  },
+}
+
+const leftItemVariants = {
+  hidden: { opacity: 0, y: 22 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.65, ease: "easeOut" as const },
+  },
+}
+
 export default function Hero() {
-  const [leftVisible, setLeftVisible] = useState(false)
-  const [rightVisible, setRightVisible] = useState(false)
   const [typewriterActive, setTypewriterActive] = useState(false)
 
   useEffect(() => {
-    const t1 = setTimeout(() => setLeftVisible(true), 150)
-    const t2 = setTimeout(() => setRightVisible(true), 900)
     const t3 = setTimeout(() => setTypewriterActive(true), 1750)
-    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3) }
+    return () => clearTimeout(t3)
   }, [])
 
   return (
@@ -318,27 +331,11 @@ export default function Hero() {
           display: flex;
           flex-direction: column;
           gap: 24px;
-          opacity: 0;
-          transform: translateY(28px);
-          transition: opacity 0.75s ease, transform 0.75s ease;
-        }
-
-        .hero-left.visible {
-          opacity: 1;
-          transform: translateY(0);
         }
 
         .hero-right {
-          opacity: 0;
-          transform: translateY(36px) scale(0.97);
-          transition: opacity 0.85s ease, transform 0.85s ease;
           justify-self: end;
           width: 100%;
-        }
-
-        .hero-right.visible {
-          opacity: 1;
-          transform: translateY(0) scale(1);
         }
 
         .hero-title {
@@ -653,22 +650,28 @@ export default function Hero() {
         <div className="hero-glow-2" />
 
         <div className="hero-inner">
-          <div className={`hero-left ${leftVisible ? "visible" : ""}`}>
-            <h1 className="hero-title">
+
+          <motion.div
+            className="hero-left"
+            variants={leftVariants}
+            initial="hidden"
+            animate="show"
+          >
+            <motion.h1 className="hero-title" variants={leftItemVariants}>
               Genera cotizaciones{" "}
               <span className="hero-title-accent">listas para enviar</span>{" "}
               en plantillas{" "}
               <span className="typewriter-placeholder">
                 <Typewriter canStart={typewriterActive} />
               </span>
-            </h1>
+            </motion.h1>
 
-            <p className="hero-sub">
+            <motion.p className="hero-sub" variants={leftItemVariants}>
               Crea cotizaciones sin esfuerzo. Ahorra tiempo, evita errores y
               mejora la presentación de tus propuestas ante cada cliente.
-            </p>
+            </motion.p>
 
-            <div className="hero-actions">
+            <motion.div className="hero-actions" variants={leftItemVariants}>
               <Link href="/auth/register" className="btn-hero">
                 <svg className="sparkle" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path className="path" d="M12 3l1.6 4.6L18 9.2l-4.4 1.6L12 15.4l-1.6-4.6L6 9.2l4.4-1.6L12 3z" />
@@ -677,10 +680,15 @@ export default function Hero() {
                 </svg>
                 <span className="text-button">Empezar gratis</span>
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
-          <div className={`hero-right ${rightVisible ? "visible" : ""}`}>
+          <motion.div
+            className="hero-right"
+            initial={{ opacity: 0, y: 36, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.85, ease: "easeOut", delay: 0.9 }}
+          >
             <div className="plantillas-wrapper">
               <div className="plantillas-header">
                 <div>
@@ -691,8 +699,14 @@ export default function Hero() {
               </div>
 
               <div className="plantillas-grid">
-                {plantillas.map((p) => (
-                  <div key={p.nombre} className="plantilla-card">
+                {plantillas.map((p, i) => (
+                  <motion.div
+                    key={p.nombre}
+                    className="plantilla-card"
+                    initial={{ opacity: 0, y: 24 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.55, ease: "easeOut", delay: 1.1 + i * 0.15 }}
+                  >
                     <TemplateMiniPreview
                       color={p.color}
                       acento={p.acento}
@@ -705,11 +719,12 @@ export default function Hero() {
                       <div className="plantilla-badge">{p.tipo}</div>
                       <div className="plantilla-type">Plantilla estándar · {p.nombre}</div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
-          </div>
+          </motion.div>
+
         </div>
       </section>
     </>

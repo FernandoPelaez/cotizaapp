@@ -48,13 +48,14 @@ const CARD_BORDER = "var(--border, #E6EBF5)"
 const CARD_FOREGROUND = "var(--foreground, #0F172A)"
 const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
 const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
-const CARD_ACCENT_BG = "var(--primary-soft, #EEF2FF)"
-const CARD_ACCENT_TEXT = "var(--primary, #1B3D7A)"
 const CARD_EMPTY_BG = "var(--background, #F8FAFC)"
-const CARD_ITEM_HOVER_BG = "var(--primary-soft, #F8FAFF)"
-const CARD_ITEM_HOVER_BORDER = "var(--primary-light, #DBE4FF)"
-const CARD_CHEVRON = "var(--text-muted, #94A3B8)"
+const CARD_ITEM_HOVER_BG = "var(--primary-soft, #EEF4FF)"
+const CARD_ITEM_HOVER_BORDER = "var(--primary-light, #CFE0FF)"
+const CARD_CHEVRON = "var(--primary, #1B3D7A)"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
+
+const CARD_ICON_BG = "var(--primary, #1B3D7A)"
+const CARD_ICON_TEXT = "#FFFFFF"
 
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "14px"
@@ -81,15 +82,16 @@ export default function RecentQuotesCard({
     >
       <div className="flex items-start gap-2">
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center"
+          className="flex h-9 w-9 shrink-0 items-center justify-center"
           style={{
-            background: CARD_ACCENT_BG,
-            borderRadius: "10px",
+            background: CARD_ICON_BG,
+            borderRadius: "12px",
+            boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
           }}
         >
           <FileClock
             className="h-4 w-4"
-            style={{ color: CARD_ACCENT_TEXT }}
+            style={{ color: CARD_ICON_TEXT }}
           />
         </div>
 

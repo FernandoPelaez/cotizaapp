@@ -1,36 +1,18 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { motion } from "framer-motion"
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+}
+
+const gridVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.09, delayChildren: 0.1 } },
+}
 
 export default function Beneficios() {
-  const cardsRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const cards = cardsRef.current?.querySelectorAll(".b-card")
-    if (!cards) return
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement
-            const delay = el.dataset.delay ?? "0"
-
-            setTimeout(() => {
-              el.classList.add("b-card--visible")
-            }, Number(delay))
-
-            observer.unobserve(el)
-          }
-        })
-      },
-      { threshold: 0.1 }
-    )
-
-    cards.forEach((card) => observer.observe(card))
-    return () => observer.disconnect()
-  }, [])
-
   const items = [
     {
       title: "Cotizaciones en minutos",
@@ -38,7 +20,6 @@ export default function Beneficios() {
       gradient: "from-blue-700 to-blue-900",
       icon: "⚡",
       iconBg: "bg-blue-400/15",
-      delay: 0,
     },
     {
       title: "Cálculos sin errores",
@@ -46,7 +27,6 @@ export default function Beneficios() {
       gradient: "from-emerald-600 to-emerald-900",
       icon: "✓",
       iconBg: "bg-emerald-400/15",
-      delay: 60,
     },
     {
       title: "Imagen profesional",
@@ -54,7 +34,6 @@ export default function Beneficios() {
       gradient: "from-violet-700 to-violet-900",
       icon: "★",
       iconBg: "bg-violet-400/15",
-      delay: 120,
     },
     {
       title: "Comparte al instante",
@@ -62,7 +41,6 @@ export default function Beneficios() {
       gradient: "from-orange-500 to-orange-900",
       icon: "↗",
       iconBg: "bg-orange-400/15",
-      delay: 180,
     },
     {
       title: "Historial organizado",
@@ -70,7 +48,6 @@ export default function Beneficios() {
       gradient: "from-rose-600 to-rose-900",
       icon: "📋",
       iconBg: "bg-rose-400/15",
-      delay: 240,
     },
     {
       title: "Plantillas modernas",
@@ -78,7 +55,6 @@ export default function Beneficios() {
       gradient: "from-sky-600 to-sky-900",
       icon: "◈",
       iconBg: "bg-sky-400/15",
-      delay: 300,
     },
     {
       title: "Clientes guardados",
@@ -86,7 +62,6 @@ export default function Beneficios() {
       gradient: "from-amber-600 to-amber-900",
       icon: "👤",
       iconBg: "bg-amber-400/15",
-      delay: 360,
     },
     {
       title: "Desde cualquier lugar",
@@ -94,7 +69,6 @@ export default function Beneficios() {
       gradient: "from-teal-600 to-teal-900",
       icon: "☁",
       iconBg: "bg-teal-400/15",
-      delay: 420,
     },
   ]
 
@@ -108,19 +82,6 @@ export default function Beneficios() {
           scroll-margin-top: 76px;
           padding-top: clamp(52px, 4vw, 64px);
           padding-bottom: 80px;
-        }
-        .b-card {
-          opacity: 0;
-          transform: translateY(20px);
-          transition:
-            opacity 0.45s ease,
-            transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
-            box-shadow 0.25s ease;
-          will-change: transform, opacity;
-        }
-        .b-card--visible {
-          opacity: 1;
-          transform: translateY(0);
         }
         .b-card:hover {
           transform: translateY(-5px) scale(1.015);
@@ -191,32 +152,57 @@ export default function Beneficios() {
         id="beneficios"
       >
         <div className="max-w-7xl mx-auto w-full">
-          <div className="text-center mb-10">
-            <span className="b-badge">Beneficios</span>
 
-            <h2
+          {/* Header animado */}
+          <div className="text-center mb-10">
+            <motion.span
+              className="b-badge"
+              initial={{ opacity: 0, y: -16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, ease: "easeOut" }}
+            >
+              Beneficios
+            </motion.span>
+
+            <motion.h2
               className="text-4xl md:text-5xl font-bold"
               style={{ color: "#0f172a" }}
+              initial={{ opacity: 0, y: -16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55, ease: "easeOut", delay: 0.1 }}
             >
               Todo lo que ganas al usar{" "}
               <span style={{ color: "#1b3d7a" }}>CotizaApp</span>
-            </h2>
+            </motion.h2>
 
-            <p
+            <motion.p
               className="mt-4 max-w-xl mx-auto text-base leading-relaxed"
               style={{ color: "#64748b" }}
+              initial={{ opacity: 0, y: -12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
             >
               Más clientes cerrados, menos tiempo perdido y una imagen que habla por tu negocio.
-            </p>
+            </motion.p>
           </div>
 
-          <div ref={cardsRef} className="b-grid">
+          {/* Grid con stagger */}
+          <motion.div
+            className="b-grid"
+            variants={gridVariants}
+            initial="hidden"
+            whileInView="show"
+            viewport={{ once: true, amount: 0.1 }}
+          >
             {items.map((item, i) => (
-              <div
+              <motion.div
                 key={i}
                 className="b-card group relative rounded-2xl border border-[var(--border)] bg-[var(--card)] text-left overflow-hidden cursor-default"
-                style={{ padding: "28px 24px" }}
-                data-delay={item.delay}
+                style={{ padding: "28px 24px", transition: "box-shadow 0.25s ease" }}
+                variants={cardVariants}
               >
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl`}
@@ -244,9 +230,10 @@ export default function Beneficios() {
                     {item.desc}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
+
         </div>
       </section>
     </>

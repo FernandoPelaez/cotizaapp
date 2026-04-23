@@ -9,6 +9,7 @@ import {
 } from "react"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
+import { motion } from "framer-motion"
 import {
   Bell,
   CheckCircle2,
@@ -347,8 +348,11 @@ export default function Header({
   }
 
   return (
-    <header
+    <motion.header
       className="flex flex-shrink-0 items-center justify-between px-6"
+      initial={{ clipPath: "inset(0 0 100% 0)", y: -8 }}
+      animate={{ clipPath: "inset(0 0 0% 0)", y: 0 }}
+      transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1], delay: 0 }} // ← Navbar primero
       style={{
         height: "72px",
         background: HEADER_BG,
@@ -595,6 +599,6 @@ export default function Header({
           )}
         </div>
       </div>
-    </header>
+    </motion.header>
   )
 }

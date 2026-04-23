@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation"
 import { LogOut } from "lucide-react"
 import { signOut, useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
+import { motion } from "framer-motion"
 import { primaryLinks, secondaryLinks } from "../../config/navigation"
 
 type NavItem = {
@@ -131,8 +132,11 @@ export default function Sidebar() {
   }
 
   return (
-    <aside
+    <motion.aside
       className="hidden h-screen w-64 md:flex md:flex-col"
+      initial={{ clipPath: "inset(0 100% 0 0)", x: -8 }}
+      animate={{ clipPath: "inset(0 0% 0 0)", x: 0 }}
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.3 }} 
       style={{
         background: SIDEBAR_BG,
         borderRight: `1px solid ${SIDEBAR_BORDER}`,
@@ -256,6 +260,6 @@ export default function Sidebar() {
           </p>
         </div>
       </div>
-    </aside>
+    </motion.aside>
   )
 }

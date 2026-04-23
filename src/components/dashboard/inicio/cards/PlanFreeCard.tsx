@@ -1,5 +1,5 @@
 import type { UserConfig } from "@/types/dashboard"
-import { CheckCircle2, Star, XCircle } from "lucide-react"
+import { CheckCircle2, XCircle } from "lucide-react"
 import { useEffect, useRef } from "react"
 
 type PlanFreeCardProps = {
@@ -11,6 +11,8 @@ type FeatureItem = {
   ok: boolean
   label: string
 }
+
+type DashboardPlanType = "free" | "pro" | "premium"
 
 const CARD_BG_START = "var(--primary-hover, #062A7A)"
 const CARD_BG_END = "var(--primary, #03256C)"
@@ -28,47 +30,113 @@ const CARD_CTA_TEXT = "var(--primary, #1447FF)"
 const CARD_CTA_DISABLED_BG = "rgba(255,255,255,0.12)"
 const CARD_CTA_DISABLED_TEXT = "rgba(255,255,255,0.92)"
 const CARD_SHADOW = "0 12px 30px rgba(15,23,42,0.22)"
+const CARD_SHADOW_HOVER = "0 22px 48px rgba(15,23,42,0.38)"
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "9999px"
 
-function getFeatures(isPro: boolean): FeatureItem[] {
-  if (isPro) {
+function getFeatures(plan: DashboardPlanType): FeatureItem[] {
+  if (plan === "premium") {
     return [
-      { ok: true, label: "Todas las plantillas disponibles" },
+      { ok: true, label: "Todo lo de Pro" },
+      { ok: true, label: "Acceso a las 30 plantillas" },
+      { ok: true, label: "Incluye Básica, Pro y Premium" },
       { ok: true, label: "Cotizaciones ilimitadas" },
-      { ok: true, label: "Exportación a PDF" },
-      { ok: true, label: "Logo y datos de empresa" },
-      { ok: true, label: "10+ plantillas Pro" },
-      { ok: true, label: "Prioridad en nuevas funciones" },
+      { ok: true, label: "PDF profesional" },
+      { ok: true, label: "Envío por WhatsApp" },
+    ]
+  }
+
+  if (plan === "pro") {
+    return [
+      { ok: true, label: "Acceso a 20 plantillas" },
+      { ok: true, label: "Cotizaciones ilimitadas" },
+      { ok: true, label: "PDF profesional" },
+      { ok: true, label: "Historial completo" },
+      { ok: true, label: "Envío por WhatsApp" },
+      { ok: true, label: "Incluye categorías Básica y Pro" },
     ]
   }
 
   return [
-    { ok: true, label: "5 plantillas (2 disponibles)" },
-    { ok: true, label: "10 cotizaciones / mes" },
-    { ok: true, label: "Exportación a PDF" },
+    { ok: true, label: "Acceso a 10 plantillas básicas" },
+    { ok: true, label: "5 cotizaciones de prueba" },
+    { ok: true, label: "Vista previa" },
+    { ok: true, label: "Descarga en PDF" },
     { ok: false, label: "Cotizaciones ilimitadas" },
-    { ok: false, label: "Logo y datos de empresa" },
-    { ok: false, label: "10+ plantillas Pro" },
+    { ok: false, label: "Envío por WhatsApp" },
   ]
+}
+
+function getPlanBadge(plan: DashboardPlanType) {
+  switch (plan) {
+    case "premium":
+      return "PLAN EMPRESA"
+    case "pro":
+      return "PLAN PRO"
+    case "free":
+    default:
+      return "PLAN FREE"
+  }
+}
+
+function getPlanTitle(plan: DashboardPlanType) {
+  switch (plan) {
+    case "premium":
+      return "Estás en el plan Empresa"
+    case "pro":
+      return "Estás en el plan Pro"
+    case "free":
+    default:
+      return "Estás en el plan gratuito"
+  }
+}
+
+function getPlanDescription(
+  plan: DashboardPlanType,
+  cotizacionesRestantes: number,
+  cotizacionesMax: number
+) {
+  switch (plan) {
+    case "premium":
+      return "Tienes acceso completo a toda la biblioteca y a las funciones más amplias del sistema."
+    case "pro":
+      return "Tienes más plantillas, historial completo y cotizaciones ilimitadas."
+    case "free":
+    default:
+      return `Te quedan ${cotizacionesRestantes} de ${cotizacionesMax} cotizaciones de prueba disponibles.`
+  }
+}
+
+function getButtonLabel(plan: DashboardPlanType) {
+  switch (plan) {
+    case "premium":
+      return "Plan Empresa activo"
+    case "pro":
+      return "Plan Pro activo"
+    case "free":
+    default:
+      return "Mejorar a Pro — $99 MXN/mes"
+  }
 }
 
 export default function PlanFreeCard({
   userConfig,
   onUpgrade,
 }: PlanFreeCardProps) {
-  const plan = userConfig?.plan ?? "free"
-  const isPro = plan === "pro"
+  const plan = (userConfig?.plan ?? "free") as DashboardPlanType
+  const isFree = plan === "free"
+  const isPaidPlan = plan === "pro" || plan === "premium"
 
   const cotizacionesUsadas = userConfig?.cotizacionesUsadas ?? 0
   const cotizacionesMax = userConfig?.cotizacionesMax ?? 5
+  const cotizacionesRestantes = Math.max(0, cotizacionesMax - cotizacionesUsadas)
 
   const porcentajeUso =
-    cotizacionesMax > 0
+    isFree && cotizacionesMax > 0
       ? Math.min(100, Math.round((cotizacionesUsadas / cotizacionesMax) * 100))
-      : 0
+      : 100
 
-  const features = getFeatures(isPro)
+  const features = getFeatures(plan)
 
   const cardRef = useRef<HTMLElement>(null)
 
@@ -99,6 +167,16 @@ export default function PlanFreeCard({
         border: `1px solid ${CARD_BORDER}`,
         boxShadow: CARD_SHADOW,
         borderRadius: CARD_RADIUS,
+        transition: "opacity 0.45s ease, transform 0.45s ease, box-shadow 0.25s ease",
+        cursor: "default",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-6px) scale(1.03)"
+        e.currentTarget.style.boxShadow = CARD_SHADOW_HOVER
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0) scale(1)"
+        e.currentTarget.style.boxShadow = CARD_SHADOW
       }}
     >
       <div
@@ -108,30 +186,35 @@ export default function PlanFreeCard({
           borderRadius: "10px",
         }}
       >
-        {isPro ? "PLAN PRO" : "PLAN FREE"}
+        {getPlanBadge(plan)}
       </div>
 
       <h3
         className="mt-3 text-[20px] font-extrabold leading-tight"
         style={{ color: CARD_TEXT }}
       >
-        {isPro ? "Estás en el plan Pro" : "Estás en el plan gratuito"}
+        {getPlanTitle(plan)}
       </h3>
 
       <p
         className="mt-2 text-[12px] leading-relaxed"
         style={{ color: CARD_TEXT_SOFT }}
       >
-        {isPro
-          ? "Tienes acceso completo a funciones, plantillas y mejores límites."
-          : "Desbloquea plantillas, cotizaciones ilimitadas y más."}
+        {getPlanDescription(plan, cotizacionesRestantes, cotizacionesMax)}
       </p>
 
       <div className="mt-4">
         <div className="flex items-center justify-between text-[11px]">
-          <span style={{ color: CARD_TEXT_SOFT }}>Cotizaciones usadas</span>
+          <span style={{ color: CARD_TEXT_SOFT }}>
+            {isFree ? "Cotizaciones usadas" : "Estado del plan"}
+          </span>
+
           <span className="font-bold" style={{ color: CARD_TEXT }}>
-            {cotizacionesUsadas} / {cotizacionesMax}
+            {isFree
+              ? `${cotizacionesUsadas} / ${cotizacionesMax}`
+              : plan === "premium"
+                ? "Empresa"
+                : "Pro"}
           </span>
         </div>
 
@@ -182,29 +265,28 @@ export default function PlanFreeCard({
 
       <button
         type="button"
-        onClick={isPro ? undefined : onUpgrade}
-        disabled={isPro}
-        className="mt-5 inline-flex w-full items-center justify-center gap-1.5 px-3 py-2 text-[11px] font-bold transition"
+        onClick={isFree ? onUpgrade : undefined}
+        disabled={isPaidPlan}
+        className="mt-5 inline-flex w-full items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-bold transition"
         style={{
-          background: isPro ? CARD_CTA_DISABLED_BG : CARD_CTA_BG,
-          color: isPro ? CARD_CTA_DISABLED_TEXT : CARD_CTA_TEXT,
+          background: isPaidPlan ? CARD_CTA_DISABLED_BG : CARD_CTA_BG,
+          color: isPaidPlan ? CARD_CTA_DISABLED_TEXT : CARD_CTA_TEXT,
           borderRadius: "14px",
-          cursor: isPro ? "default" : "pointer",
-          opacity: isPro ? 0.95 : 1,
+          cursor: isPaidPlan ? "default" : "pointer",
+          opacity: isPaidPlan ? 0.95 : 1,
         }}
         onMouseEnter={(e) => {
-          if (!isPro) {
+          if (isFree) {
             e.currentTarget.style.background = CARD_CTA_BG_HOVER
           }
         }}
         onMouseLeave={(e) => {
-          if (!isPro) {
+          if (isFree) {
             e.currentTarget.style.background = CARD_CTA_BG
           }
         }}
       >
-        <Star className="h-3.5 w-3.5 shrink-0" />
-        {isPro ? "Plan Pro activo" : "Mejorar a Pro — $199 MXN/mes"}
+        {getButtonLabel(plan)}
       </button>
     </article>
   )

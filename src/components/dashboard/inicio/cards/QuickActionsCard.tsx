@@ -23,17 +23,19 @@ const CARD_BACKGROUND = "var(--card, #FFFFFF)"
 const CARD_BORDER = "var(--border, #E6EBF5)"
 const CARD_FOREGROUND = "var(--foreground, #0F172A)"
 const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
-const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
-const ACTION_HOVER_BG = "var(--primary-soft, #EEF2FF)"
-const ACTION_ICON_BG = "var(--primary-soft, #EEF2FF)"
-const ACTION_ICON_BG_ALT = "var(--background, #F8FAFC)"
+const ACTION_DEFAULT_BG = "transparent"
+const ACTION_DEFAULT_BG_HOVER = "var(--primary-soft, #EEF2FF)"
 
-const ACTION_PRIMARY = "var(--primary-hover, #2447D5)"
+const ACTION_ICON_BG = "var(--primary, #1B3D7A)"
+const ACTION_ICON_BG_ALT = "rgba(27, 61, 122, 0.10)"
+const ACTION_ICON_BG_SUCCESS = "rgba(5, 150, 105, 0.12)"
+
+const ACTION_ICON_TEXT_LIGHT = "#FFFFFF"
 const ACTION_BRAND = "var(--primary, #1B3D7A)"
 const ACTION_SUCCESS = "var(--success, #059669)"
-const ACTION_CHEVRON = "var(--text-muted, #94A3B8)"
+const ACTION_CHEVRON = "var(--primary, #1B3D7A)"
 
 const CARD_RADIUS = "20px"
 const ACTION_RADIUS = "14px"
@@ -52,20 +54,20 @@ function ActionItem({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between gap-2 px-2 py-2 text-left transition-all duration-200"
+      className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left transition-all duration-200"
       style={{
         borderTop: showDivider ? `1px solid ${CARD_BORDER}` : "none",
         borderRadius: ACTION_RADIUS,
-        background: "transparent",
+        background: ACTION_DEFAULT_BG,
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.background = ACTION_HOVER_BG
+        e.currentTarget.style.background = ACTION_DEFAULT_BG_HOVER
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.background = "transparent"
+        e.currentTarget.style.background = ACTION_DEFAULT_BG
       }}
     >
-      <div className="flex min-w-0 items-center gap-2">
+      <div className="flex min-w-0 items-center gap-3">
         <div
           className="flex h-8 w-8 shrink-0 items-center justify-center"
           style={{
@@ -132,7 +134,7 @@ export default function QuickActionsCard({
           subtitle="Crear desde plantilla"
           onClick={onNuevaCotizacion}
           iconBackground={ACTION_ICON_BG}
-          iconColor={ACTION_PRIMARY}
+          iconColor={ACTION_ICON_TEXT_LIGHT}
         />
 
         <ActionItem
@@ -141,7 +143,7 @@ export default function QuickActionsCard({
           subtitle={`${historialTotal} guardadas`}
           onClick={onVerHistorial}
           showDivider
-          iconBackground={ACTION_ICON_BG_ALT}
+          iconBackground={ACTION_ICON_BG_SUCCESS}
           iconColor={ACTION_SUCCESS}
         />
 
@@ -151,7 +153,7 @@ export default function QuickActionsCard({
           subtitle={`${plantillasDisponibles} diseños listos para usar`}
           onClick={onExplorarPlantillas}
           showDivider
-          iconBackground={ACTION_ICON_BG}
+          iconBackground={ACTION_ICON_BG_ALT}
           iconColor={ACTION_BRAND}
         />
       </div>

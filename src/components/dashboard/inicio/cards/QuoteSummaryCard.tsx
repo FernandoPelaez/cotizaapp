@@ -52,14 +52,19 @@ const CARD_BORDER = "var(--border, #E6EBF5)"
 const CARD_FOREGROUND = "var(--foreground, #0F172A)"
 const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
 const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
-const CARD_ACCENT_BG = "var(--primary-soft, #EEF2FF)"
-const CARD_ACCENT_BG_HOVER = "var(--primary-light, #E4EBFF)"
-const CARD_ACCENT_TEXT = "var(--primary, #1B3D7A)"
-const CARD_ACCENT_TEXT_STRONG = "var(--primary-hover, #2447D5)"
 const CARD_EMPTY_BG = "var(--background, #F8FAFC)"
 const CARD_ACTIVE_DOT = "var(--primary, #1F4ED8)"
 const CARD_INACTIVE_DOT = "var(--border, #E2E8F0)"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
+
+const CARD_ICON_BG = "var(--primary, #1B3D7A)"
+const CARD_ICON_TEXT = "#FFFFFF"
+
+const CARD_ACTION_BG = "var(--primary, #1B3D7A)"
+const CARD_ACTION_BG_HOVER = "var(--primary-hover, #16356C)"
+const CARD_ACTION_TEXT = "#FFFFFF"
+const CARD_ACTION_BORDER = "rgba(27, 61, 122, 0.18)"
+
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "14px"
 const CHIP_RADIUS = "9999px"
@@ -128,32 +133,35 @@ export default function QuoteSummaryCard({
       >
         <div className="flex items-center justify-between">
           <div
-            className="flex h-8 w-8 items-center justify-center"
+            className="flex h-9 w-9 items-center justify-center"
             style={{
-              background: CARD_ACCENT_BG,
-              borderRadius: "10px",
+              background: CARD_ICON_BG,
+              borderRadius: "12px",
+              boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
             }}
           >
             <FileText
               className="h-4 w-4"
-              style={{ color: CARD_ACCENT_TEXT }}
+              style={{ color: CARD_ICON_TEXT }}
             />
           </div>
 
           <button
             type="button"
             onClick={onVerTodo}
-            className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition"
+            className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[9px] font-semibold transition"
             style={{
-              background: CARD_ACCENT_BG,
-              color: CARD_ACCENT_TEXT_STRONG,
-              borderRadius: "10px",
+              background: CARD_ACTION_BG,
+              color: CARD_ACTION_TEXT,
+              borderRadius: "11px",
+              border: `1px solid ${CARD_ACTION_BORDER}`,
+              boxShadow: "0 6px 14px rgba(27,61,122,0.16)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+              e.currentTarget.style.background = CARD_ACTION_BG_HOVER
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = CARD_ACCENT_BG
+              e.currentTarget.style.background = CARD_ACTION_BG
             }}
           >
             Ver todo
@@ -204,32 +212,35 @@ export default function QuoteSummaryCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div
-          className={`flex h-8 w-8 items-center justify-center transition-all duration-300 ease-out [transition-delay:0ms] ${animationClass}`}
+          className={`flex h-9 w-9 items-center justify-center transition-all duration-300 ease-out [transition-delay:0ms] ${animationClass}`}
           style={{
-            background: CARD_ACCENT_BG,
-            borderRadius: "10px",
+            background: CARD_ICON_BG,
+            borderRadius: "12px",
+            boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
           }}
         >
           <FileText
             className="h-4 w-4"
-            style={{ color: CARD_ACCENT_TEXT }}
+            style={{ color: CARD_ICON_TEXT }}
           />
         </div>
 
         <button
           type="button"
           onClick={onVerTodo}
-          className={`inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition-all duration-300 ease-out [transition-delay:20ms] ${animationClass}`}
+          className={`inline-flex items-center gap-1 px-2.5 py-0.5 text-[9px] font-semibold transition-all duration-300 ease-out [transition-delay:20ms] ${animationClass}`}
           style={{
-            background: CARD_ACCENT_BG,
-            color: CARD_ACCENT_TEXT_STRONG,
-            borderRadius: "10px",
+            background: CARD_ACTION_BG,
+            color: CARD_ACTION_TEXT,
+            borderRadius: "11px",
+            border: `1px solid ${CARD_ACTION_BORDER}`,
+            boxShadow: "0 6px 14px rgba(27,61,122,0.16)",
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+            e.currentTarget.style.background = CARD_ACTION_BG_HOVER
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.background = CARD_ACCENT_BG
+            e.currentTarget.style.background = CARD_ACTION_BG
           }}
         >
           Ver todo
@@ -307,17 +318,19 @@ export default function QuoteSummaryCard({
           <button
             type="button"
             onClick={() => onVerDetalle?.(cotizacion)}
-            className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-semibold transition"
+            className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[9px] font-semibold transition"
             style={{
-              background: CARD_ACCENT_BG,
-              color: CARD_ACCENT_TEXT_STRONG,
-              borderRadius: "10px",
+              background: CARD_ACTION_BG,
+              color: CARD_ACTION_TEXT,
+              borderRadius: "11px",
+              border: `1px solid ${CARD_ACTION_BORDER}`,
+              boxShadow: "0 6px 14px rgba(27,61,122,0.16)",
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = CARD_ACCENT_BG_HOVER
+              e.currentTarget.style.background = CARD_ACTION_BG_HOVER
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = CARD_ACCENT_BG
+              e.currentTarget.style.background = CARD_ACTION_BG
             }}
           >
             Ver detalle

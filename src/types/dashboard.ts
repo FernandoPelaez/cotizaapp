@@ -4,7 +4,7 @@ export interface Plantilla {
   color: string
   accentColor?: string
   activa?: boolean
-  tipo?: "basica" | "pro"
+  tipo?: "basica" | "pro" | "premium"
   preview?: string
 }
 
@@ -19,7 +19,7 @@ export interface Cotizacion {
 }
 
 export interface UserConfig {
-  plan?: "free" | "pro"
+  plan?: "free" | "pro" | "premium"
   cotizacionesUsadas?: number
   cotizacionesMax?: number
   plantillaActivaNombre?: string

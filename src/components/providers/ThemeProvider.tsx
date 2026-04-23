@@ -30,6 +30,11 @@ type ThemeProviderProps = {
   children: ReactNode
 }
 
+type ReadThemeSettingsResult = {
+  settings: ThemeSettings
+  unauthorized: boolean
+}
+
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function getApiErrorMessage(data: unknown, fallback: string) {
@@ -45,7 +50,11 @@ function getApiErrorMessage(data: unknown, fallback: string) {
   return fallback
 }
 
-async function readThemeSettings(): Promise<ThemeSettings> {
+function isUnauthorizedStatus(status: number) {
+  return status === 401 || status === 403
+}
+
+async function readThemeSettings(): Promise<ReadThemeSettingsResult> {
   const res = await fetch("/api/user/settings", {
     method: "GET",
     cache: "no-store",
@@ -56,6 +65,13 @@ async function readThemeSettings(): Promise<ThemeSettings> {
 
   const data = await res.json().catch(() => null)
 
+  if (isUnauthorizedStatus(res.status)) {
+    return {
+      settings: createDefaultThemeSettings(),
+      unauthorized: true,
+    }
+  }
+
   if (!res.ok) {
     throw new Error(
       getApiErrorMessage(
@@ -65,7 +81,10 @@ async function readThemeSettings(): Promise<ThemeSettings> {
     )
   }
 
-  return buildThemeSettings((data ?? {}) as ThemeSettingsPayload)
+  return {
+    settings: buildThemeSettings((data ?? {}) as ThemeSettingsPayload),
+    unauthorized: false,
+  }
 }
 
 async function writeThemeSettings(
@@ -81,6 +100,10 @@ async function writeThemeSettings(
   })
 
   const data = await res.json().catch(() => null)
+
+  if (isUnauthorizedStatus(res.status)) {
+    throw new Error("Debes iniciar sesión para guardar tu personalización.")
+  }
 
   if (!res.ok) {
     throw new Error(
@@ -145,16 +168,20 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
     const loadTheme = async () => {
       try {
-        const nextSettings = await readThemeSettings()
+        const result = await readThemeSettings()
 
         if (cancelled) return
 
-        setSettings(nextSettings)
-        setDraftState(nextSettings)
+        setSettings(result.settings)
+        setDraftState(result.settings)
+
+        if (result.unauthorized) {
+          return
+        }
       } catch (error) {
-        console.error("ThemeProvider load error:", error)
-
         if (cancelled) return
+
+        console.error("ThemeProvider load error:", error)
 
         const fallback = createDefaultThemeSettings()
         setSettings(fallback)

@@ -53,15 +53,13 @@ model Settings {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   defaultSendChannel  SendChannel       @default(PDF)
-
-  themeMode           ThemeMode         @default(SISTEMA)
   brandColor          String            @default("#1b3d7a")
-  fontFamily          ThemeFontFamily   @default(GEIST)
   cardStyle           ThemeCardStyle    @default(SUAVE)
+  densityStyle        ThemeDensityStyle @default(COMODA)
+  fontFamily          ThemeFontFamily   @default(GEIST)
   radiusStyle         ThemeRadiusStyle  @default(MEDIO)
   shadowStyle         ThemeShadowStyle  @default(SUAVE)
-  densityStyle        ThemeDensityStyle @default(COMODA)
-
+  themeMode           ThemeMode         @default(SISTEMA)
   user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 

@@ -1,9 +1,65 @@
+import type { ComponentType } from "react"
 import { notFound } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { templateMap } from "@/lib/templates"
 
 type PageProps = {
   params: Promise<{ id: string }>
+}
+
+type TemplateData = {
+  id: string
+  title: string
+  description: string
+
+  clientName: string
+  clientEmail: string
+  clientPhone: string
+  clientAddress: string
+  clientRFC: string
+
+  subtotal: number
+  discount: number
+  tax: number
+  total: number
+  validUntil: string | undefined
+  notes: string
+  createdAt: Date
+
+  items: {
+    name: string
+    quantity: number
+    price: number
+    total: number
+  }[]
+
+  services: {
+    name: string
+    price: number
+  }[]
+
+  products: {
+    name: string
+    quantity: number
+    price: number
+  }[]
+
+  businessName: string
+  companyName: string
+
+  logoUrl: string
+  companyLogo: string
+
+  phone: string
+  themeColor: string
+  city: string
+  state: string
+  oficio: string
+
+  settings: unknown
+
+  docNumber: string
+  date: string
 }
 
 export default async function QuotePrintPage({ params }: PageProps) {
@@ -28,12 +84,6 @@ export default async function QuotePrintPage({ params }: PageProps) {
   }
 
   const quote = quoteRecord
-
-  const templateKey = quote.template?.name?.trim() || "clasica-1"
-
-  const SelectedTemplate =
-    templateMap[templateKey as keyof typeof templateMap] ||
-    templateMap["clasica-1"]
 
   const normalizedItems = (quote.items || []).map((item) => ({
     name: item.name,
@@ -77,23 +127,31 @@ export default async function QuotePrintPage({ params }: PageProps) {
 
   const logoUrl = quote.user.profile?.logoUrl || ""
 
-  const templateData = {
+  const createdAtFormatted = quote.createdAt
+    ? new Intl.DateTimeFormat("es-MX").format(new Date(quote.createdAt))
+    : ""
+
+  const validUntilFormatted = quote.validUntil
+    ? new Intl.DateTimeFormat("es-MX").format(new Date(quote.validUntil))
+    : undefined
+
+  const templateData: TemplateData = {
     id: quote.id,
     title: quote.title,
-    description: quote.description,
+    description: quote.description ?? "",
 
-    clientName: quote.clientName,
-    clientEmail: quote.clientEmail,
-    clientPhone: quote.clientPhone,
-    clientAddress: quote.clientAddress,
-    clientRFC: quote.clientRFC,
+    clientName: quote.clientName ?? "",
+    clientEmail: quote.clientEmail ?? "",
+    clientPhone: quote.clientPhone ?? "",
+    clientAddress: quote.clientAddress ?? "",
+    clientRFC: quote.clientRFC ?? "",
 
     subtotal: quote.subtotal,
     discount: quote.discount,
     tax: quote.tax,
     total: quote.total,
-    validUntil: quote.validUntil,
-    notes: quote.notes,
+    validUntil: validUntilFormatted,
+    notes: quote.notes ?? "",
     createdAt: quote.createdAt,
 
     items: normalizedItems,
@@ -104,7 +162,7 @@ export default async function QuotePrintPage({ params }: PageProps) {
     companyName: businessName,
 
     logoUrl,
-    companyLogo: logoUrl || undefined,
+    companyLogo: logoUrl,
 
     phone: quote.user.profile?.phone || "",
     themeColor: quote.user.profile?.themeColor || "#1B3D7A",
@@ -112,13 +170,19 @@ export default async function QuotePrintPage({ params }: PageProps) {
     state: quote.user.profile?.state || "",
     oficio: quote.user.profile?.oficio || "",
 
-    settings: quote.user.settings || null,
+    settings: quote.user.settings ?? null,
 
     docNumber: quote.id.slice(0, 8).toUpperCase(),
-    date: quote.createdAt
-      ? new Intl.DateTimeFormat("es-MX").format(new Date(quote.createdAt))
-      : "",
+    date: createdAtFormatted,
   }
+
+  const templateKey = quote.template?.name?.trim() || "clasica-1"
+
+  const SelectedTemplate = (templateMap[
+    templateKey as keyof typeof templateMap
+  ] || templateMap["clasica-1"]) as unknown as ComponentType<{
+    data: TemplateData
+  }>
 
   return (
     <>

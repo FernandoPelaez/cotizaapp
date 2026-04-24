@@ -77,36 +77,34 @@ function buildProfileResponse(
   }
 }
 
-function buildUserResponse(
-  user: {
-    id: string
-    email: string
-    name: string | null
-    image: string | null
-    profileType: ProfileType | null
-    profileCompleted: boolean
-    onboardingStep: number
-    profile:
-      | {
-          phone: string | null
-          city: string | null
-          state: string | null
-          businessName: string | null
-          description: string | null
-          logoUrl: string | null
-        }
-      | null
-    plan:
-      | {
-          id: string
-          name: string
-          price: number
-          maxQuotes: number
-          whatsappSend: boolean
-        }
-      | null
-  }
-) {
+function buildUserResponse(user: {
+  id: string
+  email: string
+  name: string | null
+  image: string | null
+  profileType: ProfileType | null
+  profileCompleted: boolean
+  onboardingStep: number
+  profile:
+    | {
+        phone: string | null
+        city: string | null
+        state: string | null
+        businessName: string | null
+        description: string | null
+        logoUrl: string | null
+      }
+    | null
+  plan:
+    | {
+        id: string
+        name: string
+        price: number
+        maxQuotes: number
+        whatsappSend: boolean
+      }
+    | null
+}) {
   return {
     id: user.id,
     email: user.email,
@@ -117,6 +115,18 @@ function buildUserResponse(
     onboardingStep: user.onboardingStep,
     profile: buildProfileResponse(user.profile),
     plan: user.plan,
+  }
+}
+
+type UserResponse = ReturnType<typeof buildUserResponse>
+
+function buildProfileCompatibilityResponse(user: UserResponse) {
+  return {
+    
+    profileType: user.profileType,
+    profileCompleted: user.profileCompleted,
+    onboardingStep: user.onboardingStep,
+    profile: user.profile,
   }
 }
 
@@ -174,9 +184,14 @@ export async function GET() {
       )
     }
 
+    const userResponse = buildUserResponse(user)
+
     return NextResponse.json({
       success: true,
-      user: buildUserResponse(user),
+
+      ...buildProfileCompatibilityResponse(userResponse),
+
+      user: userResponse,
     })
   } catch (error) {
     console.error("ERROR GET PROFILE API:", error)
@@ -263,11 +278,16 @@ export async function POST(req: Request) {
       },
     })
 
+    const userResponse = buildUserResponse(user)
+
     return NextResponse.json({
       success: true,
       message: "Perfil guardado correctamente",
       nextStep: "/onboarding/questions",
-      user: buildUserResponse(user),
+
+      ...buildProfileCompatibilityResponse(userResponse),
+
+      user: userResponse,
     })
   } catch (error) {
     console.error("ERROR PROFILE API:", error)
@@ -304,9 +324,18 @@ export async function PATCH(req: Request) {
     const logoUrl = normalizeOptionalUrl(body.logoUrl)
 
     const invalidField =
-      (body.phone !== undefined && phone === null && body.phone !== null && typeof body.phone !== "string") ||
-      (body.city !== undefined && city === null && body.city !== null && typeof body.city !== "string") ||
-      (body.state !== undefined && state === null && body.state !== null && typeof body.state !== "string") ||
+      (body.phone !== undefined &&
+        phone === null &&
+        body.phone !== null &&
+        typeof body.phone !== "string") ||
+      (body.city !== undefined &&
+        city === null &&
+        body.city !== null &&
+        typeof body.city !== "string") ||
+      (body.state !== undefined &&
+        state === null &&
+        body.state !== null &&
+        typeof body.state !== "string") ||
       (body.businessName !== undefined &&
         businessName === null &&
         body.businessName !== null &&
@@ -401,10 +430,15 @@ export async function PATCH(req: Request) {
       },
     })
 
+    const userResponse = buildUserResponse(updatedUser)
+
     return NextResponse.json({
       success: true,
       message: "Perfil actualizado correctamente",
-      user: buildUserResponse(updatedUser),
+
+      ...buildProfileCompatibilityResponse(userResponse),
+
+      user: userResponse,
     })
   } catch (error) {
     console.error("ERROR PATCH PROFILE API:", error)

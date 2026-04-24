@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
             if (isDev) {
               console.log("[AUTH] Credenciales incompletas")
             }
+
             return null
           }
 
@@ -41,6 +42,7 @@ export const authOptions: NextAuthOptions = {
             if (isDev) {
               console.log("[AUTH] Usuario no encontrado:", email)
             }
+
             return null
           }
 
@@ -48,6 +50,7 @@ export const authOptions: NextAuthOptions = {
             if (isDev) {
               console.log("[AUTH] El usuario no tiene password guardado:", email)
             }
+
             return null
           }
 
@@ -57,6 +60,7 @@ export const authOptions: NextAuthOptions = {
             if (isDev) {
               console.log("[AUTH] Password incorrecta para:", email)
             }
+
             return null
           }
 
@@ -140,9 +144,14 @@ export const authOptions: NextAuthOptions = {
         session.user.name = token.name as string
         session.user.image = (token.image as string | null) ?? null
         ;(session.user as any).plan = token.plan as string
-        ;(session.user as any).profileType = (token.profileType as string | null) ?? null
-        ;(session.user as any).profileCompleted = Boolean(token.profileCompleted)
-        ;(session.user as any).onboardingStep = Number(token.onboardingStep ?? 1)
+        ;(session.user as any).profileType =
+          (token.profileType as string | null) ?? null
+        ;(session.user as any).profileCompleted = Boolean(
+          token.profileCompleted
+        )
+        ;(session.user as any).onboardingStep = Number(
+          token.onboardingStep ?? 1
+        )
       }
 
       return session
@@ -150,5 +159,6 @@ export const authOptions: NextAuthOptions = {
   },
 
   secret: process.env.NEXTAUTH_SECRET,
-  debug: isDev,
+
+  debug: false,
 }

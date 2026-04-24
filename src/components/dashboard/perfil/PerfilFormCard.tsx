@@ -169,7 +169,7 @@ export default function PerfilFormCard({
         <div className="flex items-center justify-between gap-2 border-t border-[#dbe6f7] pt-3">
 
           {!isEditing ? (
-            /* Vista: solo botón Editar */
+            
             <div className="flex w-full justify-end">
               <button
                 type="button"

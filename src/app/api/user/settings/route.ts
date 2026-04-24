@@ -18,6 +18,9 @@ const DEFAULT_BRAND_COLOR = "blue"
 
 type SessionUser = {
   id?: string | null
+  email?: string | null
+  name?: string | null
+  image?: string | null
 }
 
 type ThemeModeDb = "CLARO" | "OSCURO" | "SISTEMA"
@@ -57,11 +60,7 @@ type BooleanSettingKey =
   | "notifyLimit"
   | "systemConfirmations"
 
-type TextSettingKey =
-  | "notes"
-  | "conditions"
-  | "validity"
-  | "fileName"
+type TextSettingKey = "notes" | "conditions" | "validity" | "fileName"
 
 type EnumSettingKey =
   | "themeMode"
@@ -77,7 +76,52 @@ function json(data: unknown, status = 200) {
 
 async function getUserId() {
   const session = await getServerSession(authOptions)
-  return ((session?.user as SessionUser | undefined)?.id ?? null) as string | null
+  const sessionUser = session?.user as SessionUser | undefined
+
+  const sessionUserId = sessionUser?.id ?? null
+  const email = sessionUser?.email?.toLowerCase().trim() ?? null
+
+  if (!sessionUserId && !email) {
+    return null
+  }
+
+  if (sessionUserId) {
+    const dbUserById = await prisma.user.findUnique({
+      where: { id: sessionUserId },
+      select: { id: true },
+    })
+
+    if (dbUserById) {
+      return dbUserById.id
+    }
+  }
+
+  if (!email) {
+    return null
+  }
+
+  const dbUserByEmail = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true },
+  })
+
+  if (dbUserByEmail) {
+    return dbUserByEmail.id
+  }
+
+  const createdUser = await prisma.user.create({
+    data: {
+      email,
+      name: sessionUser?.name || email,
+      image: sessionUser?.image || "",
+      password: "",
+      profileCompleted: false,
+      onboardingStep: 1,
+    },
+    select: { id: true },
+  })
+
+  return createdUser.id
 }
 
 async function getOrCreateSettings(userId: string) {
@@ -262,6 +306,7 @@ function normalizeBrandColor(value: unknown): string | null {
   }
 
   const raw = value.trim()
+
   if (!raw) {
     return DEFAULT_BRAND_COLOR
   }
@@ -301,6 +346,7 @@ function buildUpdateData(body: Record<string, unknown>) {
 
   const assignBoolean = (key: BooleanSettingKey) => {
     const value = body[key]
+
     if (typeof value === "boolean") {
       setDataValue(data, key, value)
     }
@@ -308,6 +354,7 @@ function buildUpdateData(body: Record<string, unknown>) {
 
   const assignText = (key: TextSettingKey) => {
     const value = body[key]
+
     if (typeof value === "string") {
       setDataValue(data, key, value.trim())
     }
@@ -361,6 +408,7 @@ function buildUpdateData(body: Record<string, unknown>) {
   assignText("conditions")
   assignText("validity")
   assignText("fileName")
+
   assignBrandColor()
 
   assignMappedEnum("themeMode", THEME_MODE_TO_DB)

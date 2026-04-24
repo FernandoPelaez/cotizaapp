@@ -5,17 +5,13 @@ export default withAuth(
   function middleware(req) {
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
-
-    const isHomeRoute = pathname === "/"
     const isDashboardRoute = pathname.startsWith("/dashboard")
     const isOnboardingRoute = pathname.startsWith("/onboarding")
     const isProfileRoute = pathname === "/onboarding/profile"
     const isQuestionsRoute = pathname === "/onboarding/questions"
-
     if (!token) {
       if (isDashboardRoute || isOnboardingRoute) {
         const signInUrl = new URL("/auth/signin", req.url)
-
         signInUrl.searchParams.set(
           "callbackUrl",
           req.nextUrl.pathname + req.nextUrl.search
@@ -33,26 +29,12 @@ export default withAuth(
         : null
 
     const profileCompleted = token.profileCompleted === true
-
     const rawOnboardingStep = Number(token.onboardingStep ?? 1)
     const onboardingStep = Number.isFinite(rawOnboardingStep)
       ? rawOnboardingStep
       : 1
 
     const hasSelectedProfile = Boolean(profileType) || onboardingStep >= 2
-
-    if (isHomeRoute) {
-      if (!hasSelectedProfile) {
-        return NextResponse.redirect(new URL("/onboarding/profile", req.url))
-      }
-
-      if (!profileCompleted) {
-        return NextResponse.redirect(new URL("/onboarding/questions", req.url))
-      }
-
-      return NextResponse.redirect(new URL("/dashboard", req.url))
-    }
-
     if (isOnboardingRoute) {
       if (profileCompleted) {
         return NextResponse.redirect(new URL("/dashboard", req.url))
@@ -93,5 +75,5 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ["/", "/dashboard/:path*", "/onboarding/:path*"],
+  matcher: ["/dashboard/:path*", "/onboarding/:path*"],
 }

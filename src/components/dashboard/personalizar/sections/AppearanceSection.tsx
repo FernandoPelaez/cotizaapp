@@ -16,29 +16,37 @@ export default function AppearanceSection() {
 
   return (
     <section
-      className="rounded-2xl border p-4"
+      className="rounded-3xl border p-5"
       style={{
         backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-        boxShadow: "var(--shadow)",
+
+        // CORRECCIÓN VISUAL:
+        // Antes dependía directo de --border y se veía muy oscuro.
+        // Lo suavizamos para recuperar el diseño limpio anterior.
+        borderColor: "hsl(var(--border) / 0.45)",
+
+        // CORRECCIÓN VISUAL:
+        // Shadow más suave para que no se vea pesado.
+        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <div className="mb-3 space-y-0.5">
+      <div className="mb-4 space-y-1">
         <h2
           className="text-sm font-semibold"
           style={{ color: "hsl(var(--foreground))" }}
         >
           Apariencia
         </h2>
+
         <p
-          className="text-xs"
+          className="text-xs leading-5"
           style={{ color: "hsl(var(--text-muted))" }}
         >
           Elige cómo se verá el dashboard de forma global.
         </p>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         {THEME_MODE_OPTIONS.map((option) => {
           const Icon = modeIcons[option.value]
           const isActive = draft.themeMode === option.value
@@ -49,19 +57,28 @@ export default function AppearanceSection() {
               type="button"
               onClick={() => setDraft({ themeMode: option.value })}
               disabled={isLoading || isSaving}
-              className="rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-[116px] rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
+                // CORRECCIÓN VISUAL:
+                // Card activa suave, card inactiva clara.
                 backgroundColor: isActive
                   ? "hsl(var(--primary-soft))"
                   : "hsl(var(--background))",
+
+                // CORRECCIÓN VISUAL:
+                // Borde activo azul, inactivo más bajito para que no se vea negro.
                 borderColor: isActive
-                  ? "hsl(var(--primary))"
-                  : "hsl(var(--border))",
+                  ? "hsl(var(--primary) / 0.75)"
+                  : "hsl(var(--border) / 0.45)",
+
+                boxShadow: isActive
+                  ? "0 10px 24px rgba(45, 107, 255, 0.12)"
+                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
               }}
             >
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <div
-                  className="flex h-8 w-8 items-center justify-center rounded-lg"
+                  className="flex h-9 w-9 items-center justify-center rounded-xl"
                   style={{
                     backgroundColor: isActive
                       ? "hsl(var(--primary))"
@@ -69,12 +86,12 @@ export default function AppearanceSection() {
                     color: isActive ? "white" : "hsl(var(--primary))",
                   }}
                 >
-                  <Icon size={15} />
+                  <Icon size={16} />
                 </div>
 
                 {isActive ? (
                   <span
-                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
                     style={{
                       backgroundColor: "hsl(var(--primary))",
                       color: "white",
@@ -85,16 +102,17 @@ export default function AppearanceSection() {
                 ) : null}
               </div>
 
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 <p
                   className="text-sm font-semibold"
                   style={{ color: "hsl(var(--foreground))" }}
                 >
                   {option.label}
                 </p>
+
                 {option.description ? (
                   <p
-                    className="text-xs leading-4"
+                    className="text-xs leading-5"
                     style={{ color: "hsl(var(--text-muted))" }}
                   >
                     {option.description}

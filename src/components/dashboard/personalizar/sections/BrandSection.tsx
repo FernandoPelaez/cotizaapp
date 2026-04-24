@@ -27,16 +27,17 @@ export default function BrandSection() {
 
   return (
     <section
-      className="rounded-2xl border p-4"
+      className="rounded-3xl border p-5"
       style={{
         backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-        boxShadow: "var(--shadow)",
+        borderColor: "hsl(var(--border) / 0.45)",
+        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <div className="mb-3 space-y-0.5">
+      <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
           <Palette size={15} style={{ color: "hsl(var(--primary))" }} />
+
           <h2
             className="text-sm font-semibold"
             style={{ color: "hsl(var(--foreground))" }}
@@ -44,15 +45,16 @@ export default function BrandSection() {
             Marca
           </h2>
         </div>
+
         <p
-          className="text-xs"
+          className="text-xs leading-5"
           style={{ color: "hsl(var(--text-muted))" }}
         >
           Elige el color principal que dará identidad visual al dashboard.
         </p>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {BRAND_COLOR_PRESET_LIST.map((preset) => {
           const isActive = draft.brandColor === preset.key
 
@@ -62,7 +64,7 @@ export default function BrandSection() {
               type="button"
               onClick={() => setDraft({ brandColor: preset.key })}
               disabled={isLoading || isSaving}
-              className="rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
                   ? `linear-gradient(180deg, ${hexToRgba(
@@ -70,18 +72,19 @@ export default function BrandSection() {
                       0.12
                     )} 0%, hsl(var(--card)) 100%)`
                   : "hsl(var(--background))",
+
                 borderColor: isActive
-                  ? hexToRgba(preset.hex, 0.42)
-                  : "hsl(var(--border))",
+                  ? hexToRgba(preset.hex, 0.48)
+                  : "hsl(var(--border) / 0.45)",
                 boxShadow: isActive
-                  ? `0 0 0 1px ${hexToRgba(preset.hex, 0.12)}`
-                  : "none",
+                  ? `0 10px 24px ${hexToRgba(preset.hex, 0.12)}`
+                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
               }}
             >
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <div className="flex items-center gap-2">
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-3">
                   <span
-                    className="block h-8 w-8 flex-shrink-0 rounded-full border"
+                    className="block h-10 w-10 flex-shrink-0 rounded-full border"
                     style={{
                       background: `linear-gradient(135deg, ${hexToRgba(
                         preset.hex,
@@ -89,20 +92,21 @@ export default function BrandSection() {
                       )} 0%, ${hexToRgba(preset.hex, 0.82)} 100%)`,
                       borderColor: isActive
                         ? hexToRgba(preset.hex, 0.5)
-                        : "rgba(255,255,255,0.28)",
+                        : "rgba(255, 255, 255, 0.35)",
                       boxShadow: isActive
-                        ? `0 0 0 3px ${hexToRgba(preset.hex, 0.12)}`
-                        : "0 0 0 1px rgba(15,23,42,0.06)",
+                        ? `0 0 0 4px ${hexToRgba(preset.hex, 0.12)}`
+                        : "0 0 0 1px rgba(15, 23, 42, 0.06)",
                     }}
                   />
 
-                  <div className="space-y-0.5">
+                  <div className="min-w-0 space-y-0.5">
                     <p
-                      className="text-sm font-semibold"
+                      className="truncate text-sm font-semibold"
                       style={{ color: "hsl(var(--foreground))" }}
                     >
                       {preset.label}
                     </p>
+
                     <p
                       className="text-[11px] uppercase tracking-wide"
                       style={{ color: "hsl(var(--text-muted))" }}
@@ -114,22 +118,25 @@ export default function BrandSection() {
 
                 {isActive ? (
                   <span
-                    className="inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border"
+                    className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border"
                     style={{
                       backgroundColor: hexToRgba(preset.hex, 0.14),
                       borderColor: hexToRgba(preset.hex, 0.22),
                       color: preset.hex,
                     }}
                   >
-                    <Check size={12} />
+                    <Check size={13} />
                   </span>
                 ) : null}
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div
                   className="h-1.5 w-full overflow-hidden rounded-full"
-                  style={{ backgroundColor: "hsl(var(--border))" }}
+                  style={{
+                 
+                    backgroundColor: "hsl(var(--border) / 0.35)",
+                  }}
                 >
                   <div
                     className="h-full rounded-full"
@@ -148,8 +155,9 @@ export default function BrandSection() {
                     className="h-2 w-2 rounded-full"
                     style={{ backgroundColor: preset.hex }}
                   />
+
                   <span
-                    className="text-[11px]"
+                    className="text-[11px] leading-4"
                     style={{ color: "hsl(var(--text-muted))" }}
                   >
                     {isActive

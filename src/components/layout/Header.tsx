@@ -48,27 +48,27 @@ const SIDEBAR_COLLAPSIBLE_ROUTES = [
   "/plantillas",
 ]
 
-const HEADER_BG = "var(--card, #FFFFFF)"
-const HEADER_BORDER = "var(--border, #E5E7EB)"
-const HEADER_TEXT = "var(--foreground, #0F172A)"
-const HEADER_TEXT_MUTED = "var(--text-muted, #64748B)"
-const HEADER_TEXT_SOFT = "var(--text-muted, #94A3B8)"
+const HEADER_BG = "hsl(var(--card, 0 0% 100%))"
+const HEADER_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const HEADER_TEXT = "hsl(var(--foreground, 222 47% 11%))"
+const HEADER_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
+const HEADER_TEXT_SOFT = "hsl(var(--text-muted, 215 16% 47%) / 0.78)"
 
-const HEADER_BUTTON_BG = "var(--card, #FFFFFF)"
-const HEADER_BUTTON_BORDER = "var(--border, #E5E7EB)"
-const HEADER_BUTTON_ICON = "var(--primary, #1B3D7A)"
-const HEADER_BUTTON_HOVER_BG = "var(--primary-soft, #EEF2FF)"
-const HEADER_BUTTON_HOVER_BORDER = "var(--primary-light, #DBE4FF)"
+const HEADER_BUTTON_BG = "hsl(var(--card, 0 0% 100%))"
+const HEADER_BUTTON_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const HEADER_BUTTON_ICON = "hsl(var(--primary, 216 64% 29%))"
+const HEADER_BUTTON_HOVER_BG = "hsl(var(--primary-soft, 214 100% 94%))"
+const HEADER_BUTTON_HOVER_BORDER = "hsl(var(--primary-light, 214 91% 75%))"
 
-const HEADER_DROPDOWN_BG = "var(--card, #FFFFFF)"
-const HEADER_DROPDOWN_BORDER = "var(--border, #E5E7EB)"
-const HEADER_DROPDOWN_SURFACE = "var(--background, #F8FAFC)"
-const HEADER_TAG_BG = "var(--primary-soft, #EEF2FF)"
-const HEADER_TAG_TEXT = "var(--primary, #1B3D7A)"
-const HEADER_UNREAD_BADGE_BG = "var(--error, #EF4444)"
+const HEADER_DROPDOWN_BG = "hsl(var(--card, 0 0% 100%))"
+const HEADER_DROPDOWN_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const HEADER_DROPDOWN_SURFACE = "hsl(var(--background, 220 23% 98%))"
+const HEADER_TAG_BG = "hsl(var(--primary-soft, 214 100% 94%))"
+const HEADER_TAG_TEXT = "hsl(var(--primary, 216 64% 29%))"
+const HEADER_UNREAD_BADGE_BG = "hsl(var(--error, 0 84% 60%))"
 const HEADER_UNREAD_BADGE_TEXT = "#FFFFFF"
-const HEADER_PROFILE_BG = "var(--primary-light, #DBEAFE)"
-const HEADER_PROFILE_TEXT = "var(--primary, #1B3D7A)"
+const HEADER_PROFILE_BG = "hsl(var(--primary-light, 214 91% 75%))"
+const HEADER_PROFILE_TEXT = "hsl(var(--primary, 216 64% 29%))"
 
 type EventVisualStyle = {
   border: string
@@ -225,9 +225,11 @@ export default function Header({
   const loadNotifications = async () => {
     try {
       setLoadingNotifications(true)
+
       const res = await fetch("/api/quotes/events?limit=5", {
         cache: "no-store",
       })
+
       const data: QuoteEventsResponse | { error?: string } = await res.json()
 
       if (!res.ok) {
@@ -268,10 +270,13 @@ export default function Header({
           method: "GET",
           cache: "no-store",
         })
+
         const data = (await res.json()) as HeaderProfileResponse
+
         if (!res.ok) {
           throw new Error(data.error || "No se pudo cargar el logo del perfil")
         }
+
         setProfileLogoUrl(data.user?.profile?.logoUrl?.trim() || "")
       } catch (error) {
         console.error("Error cargando logo del perfil en header", error)
@@ -304,11 +309,13 @@ export default function Header({
   const markNotificationsAsRead = async () => {
     try {
       setMarkingNotifications(true)
+
       const res = await fetch("/api/quotes/events", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ readAll: true }),
       })
+
       const data: { error?: string; unreadCount?: number } = await res.json()
 
       if (!res.ok) {
@@ -320,6 +327,7 @@ export default function Header({
       setUnreadCount(
         typeof data.unreadCount === "number" ? data.unreadCount : 0
       )
+
       setEvents((prev) =>
         prev.map((event) => ({
           ...event,
@@ -352,7 +360,7 @@ export default function Header({
       className="flex flex-shrink-0 items-center justify-between px-6"
       initial={{ clipPath: "inset(0 0 100% 0)", y: -8 }}
       animate={{ clipPath: "inset(0 0 0% 0)", y: 0 }}
-      transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1], delay: 0 }} // ← Navbar primero
+      transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1], delay: 0 }}
       style={{
         height: "72px",
         background: HEADER_BG,
@@ -396,6 +404,7 @@ export default function Header({
           <h1 className="text-sm font-bold" style={{ color: HEADER_TEXT }}>
             {title}
           </h1>
+
           <span
             className="text-xs"
             style={{
@@ -434,6 +443,7 @@ export default function Header({
             }}
           >
             <Bell className="h-4 w-4" style={{ color: HEADER_BUTTON_ICON }} />
+
             {unreadCount > 0 && (
               <span
                 className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full px-1 text-[10px] font-semibold"
@@ -458,9 +468,13 @@ export default function Header({
             >
               <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <p className="text-sm font-semibold" style={{ color: HEADER_TEXT }}>
+                  <p
+                    className="text-sm font-semibold"
+                    style={{ color: HEADER_TEXT }}
+                  >
                     Notificaciones
                   </p>
+
                   <p className="text-xs" style={{ color: HEADER_TEXT_MUTED }}>
                     {markingNotifications
                       ? "Marcando como leídas..."

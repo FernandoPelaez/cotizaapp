@@ -7,14 +7,17 @@ datasource db {
 }
 
 model User {
-  id               String       @id @default(cuid())
+  id               String    @id @default(cuid())
   name             String?
-  email            String       @unique
+  email            String    @unique
   emailVerified    DateTime?
   image            String?
   password         String?
-  profileCompleted Boolean      @default(false)
+  profileCompleted Boolean   @default(false)
+
   planId           String?
+  stripeCustomerId String? @unique
+
   createdAt        DateTime     @default(now())
   updatedAt        DateTime     @updatedAt
   onboardingStep   Int          @default(1)
@@ -22,18 +25,22 @@ model User {
   trialBlocked     Boolean      @default(false)
   trialQuotesLimit Int          @default(5)
   profileType      ProfileType?
-  accounts         Account[]
-  profile          Profile?
-  quotes           Quote[]
-  quoteEvents      QuoteEvent[]
-  sessions         Session[]
-  settings         Settings?
-  plan             Plan?        @relation(fields: [planId], references: [id])
+
+  accounts      Account[]
+  profile       Profile?
+  quotes        Quote[]
+  quoteEvents   QuoteEvent[]
+  sessions      Session[]
+  settings      Settings?
+  subscriptions Subscription[]
+
+  plan Plan? @relation(fields: [planId], references: [id])
 
   @@index([planId])
   @@index([profileType])
   @@index([profileCompleted])
   @@index([trialBlocked])
+  @@index([stripeCustomerId])
 }
 
 model Settings {
@@ -60,7 +67,8 @@ model Settings {
   radiusStyle         ThemeRadiusStyle  @default(MEDIO)
   shadowStyle         ThemeShadowStyle  @default(SUAVE)
   themeMode           ThemeMode         @default(SISTEMA)
-  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Profile {
@@ -84,8 +92,9 @@ model Profile {
   depositPolicy     DepositPolicy?
   hasFiscalData     Boolean?
   taxMode           TaxMode?
-  defaultTemplate   Template?      @relation("DefaultProfileTemplate", fields: [defaultTemplateId], references: [id])
-  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  defaultTemplate Template? @relation("DefaultProfileTemplate", fields: [defaultTemplateId], references: [id])
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([businessModel])
   @@index([taxMode])
@@ -105,7 +114,8 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -116,7 +126,8 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -130,29 +141,84 @@ model VerificationToken {
 }
 
 model Plan {
-  id           String   @id @default(cuid())
-  name         String
-  price        Float
-  maxQuotes    Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  whatsappSend Boolean  @default(false)
-  users        User[]
+  id          String       @id @default(cuid())
+  slug        String?      @unique
+  name        String
+  description String?
+  price       Float
+  priceCents  Int          @default(0)
+  currency    String       @default("mxn")
+  interval    PlanInterval @default(MONTHLY)
+
+  maxQuotes     Int
+  templateLimit Int     @default(10)
+  whatsappSend  Boolean @default(false)
+
+  stripeProductId String? @unique
+  stripePriceId   String? @unique
+
+  isFree   Boolean @default(false)
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users         User[]
+  subscriptions Subscription[]
+
+  @@index([slug])
+  @@index([isActive])
+  @@index([isFree])
+  @@index([stripePriceId])
+}
+
+model Subscription {
+  id String @id @default(cuid())
+
+  userId String
+  planId String?
+
+  stripeCustomerId     String?
+  stripeSubscriptionId String? @unique
+  stripePriceId        String?
+
+  status            SubscriptionStatus @default(INACTIVE)
+  cancelAtPeriodEnd Boolean            @default(false)
+
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  canceledAt         DateTime?
+  endedAt            DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan Plan? @relation(fields: [planId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([planId])
+  @@index([status])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+  @@index([stripePriceId])
+  @@index([currentPeriodEnd])
 }
 
 model Template {
-  id                String         @id @default(cuid())
-  name              String         @unique
-  description       String?
-  category          String?
-  isPremium         Boolean        @default(false)
-  previewUrl        String?
-  html              String
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @updatedAt
-  businessModel     BusinessModel?
-  profileType       ProfileType?
-  defaultForProfile Profile[]      @relation("DefaultProfileTemplate")
+  id            String         @id @default(cuid())
+  name          String         @unique
+  description   String?
+  category      String?
+  isPremium     Boolean        @default(false)
+  previewUrl    String?
+  html          String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  businessModel BusinessModel?
+  profileType   ProfileType?
+
+  defaultForProfile Profile[] @relation("DefaultProfileTemplate")
   quotes            Quote[]
 
   @@index([isPremium])
@@ -186,10 +252,11 @@ model Quote {
   responseChannel   SendChannel?
   responseExpiresAt DateTime?
   responseToken     String?      @unique
-  template          Template?    @relation(fields: [templateId], references: [id])
-  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  events            QuoteEvent[]
-  items             QuoteItem[]
+
+  template Template?    @relation(fields: [templateId], references: [id])
+  user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  events   QuoteEvent[]
+  items    QuoteItem[]
 
   @@index([userId])
   @@index([templateId])
@@ -207,7 +274,8 @@ model QuoteItem {
   price    Float
   total    Float
   quoteId  String
-  quote    Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
 
   @@index([quoteId])
 }
@@ -223,8 +291,9 @@ model QuoteEvent {
   readAt    DateTime?
   metadata  Json?
   createdAt DateTime       @default(now())
-  quote     Quote          @relation(fields: [quoteId], references: [id], onDelete: Cascade)
-  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([quoteId])
   @@index([userId])
@@ -281,6 +350,23 @@ enum DepositPolicy {
 enum SendChannel {
   PDF
   WHATSAPP
+}
+
+enum PlanInterval {
+  FREE
+  MONTHLY
+}
+
+enum SubscriptionStatus {
+  INACTIVE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  PAUSED
 }
 
 enum ThemeMode {

@@ -33,16 +33,17 @@ export default function DensitySection() {
 
   return (
     <section
-      className="rounded-2xl border p-4"
+      className="rounded-3xl border p-5"
       style={{
         backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-        boxShadow: "var(--shadow)",
+        borderColor: "hsl(var(--border) / 0.45)",
+        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <div className="mb-3 space-y-0.5">
+      <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
           <Rows3 size={15} style={{ color: "hsl(var(--primary))" }} />
+
           <h2
             className="text-sm font-semibold"
             style={{ color: "hsl(var(--foreground))" }}
@@ -50,8 +51,9 @@ export default function DensitySection() {
             Densidad visual
           </h2>
         </div>
+
         <p
-          className="text-xs"
+          className="text-xs leading-5"
           style={{ color: "hsl(var(--text-muted))" }}
         >
           Controla cuánto espacio visual tienen los bloques, tarjetas,
@@ -59,7 +61,7 @@ export default function DensitySection() {
         </p>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-3">
+      <div className="grid gap-3 md:grid-cols-3">
         {DENSITY_STYLE_OPTIONS.map((option) => {
           const isActive = draft.densityStyle === option.value
           const preview =
@@ -73,30 +75,32 @@ export default function DensitySection() {
               type="button"
               onClick={() => setDraft({ densityStyle: option.value })}
               disabled={isLoading || isSaving}
-              className="rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
                   ? "linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--card)) 100%)"
                   : "hsl(var(--background))",
                 borderColor: isActive
-                  ? "hsl(var(--primary))"
-                  : "hsl(var(--border))",
+                  ? "hsl(var(--primary) / 0.65)"
+                  : "hsl(var(--border) / 0.42)",
+
                 boxShadow: isActive
-                  ? "0 0 0 1px hsl(var(--primary-soft))"
-                  : "none",
+                  ? "0 10px 24px rgba(45, 107, 255, 0.11)"
+                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
               }}
             >
-              <div className="mb-2 flex items-start justify-between gap-2">
-                <div>
+              <div className="mb-3 flex items-start justify-between gap-3">
+                <div className="min-w-0">
                   <p
                     className="text-sm font-semibold"
                     style={{ color: "hsl(var(--foreground))" }}
                   >
                     {option.label}
                   </p>
+
                   {option.description ? (
                     <p
-                      className="mt-0.5 text-xs leading-4"
+                      className="mt-1 text-xs leading-5"
                       style={{ color: "hsl(var(--text-muted))" }}
                     >
                       {option.description}
@@ -106,10 +110,10 @@ export default function DensitySection() {
 
                 {isActive ? (
                   <span
-                    className="rounded-full border px-2 py-0.5 text-[10px] font-medium"
+                    className="shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold"
                     style={{
                       backgroundColor: "hsl(var(--primary-soft))",
-                      borderColor: "hsl(var(--primary))",
+                      borderColor: "hsl(var(--primary) / 0.45)",
                       color: "hsl(var(--primary))",
                     }}
                   >
@@ -119,65 +123,67 @@ export default function DensitySection() {
               </div>
 
               <div
-                className="rounded-lg border"
+                className="rounded-2xl border"
                 style={{
                   backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
+                  borderColor: "hsl(var(--border) / 0.38)",
+
                   padding: preview.cardPadding,
+                  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.42)",
                 }}
               >
                 <div
                   className="flex flex-col"
                   style={{ gap: preview.sectionGap }}
                 >
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <div
                       className="rounded-full"
                       style={{
                         height: "7px",
                         width: "55%",
                         backgroundColor: "hsl(var(--foreground))",
-                        opacity: 0.14,
+                        opacity: 0.13,
                       }}
                     />
+
                     <div
                       className="rounded-full"
                       style={{
                         height: "5px",
                         width: "34%",
                         backgroundColor: "hsl(var(--foreground))",
-                        opacity: 0.08,
+                        opacity: 0.075,
                       }}
                     />
                   </div>
 
                   <div
-                    className="rounded-lg border"
+                    className="rounded-xl border"
                     style={{
                       height: preview.inputHeight,
                       backgroundColor: "hsl(var(--background))",
-                      borderColor: "hsl(var(--border))",
+                      borderColor: "hsl(var(--border) / 0.35)",
                     }}
                   />
 
                   <div
-                    className="rounded-lg border"
+                    className="rounded-xl border"
                     style={{
                       height: preview.inputHeight,
                       backgroundColor: "hsl(var(--background))",
-                      borderColor: "hsl(var(--border))",
+                      borderColor: "hsl(var(--border) / 0.35)",
                     }}
                   />
 
                   <div className="flex justify-start">
                     <div
-                      className="rounded-md"
+                      className="rounded-lg"
                       style={{
                         height: preview.btnHeight,
                         width: preview.btnWidth,
                         backgroundColor: "hsl(var(--primary))",
-                        boxShadow:
-                          "0 6px 14px color-mix(in srgb, hsl(var(--primary)) 24%, transparent)",
+                        boxShadow: "0 8px 18px rgba(45, 107, 255, 0.18)",
                       }}
                     />
                   </div>

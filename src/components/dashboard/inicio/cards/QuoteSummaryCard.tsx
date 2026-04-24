@@ -47,23 +47,23 @@ const STATUS_STYLES: Record<Cotizacion["estado"], StatusStyle> = {
 const CHANGE_EVERY_MS = 10000
 const FADE_DURATION_MS = 220
 
-const CARD_BACKGROUND = "var(--card, #FFFFFF)"
-const CARD_BORDER = "var(--border, #E6EBF5)"
-const CARD_FOREGROUND = "var(--foreground, #0F172A)"
-const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
-const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
-const CARD_EMPTY_BG = "var(--background, #F8FAFC)"
-const CARD_ACTIVE_DOT = "var(--primary, #1F4ED8)"
-const CARD_INACTIVE_DOT = "var(--border, #E2E8F0)"
+const CARD_BACKGROUND = "hsl(var(--card, 0 0% 100%))"
+const CARD_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const CARD_FOREGROUND = "hsl(var(--foreground, 222 47% 11%))"
+const CARD_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
+const CARD_TEXT_SOFT = "hsl(var(--text-muted, 215 16% 47%) / 0.78)"
+const CARD_EMPTY_BG = "hsl(var(--background, 220 23% 98%))"
+const CARD_ACTIVE_DOT = "hsl(var(--primary, 216 64% 29%))"
+const CARD_INACTIVE_DOT = "hsl(var(--border, 214 32% 91%))"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
-const CARD_ICON_BG = "var(--primary, #1B3D7A)"
+const CARD_ICON_BG = "hsl(var(--primary, 216 64% 29%))"
 const CARD_ICON_TEXT = "#FFFFFF"
 
-const CARD_ACTION_BG = "var(--primary, #1B3D7A)"
-const CARD_ACTION_BG_HOVER = "var(--primary-hover, #16356C)"
+const CARD_ACTION_BG = "hsl(var(--primary, 216 64% 29%))"
+const CARD_ACTION_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
 const CARD_ACTION_TEXT = "#FFFFFF"
-const CARD_ACTION_BORDER = "rgba(27, 61, 122, 0.18)"
+const CARD_ACTION_BORDER = "hsl(var(--primary, 216 64% 29%) / 0.18)"
 
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "14px"
@@ -140,10 +140,7 @@ export default function QuoteSummaryCard({
               boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
             }}
           >
-            <FileText
-              className="h-4 w-4"
-              style={{ color: CARD_ICON_TEXT }}
-            />
+            <FileText className="h-4 w-4" style={{ color: CARD_ICON_TEXT }} />
           </div>
 
           <button
@@ -183,6 +180,7 @@ export default function QuoteSummaryCard({
             >
               No hay cotizaciones aún
             </p>
+
             <p
               className="mt-0.5 text-[10px]"
               style={{ color: CARD_TEXT_MUTED }}
@@ -219,10 +217,7 @@ export default function QuoteSummaryCard({
             boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
           }}
         >
-          <FileText
-            className="h-4 w-4"
-            style={{ color: CARD_ICON_TEXT }}
-          />
+          <FileText className="h-4 w-4" style={{ color: CARD_ICON_TEXT }} />
         </div>
 
         <button

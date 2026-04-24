@@ -43,18 +43,17 @@ const STATUS_STYLES: Record<Cotizacion["estado"], StatusStyle> = {
   },
 }
 
-const CARD_BACKGROUND = "var(--card, #FFFFFF)"
-const CARD_BORDER = "var(--border, #E6EBF5)"
-const CARD_FOREGROUND = "var(--foreground, #0F172A)"
-const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
-const CARD_TEXT_SOFT = "var(--text-muted, #94A3B8)"
-const CARD_EMPTY_BG = "var(--background, #F8FAFC)"
-const CARD_ITEM_HOVER_BG = "var(--primary-soft, #EEF4FF)"
-const CARD_ITEM_HOVER_BORDER = "var(--primary-light, #CFE0FF)"
-const CARD_CHEVRON = "var(--primary, #1B3D7A)"
+const CARD_BACKGROUND = "hsl(var(--card, 0 0% 100%))"
+const CARD_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const CARD_FOREGROUND = "hsl(var(--foreground, 222 47% 11%))"
+const CARD_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
+const CARD_EMPTY_BG = "hsl(var(--background, 220 23% 98%))"
+const CARD_ITEM_HOVER_BG = "hsl(var(--primary-soft, 214 100% 94%))"
+const CARD_ITEM_HOVER_BORDER = "hsl(var(--primary-light, 214 91% 75%))"
+const CARD_CHEVRON = "hsl(var(--primary, 216 64% 29%))"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
-const CARD_ICON_BG = "var(--primary, #1B3D7A)"
+const CARD_ICON_BG = "hsl(var(--primary, 216 64% 29%))"
 const CARD_ICON_TEXT = "#FFFFFF"
 
 const CARD_RADIUS = "20px"
@@ -89,10 +88,7 @@ export default function RecentQuotesCard({
             boxShadow: "0 10px 18px rgba(27,61,122,0.14)",
           }}
         >
-          <FileClock
-            className="h-4 w-4"
-            style={{ color: CARD_ICON_TEXT }}
-          />
+          <FileClock className="h-4 w-4" style={{ color: CARD_ICON_TEXT }} />
         </div>
 
         <div className="min-w-0">
@@ -102,6 +98,7 @@ export default function RecentQuotesCard({
           >
             Cotizaciones recientes
           </h3>
+
           <p
             className="mt-0.5 text-[10px]"
             style={{ color: CARD_TEXT_MUTED }}
@@ -127,6 +124,7 @@ export default function RecentQuotesCard({
             >
               Sin movimientos recientes
             </p>
+
             <p
               className="mt-0.5 text-[10px]"
               style={{ color: CARD_TEXT_MUTED }}

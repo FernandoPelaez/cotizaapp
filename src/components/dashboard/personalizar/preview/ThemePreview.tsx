@@ -75,10 +75,6 @@ export default function ThemePreview() {
     return () => mediaQuery.removeListener(handleChange)
   }, [])
 
-  useEffect(() => {
-    setSystemPreference(getSystemPreference())
-  }, [])
-
   const preview = useMemo(() => {
     const tokens = deriveThemeTokens(draft, systemPreference)
     const variables = createThemeCssVariables(tokens)
@@ -95,22 +91,44 @@ export default function ThemePreview() {
       fontFamily: "var(--font-family)",
       backgroundColor: "hsl(var(--background))",
       color: "hsl(var(--foreground))",
-      borderColor: "hsl(var(--border))",
+      borderColor: "hsl(var(--border) / 0.42)",
     }),
     [preview.variables]
   )
 
   const isDark = preview.tokens.mode === "dark"
 
+  const softBorderColor = isDark
+    ? "hsl(var(--border) / 0.52)"
+    : "hsl(var(--border) / 0.42)"
+
+  const subtleBorderColor = isDark
+    ? "hsl(var(--border) / 0.38)"
+    : "hsl(var(--border) / 0.32)"
+
+  const cardShadow =
+    draft.shadowStyle !== "none"
+      ? isDark
+        ? "0 12px 28px rgba(0, 0, 0, 0.22)"
+        : "0 10px 24px rgba(15, 23, 42, 0.055)"
+      : "none"
+
+  const sectionShadow =
+    draft.shadowStyle !== "none"
+      ? isDark
+        ? "0 18px 42px rgba(0, 0, 0, 0.24)"
+        : "0 14px 35px rgba(15, 23, 42, 0.06)"
+      : "none"
+
   const sidebarBg = isDark
     ? `linear-gradient(180deg, ${hexToRgba(
         preview.tokens.brandHex,
-        0.18
+        0.20
       )} 0%, hsl(var(--card)) 100%)`
     : `linear-gradient(180deg, ${hexToRgba(
         preview.tokens.brandHex,
-        0.16
-      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.06)} 100%)`
+        0.98
+      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.88)} 100%)`
 
   const heroBg = `linear-gradient(135deg, ${hexToRgba(
     preview.tokens.brandHex,
@@ -124,27 +142,24 @@ export default function ThemePreview() {
       )} 0%, hsl(var(--card)) 100%)`
     : `linear-gradient(135deg, ${hexToRgba(
         preview.tokens.brandHex,
-        0.14
-      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.05)} 100%)`
+        0.12
+      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.04)} 100%)`
 
   const mainAreaBg = isDark
-    ? "linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%)"
-    : "linear-gradient(180deg, rgba(15,23,42,0.02) 0%, rgba(15,23,42,0) 100%)"
-
-  const cardShadow =
-    draft.shadowStyle !== "none" ? "var(--shadow)" : "none"
+    ? "linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 100%)"
+    : "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(248,250,252,0.72) 100%)"
 
   const sidebarDivider = isDark
-    ? "hsl(var(--border))"
-    : "rgba(255,255,255,0.22)"
+    ? "hsl(var(--border) / 0.42)"
+    : "rgba(255,255,255,0.18)"
 
   const sidebarText = isDark
     ? "hsl(var(--foreground))"
-    : hexToRgba(preview.tokens.brandHex, 0.92)
+    : "rgba(255,255,255,0.96)"
 
   const sidebarMutedText = isDark
     ? "hsl(var(--text-muted))"
-    : hexToRgba(preview.tokens.brandHex, 0.78)
+    : "rgba(255,255,255,0.72)"
 
   const expiredBadgeStyle = {
     backgroundColor: hexToRgba("#F59E0B", isDark ? 0.22 : 0.14),
@@ -163,20 +178,21 @@ export default function ThemePreview() {
 
   return (
     <section
-      className="rounded-2xl border p-4"
+      className="rounded-3xl border p-5"
       style={{
         backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-        boxShadow: "var(--shadow)",
+        borderColor: "hsl(var(--border) / 0.45)",
+        boxShadow: sectionShadow,
       }}
     >
-      <div className="mb-3 space-y-0.5">
+      <div className="mb-4 space-y-1">
         <h2
           className="text-sm font-semibold"
           style={{ color: "hsl(var(--foreground))" }}
         >
           Vista previa en vivo
         </h2>
+
         <p
           className="text-xs leading-5"
           style={{ color: "hsl(var(--text-muted))" }}
@@ -186,8 +202,15 @@ export default function ThemePreview() {
       </div>
 
       <div
-        className="overflow-hidden rounded-[calc(var(--radius)+2px)] border"
-        style={previewStyle}
+        className="overflow-hidden rounded-2xl border"
+        style={{
+          ...previewStyle,
+          borderColor: softBorderColor,
+
+          boxShadow: isDark
+            ? "inset 0 1px 0 rgba(255,255,255,0.04)"
+            : "inset 0 1px 0 rgba(255,255,255,0.75)",
+        }}
       >
         <div className="grid h-[420px] grid-cols-[72px_minmax(0,1fr)]">
           <aside
@@ -209,9 +232,10 @@ export default function ThemePreview() {
                   style={{
                     backgroundColor: isDark
                       ? "hsl(var(--primary))"
-                      : preview.tokens.brandHex,
+                      : "rgba(255,255,255,0.95)",
                   }}
                 />
+
                 <span
                   className="truncate text-[10px] font-semibold"
                   style={{ color: sidebarText }}
@@ -237,13 +261,13 @@ export default function ThemePreview() {
                       backgroundColor: item.active
                         ? isDark
                           ? hexToRgba(preview.tokens.brandHex, 0.20)
-                          : "rgba(255,255,255,0.58)"
+                          : "rgba(255,255,255,0.18)"
                         : "transparent",
                       border: item.active
                         ? `1px solid ${
                             isDark
                               ? hexToRgba(preview.tokens.brandHex, 0.34)
-                              : "rgba(255,255,255,0.68)"
+                              : "rgba(255,255,255,0.22)"
                           }`
                         : "1px solid transparent",
                       color: item.active ? sidebarText : sidebarMutedText,
@@ -262,13 +286,14 @@ export default function ThemePreview() {
               className="flex items-center justify-between border-b px-2.5 py-2"
               style={{
                 backgroundColor: "hsl(var(--background))",
-                borderColor: "hsl(var(--border))",
+                borderColor: softBorderColor,
               }}
             >
               <div className="min-w-0">
                 <p className="truncate text-[11px] font-semibold">
                   Panel de inicio
                 </p>
+
                 <p
                   className="truncate text-[9px]"
                   style={{ color: "hsl(var(--text-muted))" }}
@@ -282,7 +307,7 @@ export default function ThemePreview() {
                   className="flex h-7 min-w-[82px] items-center gap-1 rounded-lg border px-2"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: subtleBorderColor,
                     color: "hsl(var(--text-muted))",
                   }}
                 >
@@ -294,7 +319,7 @@ export default function ThemePreview() {
                   className="flex h-7 w-7 items-center justify-center rounded-full border"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: subtleBorderColor,
                     color: "hsl(var(--primary))",
                   }}
                 >
@@ -311,7 +336,7 @@ export default function ThemePreview() {
                 className="relative overflow-hidden rounded-[var(--radius)] border p-2.5"
                 style={{
                   background: heroBg,
-                  borderColor: hexToRgba(preview.tokens.brandHex, 0.28),
+                  borderColor: hexToRgba(preview.tokens.brandHex, 0.22),
                   boxShadow: cardShadow,
                 }}
               >
@@ -339,6 +364,7 @@ export default function ThemePreview() {
                     boxShadow: "0 8px 18px rgba(0,0,0,0.08)",
                   }}
                 />
+
                 <div
                   className="absolute right-8 top-3.5 h-10 w-7 rotate-[-8deg] rounded-md"
                   style={{
@@ -353,7 +379,7 @@ export default function ThemePreview() {
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
                 >
@@ -365,6 +391,7 @@ export default function ThemePreview() {
                       >
                         Cot-001
                       </p>
+
                       <p className="text-[11px] font-semibold">PRUEBAS</p>
                     </div>
 
@@ -386,13 +413,15 @@ export default function ThemePreview() {
                         className="h-1.5 w-4 rounded-full"
                         style={{ backgroundColor: "hsl(var(--primary))" }}
                       />
+
                       <span
                         className="h-1.5 w-2 rounded-full"
-                        style={{ backgroundColor: "hsl(var(--border))" }}
+                        style={{ backgroundColor: subtleBorderColor }}
                       />
+
                       <span
                         className="h-1.5 w-2 rounded-full"
-                        style={{ backgroundColor: "hsl(var(--border))" }}
+                        style={{ backgroundColor: subtleBorderColor }}
                       />
                     </div>
 
@@ -412,7 +441,7 @@ export default function ThemePreview() {
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
                 >
@@ -431,10 +460,11 @@ export default function ThemePreview() {
                         className="flex items-center justify-between rounded-lg border px-2 py-1.5"
                         style={{
                           backgroundColor: "hsl(var(--background))",
-                          borderColor: "hsl(var(--border))",
+                          borderColor: subtleBorderColor,
                         }}
                       >
                         <span className="text-[9px]">{item}</span>
+
                         <span
                           className="h-1.5 w-1.5 rounded-full"
                           style={{
@@ -450,13 +480,14 @@ export default function ThemePreview() {
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
                 >
                   <p className="mb-0.5 text-[11px] font-semibold">
                     Cotizaciones recientes
                   </p>
+
                   <p
                     className="mb-1.5 text-[9px]"
                     style={{ color: "hsl(var(--text-muted))" }}
@@ -474,12 +505,13 @@ export default function ThemePreview() {
                         className="flex items-center justify-between rounded-lg border px-2 py-1.5"
                         style={{
                           backgroundColor: "hsl(var(--background))",
-                          borderColor: "hsl(var(--border))",
+                          borderColor: subtleBorderColor,
                         }}
                       >
                         <p className="text-[9px] font-semibold">
                           {item.title}
                         </p>
+
                         <span
                           className="rounded-full px-1.5 py-0.5 text-[8px] font-medium"
                           style={
@@ -500,8 +532,8 @@ export default function ThemePreview() {
                   style={{
                     background: planBg,
                     borderColor: isDark
-                      ? hexToRgba(preview.tokens.brandHex, 0.24)
-                      : hexToRgba(preview.tokens.brandHex, 0.18),
+                      ? hexToRgba(preview.tokens.brandHex, 0.22)
+                      : hexToRgba(preview.tokens.brandHex, 0.16),
                     boxShadow: cardShadow,
                   }}
                 >
@@ -519,6 +551,7 @@ export default function ThemePreview() {
                     <p className="text-[11px] font-semibold">
                       Estás en el plan gratuito
                     </p>
+
                     <p
                       className="text-[9px]"
                       style={{ color: "hsl(var(--text-muted))" }}
@@ -534,6 +567,7 @@ export default function ThemePreview() {
                         <span>Cotizaciones usadas</span>
                         <span>3 / 5</span>
                       </div>
+
                       <div
                         className="h-1.5 rounded-full"
                         style={{ backgroundColor: "hsl(var(--primary-soft))" }}
@@ -555,13 +589,15 @@ export default function ThemePreview() {
                 className="flex items-center justify-between rounded-[var(--radius)] border px-2.5 py-2"
                 style={{
                   backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border))",
+                  borderColor: softBorderColor,
+                  boxShadow: cardShadow,
                 }}
               >
                 <div className="min-w-0">
                   <p className="text-[10px] font-semibold">
                     Configuración actual
                   </p>
+
                   <p
                     className="truncate text-[9px]"
                     style={{ color: "hsl(var(--text-muted))" }}

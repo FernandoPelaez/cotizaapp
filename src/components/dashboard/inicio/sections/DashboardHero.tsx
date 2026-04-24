@@ -7,21 +7,22 @@ type DashboardHeroProps = {
   onExplorarPlantillas?: () => void
 }
 
-const HERO_BG = "var(--primary, #1B3D7A)"
-const HERO_BG_HOVER = "var(--primary-hover, #2A5298)"
+const HERO_BG =
+  "linear-gradient(135deg, hsl(var(--primary, 216 64% 29%)) 0%, hsl(var(--primary-hover, 214 57% 38%)) 100%)"
+const HERO_BG_SOLID = "hsl(var(--primary, 216 64% 29%))"
+const HERO_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
 const HERO_TEXT = "var(--sidebar-text, #FFFFFF)"
 const HERO_TEXT_SOFT = "var(--hero-text-soft, rgba(255,255,255,0.92))"
 const HERO_GLOW_SOFT = "var(--hero-glow-soft, rgba(255,255,255,0.04))"
 const HERO_GLOW_MEDIUM = "var(--hero-glow-medium, rgba(255,255,255,0.05))"
-const HERO_GLOW_STRONG = "var(--hero-glow-strong, rgba(255,255,255,0.07))"
 const HERO_CARD_BG = "var(--hero-card-bg, rgba(255,255,255,0.96))"
 const HERO_CARD_BORDER = "var(--hero-card-border, rgba(255,255,255,0.22))"
-const HERO_CARD_TEXT = "var(--hero-card-text, #1B3D7A)"
+const HERO_CARD_TEXT = "hsl(var(--primary, 216 64% 29%))"
 const HERO_CARD_MUTED = "var(--hero-card-muted, #64748B)"
 const HERO_CARD_STRONG = "var(--hero-card-strong, #334155)"
 const HERO_CARD_LINE = "var(--hero-card-line, #E2E8F0)"
 const HERO_BUTTON_BG = "var(--hero-button-bg, #FFFFFF)"
-const HERO_BUTTON_TEXT = "var(--hero-button-text, #1B3D7A)"
+const HERO_BUTTON_TEXT = "hsl(var(--primary, 216 64% 29%))"
 const HERO_BUTTON_SHADOW = "0 4px 14px rgba(255,255,255,0.25)"
 const HERO_SHELL_SHADOW = "0 12px 40px rgba(15,37,84,0.28)"
 const HERO_DOC_SHADOW = "0 8px 24px rgba(0,0,0,0.28)"
@@ -69,11 +70,13 @@ export default function DashboardHero({
           className="pointer-events-none absolute -left-16 top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full blur-3xl"
           style={{ background: HERO_GLOW_SOFT }}
         />
+
         <div
           aria-hidden
           className="pointer-events-none absolute right-[20%] top-[-60%] h-[200px] w-[200px] rounded-full blur-3xl"
           style={{ background: HERO_GLOW_MEDIUM }}
         />
+
         <div
           aria-hidden
           className="pointer-events-none absolute right-[10%] bottom-[-40%] h-[180px] w-[180px] rounded-full blur-3xl"
@@ -103,21 +106,26 @@ export default function DashboardHero({
                 <div className="h-2 w-14 rounded-full bg-white" />
                 <div className="h-1.5 w-6 rounded-full bg-white/60" />
               </div>
+
               <div className="mb-1 h-px w-full bg-white/40" />
+
               <div className="space-y-1">
                 <div className="flex justify-between gap-1">
                   <div className="h-1 w-12 rounded-full bg-white" />
                   <div className="h-1 w-6 rounded-full bg-white/70" />
                 </div>
+
                 <div className="flex justify-between gap-1">
                   <div className="h-1 w-10 rounded-full bg-white" />
                   <div className="h-1 w-6 rounded-full bg-white/70" />
                 </div>
+
                 <div className="flex justify-between gap-1">
                   <div className="h-1 w-8 rounded-full bg-white" />
                   <div className="h-1 w-6 rounded-full bg-white/70" />
                 </div>
               </div>
+
               <div className="mt-2 h-3 w-full rounded-md bg-white/80" />
             </div>
           </div>
@@ -132,11 +140,13 @@ export default function DashboardHero({
             >
               <div className="mb-1 h-1.5 w-10 rounded-full bg-white" />
               <div className="mb-1 h-px w-full bg-white/40" />
+
               <div className="space-y-0.5">
                 <div className="h-1 w-full rounded-full bg-white" />
                 <div className="h-1 w-4/5 rounded-full bg-white/80" />
                 <div className="h-1 w-3/5 rounded-full bg-white/60" />
               </div>
+
               <div className="mt-1.5 h-2.5 w-full rounded-md bg-white/80" />
             </div>
           </div>
@@ -151,10 +161,12 @@ export default function DashboardHero({
             >
               <div className="mb-1 h-1.5 w-9 rounded-full bg-white" />
               <div className="mb-1 h-px w-full bg-white/40" />
+
               <div className="space-y-0.5">
                 <div className="h-1 w-full rounded-full bg-white" />
                 <div className="h-1 w-3/4 rounded-full bg-white/70" />
               </div>
+
               <div className="mt-1.5 h-2 w-full rounded-md bg-white/80" />
             </div>
           </div>
@@ -168,10 +180,12 @@ export default function DashboardHero({
               }}
             >
               <div className="mb-1 h-1 w-8 rounded-full bg-white" />
+
               <div className="space-y-0.5">
                 <div className="h-1 w-full rounded-full bg-white" />
                 <div className="h-1 w-2/3 rounded-full bg-white/70" />
               </div>
+
               <div className="mt-1.5 h-2 w-full rounded-md bg-white/80" />
             </div>
           </div>
@@ -220,16 +234,18 @@ export default function DashboardHero({
             >
               <div
                 className="inline-block rounded px-1 py-0.5 text-[5.5px] font-bold text-white"
-                style={{ background: HERO_BG }}
+                style={{ background: HERO_BG_SOLID }}
               >
                 TU LOGO
               </div>
+
               <p
                 className="mt-1 text-[6.5px] font-bold leading-none tracking-tight"
                 style={{ color: HERO_CARD_TEXT }}
               >
                 COTIZA…
               </p>
+
               <div className="mt-1">
                 <p
                   className="text-[4.5px] font-bold"
@@ -237,6 +253,7 @@ export default function DashboardHero({
                 >
                   Cliente:
                 </p>
+
                 <p
                   className="text-[4.5px] leading-tight"
                   style={{ color: HERO_CARD_MUTED }}
@@ -246,15 +263,18 @@ export default function DashboardHero({
                   Ciudad 00000
                 </p>
               </div>
+
               <div className="mt-1.5 space-y-0.5">
                 <div
                   className="h-0.5 rounded-full"
                   style={{ background: HERO_CARD_LINE }}
                 />
+
                 <div
                   className="h-0.5 w-3/4 rounded-full"
                   style={{ background: HERO_CARD_LINE }}
                 />
+
                 <div
                   className="h-0.5 rounded-full"
                   style={{ background: HERO_CARD_LINE }}
@@ -272,10 +292,11 @@ export default function DashboardHero({
               <div className="flex items-start justify-between">
                 <div
                   className="rounded px-1 py-0.5 text-[5px] font-bold leading-none text-white"
-                  style={{ background: HERO_BG }}
+                  style={{ background: HERO_BG_SOLID }}
                 >
                   TU LOGO
                 </div>
+
                 <div className="text-right">
                   <p
                     className="text-[5.5px] font-bold leading-none tracking-tight"
@@ -283,6 +304,7 @@ export default function DashboardHero({
                   >
                     COTIZACIÓN
                   </p>
+
                   <p
                     className="mt-0.5 text-[4px] font-semibold"
                     style={{ color: "#94A3B8" }}
@@ -307,6 +329,7 @@ export default function DashboardHero({
                   </span>
                   <span style={{ color: HERO_CARD_MUTED }}>17 Abril 2026</span>
                 </p>
+
                 <p>
                   <span style={{ color: HERO_CARD_STRONG, fontWeight: 700 }}>
                     Vigencia:{" "}
@@ -318,13 +341,14 @@ export default function DashboardHero({
               <div className="mt-1.5 overflow-hidden rounded">
                 <div
                   className="grid grid-cols-[1.3fr_0.6fr_0.7fr_0.7fr] gap-0.5 px-1 py-0.5 text-[4px] font-bold text-white"
-                  style={{ background: HERO_BG }}
+                  style={{ background: HERO_BG_SOLID }}
                 >
                   <span>Desc.</span>
                   <span>Cant.</span>
                   <span>Precio</span>
                   <span>Total</span>
                 </div>
+
                 <div className="space-y-0.5 px-1 py-0.5">
                   {[1, 2].map((row) => (
                     <div
@@ -359,12 +383,14 @@ export default function DashboardHero({
                   </span>
                   <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
                 </div>
+
                 <div className="flex items-center justify-between text-[4px]">
                   <span style={{ color: "#475569", fontWeight: 600 }}>
                     IVA (16%)
                   </span>
                   <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
                 </div>
+
                 <div
                   className="mt-0.5 flex items-center justify-between rounded-sm px-1 py-0.5 text-[4px] font-bold text-white"
                   style={{ background: HERO_BG_HOVER }}

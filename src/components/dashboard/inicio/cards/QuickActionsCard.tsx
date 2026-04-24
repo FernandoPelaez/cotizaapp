@@ -19,23 +19,23 @@ type ActionItemProps = {
   iconColor: string
 }
 
-const CARD_BACKGROUND = "var(--card, #FFFFFF)"
-const CARD_BORDER = "var(--border, #E6EBF5)"
-const CARD_FOREGROUND = "var(--foreground, #0F172A)"
-const CARD_TEXT_MUTED = "var(--text-muted, #64748B)"
+const CARD_BACKGROUND = "hsl(var(--card, 0 0% 100%))"
+const CARD_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
+const CARD_FOREGROUND = "hsl(var(--foreground, 222 47% 11%))"
+const CARD_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
 const ACTION_DEFAULT_BG = "transparent"
-const ACTION_DEFAULT_BG_HOVER = "var(--primary-soft, #EEF2FF)"
+const ACTION_DEFAULT_BG_HOVER = "hsl(var(--primary-soft, 214 100% 94%))"
 
-const ACTION_ICON_BG = "var(--primary, #1B3D7A)"
-const ACTION_ICON_BG_ALT = "rgba(27, 61, 122, 0.10)"
-const ACTION_ICON_BG_SUCCESS = "rgba(5, 150, 105, 0.12)"
+const ACTION_ICON_BG = "hsl(var(--primary, 216 64% 29%))"
+const ACTION_ICON_BG_ALT = "hsl(var(--primary, 216 64% 29%) / 0.10)"
+const ACTION_ICON_BG_SUCCESS = "hsl(var(--success, 142 76% 36%) / 0.12)"
 
 const ACTION_ICON_TEXT_LIGHT = "#FFFFFF"
-const ACTION_BRAND = "var(--primary, #1B3D7A)"
-const ACTION_SUCCESS = "var(--success, #059669)"
-const ACTION_CHEVRON = "var(--primary, #1B3D7A)"
+const ACTION_BRAND = "hsl(var(--primary, 216 64% 29%))"
+const ACTION_SUCCESS = "hsl(var(--success, 142 76% 36%))"
+const ACTION_CHEVRON = "hsl(var(--primary, 216 64% 29%))"
 
 const CARD_RADIUS = "20px"
 const ACTION_RADIUS = "14px"
@@ -86,6 +86,7 @@ function ActionItem({
           >
             {title}
           </p>
+
           <p
             className="truncate text-[10px]"
             style={{ color: CARD_TEXT_MUTED }}

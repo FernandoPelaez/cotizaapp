@@ -81,7 +81,7 @@ const LIGHT_SURFACE_TOKENS: Record<
     card: "0 0% 100%",
     foreground: "222 47% 11%",
     textMuted: "215 16% 47%",
-    border: "214 24% 82%",
+    border: "214 32% 88%",
   },
   elevated: {
     background: "220 23% 98%",
@@ -214,11 +214,9 @@ function hexToHsl(hex: string): HslColor {
 }
 
 function toHslToken(color: HslColor): string {
-  return `${Math.round(color.h)} ${Math.round(color.s)}% ${Math.round(color.l)}%`
-}
-
-function toCssHsl(value: string): string {
-  return `hsl(${value})`
+  return `${Math.round(color.h)} ${Math.round(color.s)}% ${Math.round(
+    color.l
+  )}%`
 }
 
 function shiftLightness(color: HslColor, amount: number): HslColor {
@@ -233,6 +231,38 @@ function shiftSaturation(color: HslColor, amount: number): HslColor {
     ...color,
     s: clamp(color.s + amount, 0, 100),
   }
+}
+
+function createLightSoftBrandToken(color: HslColor): string {
+  return toHslToken({
+    h: color.h,
+    s: clamp(color.s + 18, 55, 95),
+    l: 94,
+  })
+}
+
+function createLightBrandToken(color: HslColor): string {
+  return toHslToken({
+    h: color.h,
+    s: clamp(color.s + 8, 55, 92),
+    l: clamp(color.l + 36, 68, 78),
+  })
+}
+
+function createDarkSoftBrandToken(color: HslColor): string {
+  return toHslToken({
+    h: color.h,
+    s: clamp(color.s - 12, 30, 72),
+    l: 20,
+  })
+}
+
+function createDarkBrandToken(color: HslColor): string {
+  return toHslToken({
+    h: color.h,
+    s: clamp(color.s - 6, 42, 78),
+    l: clamp(color.l + 20, 48, 62),
+  })
 }
 
 function resolveThemeMode(
@@ -263,30 +293,19 @@ function createDefaultCotizaBrandTokens(
   mode: ResolvedThemeMode
 ): BrandTokens {
   const base = hexToHsl(COTIZAAPP_PRIMARY_HEX)
-
-  const primaryLight =
-    mode === "light"
-      ? toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 24), -14))
-        )
-      : toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 14), -10))
-        )
-
-  const primarySoft =
-    mode === "light"
-      ? toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 34), -24))
-        )
-      : toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 20), -22))
-        )
+  const hover = hexToHsl(COTIZAAPP_PRIMARY_HOVER_HEX)
 
   return {
-    primary: COTIZAAPP_PRIMARY_HEX,
-    primaryHover: COTIZAAPP_PRIMARY_HOVER_HEX,
-    primaryLight,
-    primarySoft,
+    primary: toHslToken(base),
+    primaryHover: toHslToken(hover),
+    primaryLight:
+      mode === "light"
+        ? createLightBrandToken(base)
+        : createDarkBrandToken(base),
+    primarySoft:
+      mode === "light"
+        ? createLightSoftBrandToken(base)
+        : createDarkSoftBrandToken(base),
   }
 }
 
@@ -298,32 +317,20 @@ function createPresetBrandTokens(
 
   const primaryHover =
     mode === "light"
-      ? toCssHsl(toHslToken(shiftLightness(base, -8)))
-      : toCssHsl(toHslToken(shiftLightness(base, 6)))
-
-  const primaryLight =
-    mode === "light"
-      ? toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 24), -14))
-        )
-      : toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 14), -10))
-        )
-
-  const primarySoft =
-    mode === "light"
-      ? toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 34), -24))
-        )
-      : toCssHsl(
-          toHslToken(shiftSaturation(shiftLightness(base, 20), -22))
-        )
+      ? shiftLightness(base, -8)
+      : shiftLightness(base, 6)
 
   return {
-    primary: brandHex,
-    primaryHover,
-    primaryLight,
-    primarySoft,
+    primary: toHslToken(base),
+    primaryHover: toHslToken(primaryHover),
+    primaryLight:
+      mode === "light"
+        ? createLightBrandToken(base)
+        : createDarkBrandToken(base),
+    primarySoft:
+      mode === "light"
+        ? createLightSoftBrandToken(base)
+        : createDarkSoftBrandToken(base),
   }
 }
 
@@ -349,11 +356,11 @@ function createSurfaceTokens(
       : DARK_SURFACE_TOKENS[cardStyle]
 
   return {
-    background: toCssHsl(source.background),
-    card: toCssHsl(source.card),
-    foreground: toCssHsl(source.foreground),
-    textMuted: toCssHsl(source.textMuted),
-    border: toCssHsl(source.border),
+    background: source.background,
+    card: source.card,
+    foreground: source.foreground,
+    textMuted: source.textMuted,
+    border: source.border,
   }
 }
 
@@ -364,9 +371,9 @@ function createSemanticTokens(mode: ResolvedThemeMode): SemanticTokens {
       : DARK_SEMANTIC_TOKENS
 
   return {
-    success: toCssHsl(source.success),
-    warning: toCssHsl(source.warning),
-    error: toCssHsl(source.error),
+    success: source.success,
+    warning: source.warning,
+    error: source.error,
   }
 }
 

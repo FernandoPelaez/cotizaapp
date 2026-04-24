@@ -14,19 +14,19 @@ type FeatureItem = {
 
 type DashboardPlanType = "free" | "pro" | "premium"
 
-const CARD_BG_START = "var(--primary-hover, #062A7A)"
-const CARD_BG_END = "var(--primary, #03256C)"
+const CARD_BG_START = "hsl(var(--primary-hover, 214 57% 38%))"
+const CARD_BG_END = "hsl(var(--primary, 216 64% 29%))"
 const CARD_BORDER = "rgba(255,255,255,0.10)"
 const CARD_TEXT = "#FFFFFF"
 const CARD_TEXT_SOFT = "rgba(255,255,255,0.82)"
 const CARD_TEXT_FAINT = "rgba(255,255,255,0.35)"
-const CARD_BADGE_BG = "var(--warning, #FF9800)"
+const CARD_BADGE_BG = "hsl(var(--warning, 38 92% 50%))"
 const CARD_PROGRESS_BG = "rgba(255,255,255,0.18)"
-const CARD_PROGRESS_FILL = "var(--primary-light, #60A5FA)"
-const CARD_CHECK = "var(--primary-light, #7DD3FC)"
+const CARD_PROGRESS_FILL = "hsl(var(--primary-light, 214 91% 75%))"
+const CARD_CHECK = "hsl(var(--primary-light, 214 91% 75%))"
 const CARD_CTA_BG = "#FFFFFF"
 const CARD_CTA_BG_HOVER = "rgba(255,255,255,0.94)"
-const CARD_CTA_TEXT = "var(--primary, #1447FF)"
+const CARD_CTA_TEXT = "hsl(var(--primary, 216 64% 29%))"
 const CARD_CTA_DISABLED_BG = "rgba(255,255,255,0.12)"
 const CARD_CTA_DISABLED_TEXT = "rgba(255,255,255,0.92)"
 const CARD_SHADOW = "0 12px 30px rgba(15,23,42,0.22)"
@@ -167,7 +167,8 @@ export default function PlanFreeCard({
         border: `1px solid ${CARD_BORDER}`,
         boxShadow: CARD_SHADOW,
         borderRadius: CARD_RADIUS,
-        transition: "opacity 0.45s ease, transform 0.45s ease, box-shadow 0.25s ease",
+        transition:
+          "opacity 0.45s ease, transform 0.45s ease, box-shadow 0.25s ease",
         cursor: "default",
       }}
       onMouseEnter={(e) => {

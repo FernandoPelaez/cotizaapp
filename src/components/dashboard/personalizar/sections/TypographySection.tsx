@@ -2,23 +2,27 @@
 
 import { Type } from "lucide-react"
 import { useThemeContext } from "@/components/providers/ThemeProvider"
-import { FONT_FAMILY_OPTIONS, FONT_FAMILY_STACKS } from "@/lib/theme/theme-presets"
+import {
+  FONT_FAMILY_OPTIONS,
+  FONT_FAMILY_STACKS,
+} from "@/lib/theme/theme-presets"
 
 export default function TypographySection() {
   const { draft, setDraft, isLoading, isSaving } = useThemeContext()
 
   return (
     <section
-      className="rounded-2xl border p-4"
+      className="rounded-3xl border p-5"
       style={{
         backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border))",
-        boxShadow: "var(--shadow)",
+        borderColor: "hsl(var(--border) / 0.45)",
+        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
-      <div className="mb-3 space-y-0.5">
+      <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
           <Type size={15} style={{ color: "hsl(var(--primary))" }} />
+
           <h2
             className="text-sm font-semibold"
             style={{ color: "hsl(var(--foreground))" }}
@@ -28,15 +32,15 @@ export default function TypographySection() {
         </div>
 
         <p
-          className="text-xs"
+          className="text-xs leading-5"
           style={{ color: "hsl(var(--text-muted))" }}
         >
-          Selecciona la fuente principal del dashboard para mantener una identidad
-          visual consistente.
+          Selecciona la fuente principal del dashboard para mantener una
+          identidad visual consistente.
         </p>
       </div>
 
-      <div className="grid gap-2 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2">
         {FONT_FAMILY_OPTIONS.map((option) => {
           const isActive = draft.fontFamily === option.value
 
@@ -46,19 +50,23 @@ export default function TypographySection() {
               type="button"
               onClick={() => setDraft({ fontFamily: option.value })}
               disabled={isLoading || isSaving}
-              className="rounded-xl border p-3 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 backgroundColor: isActive
                   ? "hsl(var(--primary-soft))"
                   : "hsl(var(--background))",
                 borderColor: isActive
-                  ? "hsl(var(--primary))"
-                  : "hsl(var(--border))",
+                  ? "hsl(var(--primary) / 0.65)"
+                  : "hsl(var(--border) / 0.42)",
+
+                boxShadow: isActive
+                  ? "0 10px 24px rgba(45, 107, 255, 0.11)"
+                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
               }}
             >
-              <div className="space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div>
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
                     <p
                       className="text-sm font-semibold"
                       style={{ color: "hsl(var(--foreground))" }}
@@ -68,7 +76,7 @@ export default function TypographySection() {
 
                     {option.description ? (
                       <p
-                        className="mt-0.5 text-xs leading-4"
+                        className="mt-1 text-xs leading-5"
                         style={{ color: "hsl(var(--text-muted))" }}
                       >
                         {option.description}
@@ -78,7 +86,7 @@ export default function TypographySection() {
 
                   {isActive ? (
                     <span
-                      className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                      className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold"
                       style={{
                         backgroundColor: "hsl(var(--primary))",
                         color: "white",
@@ -90,19 +98,22 @@ export default function TypographySection() {
                 </div>
 
                 <div
-                  className="rounded-lg border px-3 py-2"
+                  className="rounded-2xl border px-3.5 py-3"
                   style={{
                     backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border))",
+                    borderColor: "hsl(var(--border) / 0.38)",
+
                     fontFamily: FONT_FAMILY_STACKS[option.value],
                     color: "hsl(var(--foreground))",
+                    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.45)",
                   }}
                 >
                   <p className="text-sm font-semibold">
                     CotizaApp Dashboard
                   </p>
+
                   <p
-                    className="mt-0.5 text-xs"
+                    className="mt-1 text-xs leading-5"
                     style={{ color: "hsl(var(--text-muted))" }}
                   >
                     Vista previa de títulos, textos y lectura general.

@@ -1,75 +1,135 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { motion, type Variants, type TargetAndTransition } from "framer-motion"
 
 export default function Planes() {
-  const ref = useRef<HTMLDivElement | null>(null)
-  const [visible, setVisible] = useState(false)
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) setVisible(true)
-      },
-      { threshold: 0.1 }
-    )
-    if (ref.current) observer.observe(ref.current)
-    return () => observer.disconnect()
-  }, [])
-
   const planes = [
     {
-      nombre: "Gratis",
-      desc: "Ideal para comenzar",
+      nombre: "Free",
+      desc: "Ideal para comenzar y probar la herramienta",
       precio: "$0",
-      periodo: "",
+      periodo: "para siempre",
       features: [
-        "10 cotizaciones al mes",
-        "10 plantillas básicas",
+        "5 cotizaciones de prueba",
+        "Acceso a 10 plantillas básicas",
         "Vista previa",
         "Descarga en PDF",
+        "Al llegar al límite, se bloquea seguir creando y se invita a mejorar el plan",
       ],
-      cta: "Empezar gratis",
+      cta: "Elegir plan",
       popular: false,
       premium: false,
-      delay: "0ms",
     },
     {
       nombre: "Pro",
-      desc: "Para crecer en serio",
+      desc: "Para profesionales que quieren crecer",
       precio: "$99",
-      periodo: "/mes",
+      periodo: "/ mes",
       features: [
         "Cotizaciones ilimitadas",
-        "10 plantillas básicas",
-        "10 plantillas pro",
-        "Exportación PDF",
+        "Acceso a 20 plantillas",
+        "Incluye categorías Básica y Pro",
+        "PDF profesional",
+        "Historial completo",
         "Envío por WhatsApp",
       ],
       cta: "Elegir plan",
       popular: true,
       premium: false,
-      delay: "130ms",
     },
     {
       nombre: "Empresa",
-      desc: "Para equipos exigentes",
+      desc: "Ideal para negocios que buscan toda la biblioteca disponible",
       precio: "$199",
-      periodo: "/mes",
+      periodo: "/ mes",
       features: [
-        "Todo lo del plan Pro",
-        "Hasta 10 usuarios",
-        "Panel de administración",
-        "Reportes y analytics",
-        "Soporte prioritario 24/7",
-        "Onboarding personalizado",
+        "Todo lo de Pro",
+        "Acceso a las 30 plantillas",
+        "Incluye Básica, Pro y Premium",
+        "Ideal para negocios que buscan toda la biblioteca disponible",
       ],
-      cta: "Hablar con ventas",
+      cta: "Plan actual",
       popular: false,
       premium: true,
-      delay: "260ms",
     },
   ]
+  
+  const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
+  const headerVariants: Variants = {
+    hidden: { opacity: 0, y: 24 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: easeOut },
+    },
+  }
+
+  const gridVariants: Variants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.25,
+      },
+    },
+  }
+
+  const cardVariants: Variants = {
+    hidden: { opacity: 0, y: 60 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.9, ease: easeOut },
+    },
+  }
+
+  const featuresContainerVariants: Variants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.1,
+        delayChildren: 0.45,
+      },
+    },
+  }
+
+  const featureItemVariants: Variants = {
+    hidden: { opacity: 0, x: -12 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.55, ease: easeOut },
+    },
+  }
+
+  const pillVariants: Variants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 220,
+        damping: 14,
+        delay: 0.5,
+      },
+    },
+  }
+
+  const noteVariants: Variants = {
+    hidden: { opacity: 0, y: 12 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.7, delay: 1.4, ease: easeOut },
+    },
+  }
+
+  const hoverLift: TargetAndTransition = {
+    y: -8,
+    transition: { type: "spring", stiffness: 280, damping: 20 },
+  }
 
   return (
     <>
@@ -126,20 +186,19 @@ export default function Planes() {
           align-items: stretch;
         }
         @media (max-width: 900px) {
-          .planes-grid { grid-template-columns: 1fr; max-width: 380px; margin: 0 auto; }
+          .planes-grid {
+            grid-template-columns: 1fr;
+            max-width: 380px;
+            margin: 0 auto;
+          }
         }
 
-        /* ── ENTRADA ── */
         .plan-wrap {
-          opacity: 0;
-          transform: translateY(36px);
-          transition: opacity 0.65s cubic-bezier(0.22,1,0.36,1), transform 0.65s cubic-bezier(0.22,1,0.36,1);
           display: flex;
           flex-direction: column;
         }
-        .plan-wrap.visible { opacity: 1; transform: translateY(0); }
 
-        /* ── TARJETA GRATIS ── */
+        /* ── TARJETA FREE ── */
         .plan-card {
           background: white;
           border-radius: 20px;
@@ -150,10 +209,9 @@ export default function Planes() {
           flex: 1;
           box-sizing: border-box;
           box-shadow: 0 4px 20px rgba(0,0,0,0.13);
-          transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease;
+          transition: box-shadow 0.3s ease;
         }
-        .plan-card:hover {
-          transform: translateY(-8px);
+        .plan-wrap:hover .plan-card {
           box-shadow: 0 24px 52px rgba(0,0,0,0.22);
         }
 
@@ -166,11 +224,10 @@ export default function Planes() {
           box-sizing: border-box;
           overflow: hidden;
           box-shadow: 0 8px 36px rgba(27,61,122,0.5);
-          transition: box-shadow 0.3s ease, transform 0.3s cubic-bezier(0.22,1,0.36,1);
+          transition: box-shadow 0.3s ease;
         }
-        .pro-shell:hover {
+        .plan-wrap:hover .pro-shell {
           box-shadow: 0 24px 56px rgba(27,61,122,0.7);
-          transform: translateY(-8px);
         }
         .pro-shell-bg {
           position: absolute;
@@ -181,7 +238,7 @@ export default function Planes() {
         }
         @keyframes spinBorder {
           from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
+          to { transform: rotate(360deg); }
         }
         .pro-inner {
           position: relative;
@@ -195,7 +252,7 @@ export default function Planes() {
           box-sizing: border-box;
         }
 
-        /* ── TARJETA PREMIUM – mismo estilo blanco ── */
+        /* ── TARJETA PREMIUM ── */
         .premium-card {
           background: white;
           border-radius: 20px;
@@ -206,103 +263,149 @@ export default function Planes() {
           flex: 1;
           box-sizing: border-box;
           box-shadow: 0 4px 20px rgba(0,0,0,0.13);
-          transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s ease;
+          transition: box-shadow 0.3s ease;
         }
-        .premium-card:hover {
-          transform: translateY(-8px);
+        .plan-wrap:hover .premium-card {
           box-shadow: 0 24px 52px rgba(0,0,0,0.22);
         }
 
         /* ── CONTENIDO ── */
         .plan-tag {
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.1em; text-transform: uppercase;
-          color: #9ca3af; margin-bottom: 3px;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.1em;
+          text-transform: uppercase;
+          color: #9ca3af;
+          margin-bottom: 3px;
         }
         .plan-name {
-          font-size: 20px; font-weight: 800;
-          color: #0f172a; margin: 0 0 16px;
+          font-size: 20px;
+          font-weight: 800;
+          color: #0f172a;
+          margin: 0 0 16px;
         }
         .plan-price-row {
-          display: flex; align-items: baseline;
-          gap: 3px; margin-bottom: 20px;
+          display: flex;
+          align-items: baseline;
+          gap: 3px;
+          margin-bottom: 20px;
         }
         .plan-price-num {
-          font-size: 42px; font-weight: 800;
-          color: #1B3D7A; line-height: 1; letter-spacing: -2px;
+          font-size: 42px;
+          font-weight: 800;
+          color: #1B3D7A;
+          line-height: 1;
+          letter-spacing: -2px;
         }
         .plan-price-per {
-          font-size: 12px; color: #9ca3af; font-weight: 500;
+          font-size: 12px;
+          color: #9ca3af;
+          font-weight: 500;
         }
         .plan-divider {
-          height: 1px; background: #f1f5f9; margin-bottom: 16px;
+          height: 1px;
+          background: #f1f5f9;
+          margin-bottom: 16px;
         }
         .plan-features {
-          flex: 1; display: flex;
-          flex-direction: column; gap: 9px; margin-bottom: 24px;
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 9px;
+          margin-bottom: 24px;
         }
         .plan-feat-item {
-          display: flex; align-items: center;
-          gap: 9px; font-size: 13px; color: #374151;
+          display: flex;
+          align-items: center;
+          gap: 9px;
+          font-size: 13px;
+          color: #374151;
         }
         .feat-check {
-          width: 17px; height: 17px; border-radius: 50%;
-          background: #EEF2FA; color: #1B3D7A;
-          font-size: 8px; font-weight: 800;
-          display: flex; align-items: center;
-          justify-content: center; flex-shrink: 0;
+          width: 17px;
+          height: 17px;
+          border-radius: 50%;
+          background: #EEF2FA;
+          color: #1B3D7A;
+          font-size: 8px;
+          font-weight: 800;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
         }
         .popular-pill {
-          display: inline-flex; align-items: center; gap: 5px;
-          background: #1B3D7A; color: white;
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.07em; text-transform: uppercase;
-          padding: 4px 12px; border-radius: 999px;
-          margin-bottom: 14px; width: fit-content;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          background: #1B3D7A;
+          color: white;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          padding: 4px 12px;
+          border-radius: 999px;
+          margin-bottom: 14px;
+          width: fit-content;
+          transform-origin: left center;
         }
         .premium-pill {
-          display: inline-flex; align-items: center; gap: 5px;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
           background: #EEF2FA;
           color: #1B3D7A;
           border: 1px solid #dbe4f3;
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.07em; text-transform: uppercase;
-          padding: 4px 12px; border-radius: 999px;
-          margin-bottom: 14px; width: fit-content;
+          font-size: 10px;
+          font-weight: 700;
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          padding: 4px 12px;
+          border-radius: 999px;
+          margin-bottom: 14px;
+          width: fit-content;
+          transform-origin: left center;
         }
-        .btn-outline-plan {
-          width: 100%; padding: 12px 16px;
-          border-radius: 12px; border: 1.5px solid #e2e8f0;
-          background: white; color: #1B3D7A;
-          font-size: 13px; font-weight: 600;
-          cursor: pointer; transition: all 0.22s ease; margin-top: auto;
+        .btn-outline-plan, .btn-empresa-plan {
+          width: 100%;
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: 1.5px solid #e2e8f0;
+          background: white;
+          color: #1B3D7A;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.22s ease;
+          margin-top: auto;
         }
-        .btn-outline-plan:hover { background: #EEF2FA; border-color: #1B3D7A; }
+        .btn-outline-plan:hover, .btn-empresa-plan:hover {
+          background: #EEF2FA;
+          border-color: #1B3D7A;
+        }
         .btn-filled-plan {
-          width: 100%; padding: 12px 16px;
-          border-radius: 12px; border: none;
-          background: #1B3D7A; color: white;
-          font-size: 13px; font-weight: 600;
-          cursor: pointer; transition: all 0.22s ease; margin-top: auto;
+          width: 100%;
+          padding: 12px 16px;
+          border-radius: 12px;
+          border: none;
+          background: #1B3D7A;
+          color: white;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.22s ease;
+          margin-top: auto;
         }
-        .btn-filled-plan:hover { background: #162f5e; }
-        .btn-empresa-plan {
-          width: 100%; padding: 12px 16px;
-          border-radius: 12px; border: 1.5px solid #e2e8f0;
-          background: white; color: #1B3D7A;
-          font-size: 13px; font-weight: 600;
-          cursor: pointer; transition: all 0.22s ease; margin-top: auto;
+        .btn-filled-plan:hover {
+          background: #162f5e;
         }
-        .btn-empresa-plan:hover { background: #EEF2FA; border-color: #1B3D7A; }
         .planes-note {
-          margin-top: 36px; font-size: 11px;
-          color: rgba(255,255,255,0.28); letter-spacing: 0.03em;
+          margin-top: 36px;
+          font-size: 11px;
+          color: rgba(255,255,255,0.28);
+          letter-spacing: 0.03em;
         }
-        .header-reveal {
-          opacity: 0; transform: translateY(20px);
-          transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1);
-        }
-        .header-reveal.visible { opacity: 1; transform: translateY(0); }
       `}</style>
 
       <section className="planes-section" id="planes">
@@ -311,106 +414,163 @@ export default function Planes() {
         <div className="deco-circle" style={{ width: 160, height: 160, top: "38%", left: "43%" }} />
 
         <div className="planes-inner">
-
           {/* Header */}
-          <div className={`header-reveal ${visible ? "visible" : ""}`}>
+          <motion.div
+            variants={headerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.3 }}
+          >
             <div className="planes-badge">Precios</div>
             <h2 className="planes-title">Planes para cada necesidad</h2>
             <p className="planes-sub">
-              Empieza gratis y escala conforme tu negocio crece. Sin contratos, cancela cuando quieras.
+              Empieza gratis y escala conforme tu negocio crece. Sin contratos,
+              cancela cuando quieras.
             </p>
-          </div>
+          </motion.div>
 
           {/* Grid */}
-          <div ref={ref} className="planes-grid">
+          <motion.div
+            className="planes-grid"
+            variants={gridVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.15 }}
+          >
             {planes.map((plan, i) => (
-              <div
+              <motion.div
                 key={i}
-                className={`plan-wrap ${visible ? "visible" : ""}`}
-                style={{ transitionDelay: plan.delay }}
+                className="plan-wrap"
+                variants={cardVariants}
+                whileHover={hoverLift}
               >
                 {/* PRO */}
                 {plan.popular && (
                   <div className="pro-shell">
                     <div className="pro-shell-bg" />
                     <div className="pro-inner">
-                      <div className="popular-pill">★ Más popular</div>
+                      <motion.div className="popular-pill" variants={pillVariants}>
+                        ★ Más popular
+                      </motion.div>
                       <div className="plan-tag">{plan.desc}</div>
                       <div className="plan-name">{plan.nombre}</div>
+
                       <div className="plan-price-row">
                         <span className="plan-price-num">{plan.precio}</span>
-                        {plan.periodo && <span className="plan-price-per">{plan.periodo}</span>}
+                        {plan.periodo && (
+                          <span className="plan-price-per">{plan.periodo}</span>
+                        )}
                       </div>
+
                       <div className="plan-divider" />
-                      <div className="plan-features">
+
+                      <motion.div
+                        className="plan-features"
+                        variants={featuresContainerVariants}
+                      >
                         {plan.features.map((f, j) => (
-                          <div key={j} className="plan-feat-item">
+                          <motion.div
+                            key={j}
+                            className="plan-feat-item"
+                            variants={featureItemVariants}
+                          >
                             <div className="feat-check">✓</div>
                             <span>{f}</span>
-                          </div>
+                          </motion.div>
                         ))}
-                      </div>
+                      </motion.div>
+
                       <button className="btn-filled-plan">{plan.cta}</button>
                     </div>
                   </div>
                 )}
 
-                {/* PREMIUM */}
+                {/* PREMIUM / EMPRESA */}
                 {plan.premium && (
                   <div className="premium-card">
-                    <div className="premium-pill">◈ Premium</div>
+                    <motion.div className="premium-pill" variants={pillVariants}>
+                      ◈ Premium
+                    </motion.div>
                     <div className="plan-tag">{plan.desc}</div>
                     <div className="plan-name">{plan.nombre}</div>
+
                     <div className="plan-price-row">
                       <span className="plan-price-num">{plan.precio}</span>
-                      {plan.periodo && <span className="plan-price-per">{plan.periodo}</span>}
+                      {plan.periodo && (
+                        <span className="plan-price-per">{plan.periodo}</span>
+                      )}
                     </div>
+
                     <div className="plan-divider" />
-                    <div className="plan-features">
+
+                    <motion.div
+                      className="plan-features"
+                      variants={featuresContainerVariants}
+                    >
                       {plan.features.map((f, j) => (
-                        <div key={j} className="plan-feat-item">
+                        <motion.div
+                          key={j}
+                          className="plan-feat-item"
+                          variants={featureItemVariants}
+                        >
                           <div className="feat-check">✓</div>
                           <span>{f}</span>
-                        </div>
+                        </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
+
                     <button className="btn-empresa-plan">{plan.cta}</button>
                   </div>
                 )}
 
-                {/* GRATIS */}
+                {/* FREE */}
                 {!plan.popular && !plan.premium && (
                   <div className="plan-card">
                     <div style={{ height: 26, marginBottom: 14 }} />
                     <div className="plan-tag">{plan.desc}</div>
                     <div className="plan-name">{plan.nombre}</div>
+
                     <div className="plan-price-row">
                       <span className="plan-price-num">{plan.precio}</span>
-                      {plan.periodo && <span className="plan-price-per">{plan.periodo}</span>}
+                      {plan.periodo && (
+                        <span className="plan-price-per">{plan.periodo}</span>
+                      )}
                     </div>
+
                     <div className="plan-divider" />
-                    <div className="plan-features">
+
+                    <motion.div
+                      className="plan-features"
+                      variants={featuresContainerVariants}
+                    >
                       {plan.features.map((f, j) => (
-                        <div key={j} className="plan-feat-item">
+                        <motion.div
+                          key={j}
+                          className="plan-feat-item"
+                          variants={featureItemVariants}
+                        >
                           <div className="feat-check">✓</div>
                           <span>{f}</span>
-                        </div>
+                        </motion.div>
                       ))}
-                    </div>
+                    </motion.div>
+
                     <button className="btn-outline-plan">{plan.cta}</button>
                   </div>
                 )}
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
 
-          <p
-            className={`planes-note header-reveal ${visible ? "visible" : ""}`}
-            style={{ transitionDelay: "400ms" }}
+          <motion.p
+            className="planes-note"
+            variants={noteVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
           >
             Precios en MXN · IVA no incluido · Cancela en cualquier momento
-          </p>
-
+          </motion.p>
         </div>
       </section>
     </>

@@ -24,8 +24,8 @@ type SidebarProfileResponse = {
   error?: string
 }
 
-const SIDEBAR_BG = "var(--primary, #1B3D7A)"
-const SIDEBAR_BG_HOVER = "var(--primary-hover, #2A5298)"
+const SIDEBAR_BG = "hsl(var(--primary, 216 64% 29%))"
+const SIDEBAR_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
 const SIDEBAR_TEXT = "var(--sidebar-text, #FFFFFF)"
 const SIDEBAR_TEXT_MUTED = "var(--sidebar-text-muted, rgba(255,255,255,0.72))"
 const SIDEBAR_TEXT_SOFT = "var(--sidebar-text-soft, rgba(255,255,255,0.5))"
@@ -36,7 +36,7 @@ const SIDEBAR_SURFACE = "var(--sidebar-surface, rgba(255,255,255,0.08))"
 const SIDEBAR_SURFACE_BORDER =
   "var(--sidebar-surface-border, rgba(255,255,255,0.12))"
 const SIDEBAR_HOVER_BG = "var(--sidebar-hover-bg, rgba(255,255,255,0.1))"
-const SIDEBAR_BRAND_ACCENT = "var(--sidebar-brand-accent, #93C5FD)"
+const SIDEBAR_BRAND_ACCENT = "hsl(var(--primary-light, 214 100% 79%))"
 const SIDEBAR_ICON_SOFT = "var(--sidebar-icon-soft, #E5E7EB)"
 
 const SIDEBAR_DANGER_BG = "var(--sidebar-danger-bg, rgba(220,38,38,0.2))"
@@ -136,7 +136,7 @@ export default function Sidebar() {
       className="hidden h-screen w-64 md:flex md:flex-col"
       initial={{ clipPath: "inset(0 100% 0 0)", x: -8 }}
       animate={{ clipPath: "inset(0 0% 0 0)", x: 0 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.3 }} 
+      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
       style={{
         background: SIDEBAR_BG,
         borderRight: `1px solid ${SIDEBAR_BORDER}`,
@@ -153,6 +153,7 @@ export default function Sidebar() {
           className="h-2 w-2 flex-shrink-0 rounded-full"
           style={{ background: SIDEBAR_TEXT }}
         />
+
         <span className="text-base font-bold tracking-tight">
           <span style={{ color: SIDEBAR_TEXT }}>Cotiza</span>
           <span style={{ color: SIDEBAR_BRAND_ACCENT }}>App</span>
@@ -196,7 +197,10 @@ export default function Sidebar() {
           >
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-bold"
-              style={{ background: SIDEBAR_BG_HOVER, color: SIDEBAR_TEXT }}
+              style={{
+                background: SIDEBAR_BG_HOVER,
+                color: SIDEBAR_TEXT,
+              }}
             >
               {showProfileLogo ? (
                 <img
@@ -217,6 +221,7 @@ export default function Sidebar() {
               >
                 {session?.user?.name || "Usuario"}
               </p>
+
               <p
                 className="truncate text-xs"
                 style={{ color: SIDEBAR_TEXT_SOFT, margin: 0 }}

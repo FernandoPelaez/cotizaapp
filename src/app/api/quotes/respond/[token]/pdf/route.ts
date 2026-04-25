@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/prisma"
-import puppeteer, { type Browser, type Page } from "puppeteer"
+import type { Browser, Page } from "puppeteer-core"
 
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
@@ -30,6 +30,38 @@ function sanitizeFileName(value: string) {
     .trim()
 
   return sanitized || "Cotizacion"
+}
+
+async function launchBrowser(): Promise<Browser> {
+  const isProduction = process.env.NODE_ENV === "production"
+
+  if (isProduction) {
+    const chromium = (await import("@sparticuz/chromium")).default
+    const puppeteerCore = await import("puppeteer-core")
+
+    const executablePath = await chromium.executablePath()
+
+    return puppeteerCore.launch({
+      args: [
+        ...chromium.args,
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+      ],
+      executablePath,
+      headless: true,
+    })
+  }
+
+  const puppeteer = await import("puppeteer")
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  })
+
+  return browser as unknown as Browser
 }
 
 async function waitForPrintablePage(page: Page) {
@@ -147,17 +179,7 @@ export async function GET(
     const baseUrl = getBaseUrl(req)
     const printUrl = `${baseUrl}/quotes/${quote.id}/print`
 
-    browser = await puppeteer.launch({
-      headless: true,
-      args: [
-        "--no-sandbox",
-        "--disable-setuid-sandbox",
-        "--disable-dev-shm-usage",
-        "--disable-gpu",
-        "--no-zygote",
-        "--single-process",
-      ],
-    })
+    browser = await launchBrowser()
 
     const page = await browser.newPage()
 
@@ -214,13 +236,13 @@ export async function GET(
   } catch (error) {
     console.error("PUBLIC PDF ERROR:", error)
 
-    const message =
-      error instanceof Error ? error.message : "Error desconocido"
+    const message = error instanceof Error ? error.message : "Error desconocido"
 
     return NextResponse.json(
-      process.env.NODE_ENV === "development"
-        ? { error: "Error al generar PDF", detail: message }
-        : { error: "Error al generar PDF" },
+      {
+        error: "Error al generar PDF",
+        detail: message,
+      },
       { status: 500 }
     )
   } finally {

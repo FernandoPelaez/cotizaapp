@@ -17,8 +17,10 @@ type StripeSubscriptionSafe = Stripe.Subscription & {
   } | null
 }
 
+type PlanSlug = "free" | "pro" | "empresa"
+
 function getWebhookSecret() {
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET?.trim()
 
   if (!webhookSecret) {
     throw new Error("STRIPE_WEBHOOK_SECRET no está configurada")
@@ -90,14 +92,17 @@ function getPriceIdFromSubscription(subscription: Stripe.Subscription) {
   return subscription.items.data[0]?.price?.id ?? null
 }
 
-function getPlanSlugFromPriceId(priceId?: string | null) {
+function getPlanSlugFromPriceId(priceId?: string | null): PlanSlug | null {
   if (!priceId) return null
 
-  if (priceId === process.env.STRIPE_PRICE_PRO) {
+  const stripePricePro = process.env.STRIPE_PRICE_PRO?.trim()
+  const stripePriceEmpresa = process.env.STRIPE_PRICE_EMPRESA?.trim()
+
+  if (priceId === stripePricePro) {
     return "pro"
   }
 
-  if (priceId === process.env.STRIPE_PRICE_EMPRESA) {
+  if (priceId === stripePriceEmpresa) {
     return "empresa"
   }
 
@@ -163,6 +168,40 @@ async function getFreePlanId() {
   return freePlan?.id ?? null
 }
 
+function getSubscriptionPayload({
+  userId,
+  planId,
+  stripeCustomerId,
+  stripeSubscriptionId,
+  stripePriceId,
+  status,
+  stripeSubscription,
+}: {
+  userId: string
+  planId: string | null
+  stripeCustomerId: string
+  stripeSubscriptionId: string
+  stripePriceId: string | null
+  status: SubscriptionStatus
+  stripeSubscription: StripeSubscriptionSafe
+}) {
+  return {
+    userId,
+    planId,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripePriceId,
+    status,
+    cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+    currentPeriodStart: toDateFromUnix(
+      getCurrentPeriodStart(stripeSubscription)
+    ),
+    currentPeriodEnd: toDateFromUnix(getCurrentPeriodEnd(stripeSubscription)),
+    canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
+    endedAt: toDateFromUnix(stripeSubscription.ended_at),
+  }
+}
+
 async function activateSubscriptionFromCheckoutSession(
   checkoutSession: Stripe.Checkout.Session
 ) {
@@ -189,25 +228,35 @@ async function activateSubscriptionFromCheckoutSession(
     stripeSubscriptionId
   )) as StripeSubscriptionSafe
 
-  const priceId = getPriceIdFromSubscription(stripeSubscription)
+  const stripePriceId = getPriceIdFromSubscription(stripeSubscription)
 
   const plan = await getPlanForSubscription({
     planId,
     planSlug,
-    priceId,
+    priceId: stripePriceId,
   })
 
   if (!plan) {
     console.error("STRIPE_WEBHOOK_PLAN_NOT_FOUND:", {
       planId,
       planSlug,
-      priceId,
+      stripePriceId,
     })
 
     return
   }
 
   const status = mapStripeStatus(stripeSubscription.status)
+
+  const subscriptionPayload = getSubscriptionPayload({
+    userId,
+    planId: plan.id,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripePriceId,
+    status,
+    stripeSubscription,
+  })
 
   await prisma.$transaction([
     prisma.user.update({
@@ -223,47 +272,36 @@ async function activateSubscriptionFromCheckoutSession(
       where: {
         stripeSubscriptionId,
       },
-      create: {
-        userId,
-        planId: plan.id,
-        stripeCustomerId,
-        stripeSubscriptionId,
-        stripePriceId: priceId,
-        status,
-        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-        currentPeriodStart: toDateFromUnix(
-          getCurrentPeriodStart(stripeSubscription)
-        ),
-        currentPeriodEnd: toDateFromUnix(
-          getCurrentPeriodEnd(stripeSubscription)
-        ),
-        canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
-        endedAt: toDateFromUnix(stripeSubscription.ended_at),
-      },
+      create: subscriptionPayload,
       update: {
         planId: plan.id,
         stripeCustomerId,
-        stripePriceId: priceId,
+        stripePriceId,
         status,
         cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-        currentPeriodStart: toDateFromUnix(
-          getCurrentPeriodStart(stripeSubscription)
-        ),
-        currentPeriodEnd: toDateFromUnix(
-          getCurrentPeriodEnd(stripeSubscription)
-        ),
-        canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
-        endedAt: toDateFromUnix(stripeSubscription.ended_at),
+        currentPeriodStart: subscriptionPayload.currentPeriodStart,
+        currentPeriodEnd: subscriptionPayload.currentPeriodEnd,
+        canceledAt: subscriptionPayload.canceledAt,
+        endedAt: subscriptionPayload.endedAt,
       },
     }),
   ])
+
+  console.log("STRIPE_WEBHOOK_CHECKOUT_ACTIVATED:", {
+    userId,
+    planSlug: plan.slug,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripePriceId,
+    status,
+  })
 }
 
 async function syncSubscription(subscription: Stripe.Subscription) {
   const stripeSubscription = subscription as StripeSubscriptionSafe
   const stripeSubscriptionId = stripeSubscription.id
   const stripeCustomerId = getStripeId(stripeSubscription.customer)
-  const priceId = getPriceIdFromSubscription(stripeSubscription)
+  const stripePriceId = getPriceIdFromSubscription(stripeSubscription)
 
   if (!stripeCustomerId) {
     console.error("STRIPE_WEBHOOK_SUBSCRIPTION_WITHOUT_CUSTOMER")
@@ -278,6 +316,7 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   if (!user) {
     console.error("STRIPE_WEBHOOK_USER_NOT_FOUND_BY_CUSTOMER:", {
       stripeCustomerId,
+      stripeSubscriptionId,
     })
 
     return
@@ -286,7 +325,7 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   const plan = await getPlanForSubscription({
     planId: stripeSubscription.metadata?.planId ?? null,
     planSlug: stripeSubscription.metadata?.planSlug ?? null,
-    priceId,
+    priceId: stripePriceId,
   })
 
   const status = mapStripeStatus(stripeSubscription.status)
@@ -295,37 +334,31 @@ async function syncSubscription(subscription: Stripe.Subscription) {
     status === SubscriptionStatus.ACTIVE ||
     status === SubscriptionStatus.TRIALING
 
+  const subscriptionPayload = getSubscriptionPayload({
+    userId: user.id,
+    planId: plan?.id ?? null,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripePriceId,
+    status,
+    stripeSubscription,
+  })
+
   await prisma.subscription.upsert({
     where: {
       stripeSubscriptionId,
     },
-    create: {
-      userId: user.id,
-      planId: plan?.id ?? null,
-      stripeCustomerId,
-      stripeSubscriptionId,
-      stripePriceId: priceId,
-      status,
-      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-      currentPeriodStart: toDateFromUnix(
-        getCurrentPeriodStart(stripeSubscription)
-      ),
-      currentPeriodEnd: toDateFromUnix(getCurrentPeriodEnd(stripeSubscription)),
-      canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
-      endedAt: toDateFromUnix(stripeSubscription.ended_at),
-    },
+    create: subscriptionPayload,
     update: {
       planId: plan?.id ?? null,
       stripeCustomerId,
-      stripePriceId: priceId,
+      stripePriceId,
       status,
       cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-      currentPeriodStart: toDateFromUnix(
-        getCurrentPeriodStart(stripeSubscription)
-      ),
-      currentPeriodEnd: toDateFromUnix(getCurrentPeriodEnd(stripeSubscription)),
-      canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
-      endedAt: toDateFromUnix(stripeSubscription.ended_at),
+      currentPeriodStart: subscriptionPayload.currentPeriodStart,
+      currentPeriodEnd: subscriptionPayload.currentPeriodEnd,
+      canceledAt: subscriptionPayload.canceledAt,
+      endedAt: subscriptionPayload.endedAt,
     },
   })
 
@@ -338,6 +371,15 @@ async function syncSubscription(subscription: Stripe.Subscription) {
       },
     })
   }
+
+  console.log("STRIPE_WEBHOOK_SUBSCRIPTION_SYNCED:", {
+    userId: user.id,
+    planSlug: plan?.slug ?? null,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    stripePriceId,
+    status,
+  })
 }
 
 async function cancelSubscription(subscription: Stripe.Subscription) {
@@ -358,6 +400,7 @@ async function cancelSubscription(subscription: Stripe.Subscription) {
   if (!user) {
     console.error("STRIPE_WEBHOOK_CANCEL_USER_NOT_FOUND:", {
       stripeCustomerId,
+      stripeSubscriptionId,
     })
 
     return
@@ -383,6 +426,13 @@ async function cancelSubscription(subscription: Stripe.Subscription) {
       },
     }),
   ])
+
+  console.log("STRIPE_WEBHOOK_SUBSCRIPTION_CANCELED:", {
+    userId: user.id,
+    stripeCustomerId,
+    stripeSubscriptionId,
+    freePlanId,
+  })
 }
 
 export async function POST(req: Request) {
@@ -432,8 +482,10 @@ export async function POST(req: Request) {
         break
       }
 
-      default:
+      default: {
+        console.log("STRIPE_WEBHOOK_EVENT_IGNORED:", event.type)
         break
+      }
     }
 
     return NextResponse.json({ received: true })

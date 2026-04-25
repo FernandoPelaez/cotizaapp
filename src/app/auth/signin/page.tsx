@@ -1,22 +1,23 @@
 import SignInForm from "@/components/auth/signin/SigiInForm"
+import { getSelectedPlanFromSigninParams } from "@/features/auth/signin/signin-utils"
 
-type PlanSlug = "free" | "pro" | "empresa"
-
-function normalizePlan(plan?: string): PlanSlug {
-  if (plan === "pro") return "pro"
-  if (plan === "empresa") return "empresa"
-  return "free"
+type SignInPageProps = {
+  searchParams: Promise<{
+    email?: string
+    plan?: string | string[]
+  }>
 }
 
-export default async function SignInPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ email?: string; plan?: string }>
-}) {
+export default async function SignInPage({ searchParams }: SignInPageProps) {
   const params = await searchParams
 
   const initialEmail = params.email ?? ""
-  const selectedPlan = normalizePlan(params.plan)
+  const selectedPlan = getSelectedPlanFromSigninParams(params)
 
-  return <SignInForm initialEmail={initialEmail} selectedPlan={selectedPlan} />
+  return (
+    <SignInForm
+      initialEmail={initialEmail}
+      selectedPlan={selectedPlan}
+    />
+  )
 }

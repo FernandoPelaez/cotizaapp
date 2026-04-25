@@ -6,6 +6,15 @@ import { prisma } from "@/lib/prisma"
 
 const isDev = process.env.NODE_ENV !== "production"
 
+async function getFreePlanId() {
+  const freePlan = await prisma.plan.findUnique({
+    where: { slug: "free" },
+    select: { id: true },
+  })
+
+  return freePlan?.id ?? null
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GoogleProvider({
@@ -69,7 +78,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             name: user.name,
             image: user.image,
-            plan: user.plan?.name || "free",
+            plan: user.plan?.slug ?? "free",
             profileType: user.profileType ?? null,
             profileCompleted: user.profileCompleted,
             onboardingStep: user.onboardingStep ?? 1,
@@ -91,8 +100,54 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async signIn() {
-      return true
+    async signIn({ user, account }) {
+      try {
+        if (account?.provider !== "google") {
+          return true
+        }
+
+        const email = user.email?.toLowerCase().trim()
+
+        if (!email) {
+          return false
+        }
+
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+          select: { id: true },
+        })
+
+        if (existingUser) {
+          await prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              name: user.name ?? undefined,
+              image: user.image ?? undefined,
+            },
+          })
+
+          return true
+        }
+
+        const freePlanId = await getFreePlanId()
+
+        await prisma.user.create({
+          data: {
+            email,
+            name: user.name ?? null,
+            image: user.image ?? null,
+            planId: freePlanId,
+            quotesUsed: 0,
+            trialBlocked: false,
+            trialQuotesLimit: 5,
+          },
+        })
+
+        return true
+      } catch (error) {
+        console.error("[AUTH][GOOGLE_SIGNIN_ERROR]", error)
+        return false
+      }
     },
 
     async jwt({ token, user, trigger, session }) {
@@ -123,7 +178,7 @@ export const authOptions: NextAuthOptions = {
             token.email = dbUser.email
             token.name = dbUser.name
             token.image = dbUser.image
-            token.plan = dbUser.plan?.name || "free"
+            token.plan = dbUser.plan?.slug ?? "free"
             token.profileType = dbUser.profileType ?? null
             token.profileCompleted = dbUser.profileCompleted
             token.onboardingStep = dbUser.onboardingStep ?? 1

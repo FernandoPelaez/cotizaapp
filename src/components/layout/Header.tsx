@@ -357,9 +357,9 @@ export default function Header({
 
   return (
     <motion.header
-      className="flex flex-shrink-0 items-center justify-between px-6"
-      initial={{ clipPath: "inset(0 0 100% 0)", y: -8 }}
-      animate={{ clipPath: "inset(0 0 0% 0)", y: 0 }}
+      className="relative z-[80] flex flex-shrink-0 items-center justify-between px-6"
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.52, ease: [0.16, 1, 0.3, 1], delay: 0 }}
       style={{
         height: "72px",
@@ -421,7 +421,7 @@ export default function Header({
       </div>
 
       <div className="flex items-center gap-3">
-        <div className="relative" ref={notificationsRef}>
+        <div className="relative z-[90]" ref={notificationsRef}>
           <button
             type="button"
             onClick={() => void handleToggleNotifications()}
@@ -459,11 +459,13 @@ export default function Header({
 
           {notificationsOpen && (
             <div
-              className="absolute right-0 top-12 z-30 w-[360px] rounded-2xl p-3"
+              className="absolute right-0 top-12 z-[100] w-[360px] rounded-2xl p-3"
               style={{
                 background: HEADER_DROPDOWN_BG,
                 border: `1px solid ${HEADER_DROPDOWN_BORDER}`,
-                boxShadow: "0 18px 40px rgba(15,23,42,0.14)",
+                boxShadow: "0 24px 60px rgba(15,23,42,0.22)",
+                maxHeight: "min(520px, calc(100vh - 96px))",
+                overflowY: "auto",
               }}
             >
               <div className="mb-3 flex items-center justify-between gap-3">

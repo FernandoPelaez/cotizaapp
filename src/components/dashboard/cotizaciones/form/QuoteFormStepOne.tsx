@@ -50,7 +50,7 @@ export default function QuoteFormStepOne({
   onNext,
 }: QuoteFormStepOneProps) {
   return (
-    <div className="p-4 space-y-3.5">
+    <div className="space-y-3.5 p-4">
       <div>
         <p className={sectionCls}>Datos generales</p>
 
@@ -91,7 +91,7 @@ export default function QuoteFormStepOne({
         <p className={sectionCls}>Datos del cliente</p>
 
         <div className="space-y-2">
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
               <label className={labelCls}>Cliente</label>
               <input
@@ -114,7 +114,7 @@ export default function QuoteFormStepOne({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div>
               <label className={labelCls}>Teléfono cliente</label>
               <input
@@ -159,19 +159,24 @@ export default function QuoteFormStepOne({
         </div>
       </div>
 
-      <div className="pt-0.5">
+      <div className="flex justify-start pt-1">
         <button
           type="button"
           onClick={onNext}
-          className="h-9 px-5 bg-[#1B3D7A] text-white rounded-xl text-[12px] font-medium hover:bg-[#16326a] transition-colors flex items-center gap-1.5"
+          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#1B3D7A] px-5 text-[12px] font-semibold !text-white shadow-sm shadow-blue-950/10 transition-all hover:-translate-y-0.5 hover:bg-[#16326a] focus:outline-none focus:ring-2 focus:ring-blue-200 active:translate-y-0"
+          style={{ color: "#FFFFFF" }}
         >
-          Siguiente
+          <span className="!text-white" style={{ color: "#FFFFFF" }}>
+            Siguiente
+          </span>
+
           <svg
-            className="w-3 h-3"
+            className="h-3 w-3 text-white"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"
+            aria-hidden="true"
           >
             <line x1="5" y1="12" x2="19" y2="12" />
             <polyline points="12 5 19 12 12 19" />

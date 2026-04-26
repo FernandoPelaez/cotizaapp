@@ -45,7 +45,6 @@ export default function RecentActivityCard({ events }: RecentActivityCardProps) 
         </span>
       </div>
 
-      {/* Lista — flex-1 para que ocupe todo el espacio restante */}
       <div className="flex flex-1 flex-col p-3">
         {events.length === 0 ? (
           <div className="flex flex-1 items-center justify-center rounded-xl border border-dashed border-neutral-200 bg-neutral-50 p-6 text-center">

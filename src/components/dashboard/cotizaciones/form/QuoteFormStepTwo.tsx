@@ -66,7 +66,7 @@ export default function QuoteFormStepTwo({
   onBack,
 }: QuoteFormStepTwoProps) {
   return (
-    <div className="p-4 space-y-3.5">
+    <div className="space-y-3.5 p-4">
       {showServicesSection && (
         <div>
           <p className={sectionCls}>
@@ -74,14 +74,15 @@ export default function QuoteFormStepTwo({
             <button
               type="button"
               onClick={onAddService}
-              className="flex items-center gap-1 text-blue-500 text-[11px] font-medium normal-case tracking-normal hover:text-blue-600"
+              className="flex items-center gap-1 text-[11px] font-medium normal-case tracking-normal text-blue-500 transition-colors hover:text-blue-600"
             >
               <svg
-                className="w-3 h-3"
+                className="h-3 w-3"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
+                aria-hidden="true"
               >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -94,7 +95,7 @@ export default function QuoteFormStepTwo({
             {services.map((service, index) => (
               <div
                 key={index}
-                className="grid grid-cols-[1fr_85px_28px] gap-1.5 items-center"
+                className="grid grid-cols-[1fr_85px_28px] items-center gap-1.5"
               >
                 <input
                   className={inputCls}
@@ -104,6 +105,7 @@ export default function QuoteFormStepTwo({
                     onServiceChange(index, "name", e.target.value)
                   }
                 />
+
                 <input
                   className={inputCls}
                   placeholder="$0.00"
@@ -112,17 +114,19 @@ export default function QuoteFormStepTwo({
                     onServiceChange(index, "price", e.target.value)
                   }
                 />
+
                 <button
                   type="button"
                   onClick={() => onRemoveService(index)}
-                  className="w-[28px] h-[34px] rounded-lg border border-red-100 bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors"
+                  className="flex h-[34px] w-[28px] items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition-colors hover:bg-red-100"
                 >
                   <svg
-                    className="w-3 h-3"
+                    className="h-3 w-3"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
                     strokeWidth="2"
+                    aria-hidden="true"
                   >
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
@@ -141,14 +145,15 @@ export default function QuoteFormStepTwo({
             <button
               type="button"
               onClick={onAddProduct}
-              className="flex items-center gap-1 text-blue-500 text-[11px] font-medium normal-case tracking-normal hover:text-blue-600"
+              className="flex items-center gap-1 text-[11px] font-medium normal-case tracking-normal text-blue-500 transition-colors hover:text-blue-600"
             >
               <svg
-                className="w-3 h-3"
+                className="h-3 w-3"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2.5"
+                aria-hidden="true"
               >
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -158,7 +163,7 @@ export default function QuoteFormStepTwo({
           </p>
 
           {products.length === 0 ? (
-            <p className="text-[11px] text-neutral-400 py-0.5">
+            <p className="py-0.5 text-[11px] text-neutral-400">
               Sin productos agregados
             </p>
           ) : (
@@ -166,7 +171,7 @@ export default function QuoteFormStepTwo({
               {products.map((product, index) => (
                 <div
                   key={index}
-                  className="grid grid-cols-[1fr_55px_75px_28px] gap-1.5 items-center"
+                  className="grid grid-cols-[1fr_55px_75px_28px] items-center gap-1.5"
                 >
                   <input
                     className={inputCls}
@@ -176,6 +181,7 @@ export default function QuoteFormStepTwo({
                       onProductChange(index, "name", e.target.value)
                     }
                   />
+
                   <input
                     className={inputCls}
                     placeholder="Cant."
@@ -184,6 +190,7 @@ export default function QuoteFormStepTwo({
                       onProductChange(index, "quantity", e.target.value)
                     }
                   />
+
                   <input
                     className={inputCls}
                     placeholder="$0.00"
@@ -192,17 +199,19 @@ export default function QuoteFormStepTwo({
                       onProductChange(index, "price", e.target.value)
                     }
                   />
+
                   <button
                     type="button"
                     onClick={() => onRemoveProduct(index)}
-                    className="w-[28px] h-[34px] rounded-lg border border-red-100 bg-red-50 text-red-400 hover:bg-red-100 flex items-center justify-center transition-colors"
+                    className="flex h-[34px] w-[28px] items-center justify-center rounded-lg border border-red-100 bg-red-50 text-red-400 transition-colors hover:bg-red-100"
                   >
                     <svg
-                      className="w-3 h-3"
+                      className="h-3 w-3"
                       viewBox="0 0 24 24"
                       fill="none"
                       stroke="currentColor"
                       strokeWidth="2"
+                      aria-hidden="true"
                     >
                       <line x1="18" y1="6" x2="6" y2="18" />
                       <line x1="6" y1="6" x2="18" y2="18" />
@@ -218,7 +227,7 @@ export default function QuoteFormStepTwo({
       <div>
         <p className={sectionCls}>Ajustes</p>
 
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           <div>
             <label className={labelCls}>Descuento ($)</label>
             <input
@@ -240,19 +249,21 @@ export default function QuoteFormStepTwo({
           </div>
         </div>
 
-        <div className="mt-3 rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-[12px] text-neutral-600 space-y-1">
+        <div className="mt-3 space-y-1 rounded-xl border border-neutral-200 bg-neutral-50 p-3 text-[12px] text-neutral-600">
           <div className="flex items-center justify-between">
             <span>Subtotal</span>
             <span className="font-medium text-neutral-900">
               {formatMoney(subtotal)}
             </span>
           </div>
+
           <div className="flex items-center justify-between">
             <span>Impuesto</span>
             <span className="font-medium text-neutral-900">
               {formatMoney(taxAmount)}
             </span>
           </div>
+
           <div className="flex items-center justify-between border-t border-neutral-200 pt-2">
             <span className="font-semibold text-neutral-900">Total</span>
             <span className="font-bold text-[#1B3D7A]">
@@ -264,26 +275,28 @@ export default function QuoteFormStepTwo({
 
       <div>
         <p className={sectionCls}>Notas / Condiciones</p>
+
         <textarea
-          className="w-full border border-neutral-200 rounded-lg px-3 py-2 text-[12px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all resize-none h-[72px] bg-white"
+          className="h-[72px] w-full resize-none rounded-lg border border-neutral-200 bg-white px-3 py-2 text-[12px] text-neutral-900 placeholder:text-neutral-400 transition-all focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
           placeholder="Forma de pago, vigencia, condiciones especiales..."
           value={notes}
           onChange={(e) => onNotesChange(e.target.value)}
         />
       </div>
 
-      <div className="flex items-center gap-2 pt-0.5">
+      <div className="flex items-center gap-2 pt-1">
         <button
           type="button"
           onClick={onBack}
-          className="h-9 px-4 border border-neutral-200 text-neutral-500 rounded-xl text-[12px] font-medium hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
+          className="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white px-4 text-[12px] font-medium text-neutral-600 transition-all hover:-translate-y-0.5 hover:bg-neutral-50 focus:outline-none focus:ring-2 focus:ring-neutral-200 active:translate-y-0"
         >
           <svg
-            className="w-3 h-3"
+            className="h-3 w-3"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             strokeWidth="2.5"
+            aria-hidden="true"
           >
             <line x1="19" y1="12" x2="5" y2="12" />
             <polyline points="12 19 5 12 12 5" />
@@ -294,16 +307,21 @@ export default function QuoteFormStepTwo({
         <button
           type="submit"
           disabled={loading}
-          className="h-9 px-5 bg-[#1B3D7A] text-white rounded-xl text-[12px] font-medium hover:bg-[#16326a] disabled:opacity-50 transition-colors"
+          className="inline-flex h-9 items-center justify-center rounded-xl bg-[#1B3D7A] px-5 text-[12px] font-semibold !text-white shadow-sm shadow-blue-950/10 transition-all hover:-translate-y-0.5 hover:bg-[#16326a] focus:outline-none focus:ring-2 focus:ring-blue-200 active:translate-y-0 disabled:pointer-events-none disabled:opacity-50"
+          style={{ color: "#FFFFFF" }}
         >
           {loading ? (
-            <span className="flex items-center gap-1.5">
+            <span
+              className="inline-flex items-center gap-1.5 !text-white"
+              style={{ color: "#FFFFFF" }}
+            >
               <svg
-                className="w-3 h-3 animate-spin"
+                className="h-3 w-3 animate-spin text-white"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
                 strokeWidth="2"
+                aria-hidden="true"
               >
                 <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
                 <path d="M12 2a10 10 0 0 1 10 10" strokeOpacity="1" />
@@ -311,7 +329,9 @@ export default function QuoteFormStepTwo({
               Creando...
             </span>
           ) : (
-            "Crear cotización"
+            <span className="!text-white" style={{ color: "#FFFFFF" }}>
+              Crear cotización
+            </span>
           )}
         </button>
       </div>

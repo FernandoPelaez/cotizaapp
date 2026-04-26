@@ -1,5 +1,6 @@
 "use client"
 
+import Link from "next/link"
 import {
   useEffect,
   useMemo,
@@ -40,7 +41,7 @@ export default function CotizacionForm() {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [step, setStep] = useState(1)
-  const [templateKey, setTemplateKey] = useState("clasica-1")
+  const [templateKey, setTemplateKey] = useState<string | null>(null)
   const [profileType, setProfileType] = useState<ProfileType | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
   const [previewScale, setPreviewScale] = useState(0.38)
@@ -87,16 +88,21 @@ export default function CotizacionForm() {
 
   useEffect(() => {
     const queryTemplate = searchParams.get("template")?.trim()
-    const storedTemplate =
-      typeof window !== "undefined"
-        ? localStorage.getItem("selectedTemplate")?.trim()
-        : null
 
-    const nextTemplateKey = queryTemplate || storedTemplate || "clasica-1"
-    setTemplateKey(nextTemplateKey)
+    if (queryTemplate) {
+      setTemplateKey(queryTemplate)
+
+      if (typeof window !== "undefined") {
+        localStorage.setItem("selectedTemplate", queryTemplate)
+      }
+
+      return
+    }
+
+    setTemplateKey(null)
 
     if (typeof window !== "undefined") {
-      localStorage.setItem("selectedTemplate", nextTemplateKey)
+      localStorage.removeItem("selectedTemplate")
     }
   }, [searchParams])
 
@@ -261,6 +267,11 @@ export default function CotizacionForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    if (!templateKey) {
+      showToast("Selecciona una plantilla antes de crear la cotización", "warning")
+      return
+    }
+
     const items = [
       ...validServices.map((s) => ({
         name: s.name,
@@ -387,7 +398,7 @@ export default function CotizacionForm() {
         <div className="border-b border-neutral-100 px-4 pb-0 pt-3">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold tracking-tight text-neutral-900">
-              Nueva cotización
+              Datos de la cotizacion
             </h2>
 
             <div className="flex items-center gap-1.5">
@@ -481,13 +492,51 @@ export default function CotizacionForm() {
         </form>
       </div>
 
-      <QuoteFormPreview
-        containerRef={containerRef}
-        previewScale={previewScale}
-        templateKey={templateKey}
-        profileType={profileType}
-        templateData={templateData}
-      />
+      {templateKey ? (
+        <QuoteFormPreview
+          containerRef={containerRef}
+          previewScale={previewScale}
+          templateKey={templateKey}
+          profileType={profileType}
+          templateData={templateData}
+        />
+      ) : (
+        <div
+          ref={containerRef}
+          className="flex min-h-[520px] w-full items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6"
+        >
+          <div className="max-w-[360px] text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">
+              <span className="text-2xl font-black">+</span>
+            </div>
+
+            <p className="mb-1 text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
+              Plantilla requerida
+            </p>
+
+            <h3 className="text-xl font-black tracking-[-0.03em] text-neutral-900">
+              Elige una plantilla para comenzar
+            </h3>
+
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              La cotización todavía no tiene diseño asignado. Primero selecciona
+              una plantilla y después verás aquí la vista previa en tiempo real.
+            </p>
+
+            <Link
+              href="/plantillas"
+              className="mt-5 inline-flex items-center justify-center rounded-full bg-[#1B3D7A] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-0.5 hover:bg-[#244d96]"
+            >
+              Ver plantillas
+            </Link>
+
+            <p className="mt-4 text-[11px] leading-5 text-neutral-400">
+              Así evitamos que el sistema agarre una plantilla al azar como si
+              tuviera vida propia.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

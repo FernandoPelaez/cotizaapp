@@ -1,6 +1,4 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import type { Browser, Page } from "puppeteer-core"
 
@@ -137,19 +135,18 @@ export async function GET(
   let browser: Browser | null = null
 
   try {
-    const session = await getServerSession(authOptions)
-    const userId = (session?.user as { id?: string } | undefined)?.id
-
-    if (!userId) {
-      return NextResponse.json({ error: "No autorizado" }, { status: 401 })
-    }
-
     const { id } = await context.params
 
-    const quote = await prisma.quote.findFirst({
+    if (!id) {
+      return NextResponse.json(
+        { error: "ID de cotización requerido" },
+        { status: 400 }
+      )
+    }
+
+    const quote = await prisma.quote.findUnique({
       where: {
         id,
-        userId,
       },
       select: {
         id: true,

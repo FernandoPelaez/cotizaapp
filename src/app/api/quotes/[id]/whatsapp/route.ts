@@ -160,7 +160,11 @@ export async function POST(
     ])
 
     const baseUrl = getBaseUrl(request)
-    const pdfUrl = `${baseUrl}/api/quotes/${quote.id}/pdf`
+
+    const pdfUrl = `${baseUrl}/api/quotes/${
+      quote.id
+    }/pdf?token=${encodeURIComponent(responseToken)}`
+
     const responseUrl = `${baseUrl}/quotes/respond/${responseToken}`
 
     const formattedTotal = new Intl.NumberFormat("es-MX", {

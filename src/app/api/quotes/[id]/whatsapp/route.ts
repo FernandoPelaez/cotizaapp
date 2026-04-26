@@ -160,7 +160,6 @@ export async function POST(
     ])
 
     const baseUrl = getBaseUrl(request)
-
     const pdfUrl = `${baseUrl}/api/quotes/${
       quote.id
     }/pdf?token=${encodeURIComponent(responseToken)}`
@@ -175,12 +174,14 @@ export async function POST(
 
     const message = [
       `Hola ${quote.clientName}, te comparto tu cotización "${quote.title}".`,
-      `Total: ${formattedTotal}.`,
       ``,
-      `PDF: ${pdfUrl}`,
-      `Responder cotización: ${responseUrl}`,
+      `Total: ${formattedTotal}`,
       ``,
-      `Por favor indícanos si aceptas o rechazas la cotización.`,
+      `Ver cotización:`,
+      responseUrl,
+      ``,
+      `Desde ese enlace puedes revisar el PDF, aceptar o rechazar la cotización.`,
+      ``,
       `Este enlace estará disponible por ${RESPONSE_EXPIRATION_HOURS} horas.`,
     ].join("\n")
 

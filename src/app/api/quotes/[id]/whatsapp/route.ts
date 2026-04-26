@@ -172,24 +172,21 @@ export async function POST(
       maximumFractionDigits: 2,
     }).format(Number(quote.total))
 
-    const message = [
-      `👋 Hola *${quote.clientName}*,`,
+ const message = [
+      `Hola *${quote.clientName}* 👋`,
       ``,
       `Te comparto tu cotización *"${quote.title}"* generada especialmente para ti.`,
       ``,
-      `💰 *Total: ${formattedTotal}*`,
+      `*Total: ${formattedTotal}*`,
       ``,
-      `📄 *Revisa tu cotización aquí:*`,
+      `*Ver tu cotización:*`,
       responseUrl,
       ``,
-      `Desde ese enlace puedes:`,
-      `✅ Ver el detalle completo`,
-      `📥 Descargar el PDF`,
-      `👍 Aceptar o rechazar la propuesta`,
+      `Desde ese enlace puedes revisar el PDF, aceptar o rechazar la propuesta.`,
       ``,
-      `⏰ Este enlace estará disponible por *${RESPONSE_EXPIRATION_HOURS} horas*.`,
+      `Este enlace estará disponible por *${RESPONSE_EXPIRATION_HOURS} horas*. ⏳`,
       ``,
-      `Cualquier duda, con gusto te ayudamos. 🙌`,
+      `Cualquier duda, con gusto te ayudamos 😊`,
     ].join("\n")
 
     const whatsappUrl = `https://wa.me/${normalizedPhone}?text=${encodeURIComponent(

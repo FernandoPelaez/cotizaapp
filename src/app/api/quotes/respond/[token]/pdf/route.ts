@@ -1,7 +1,4 @@
 import { NextResponse } from "next/server"
-import { getServerSession } from "next-auth"
-import type { Prisma } from "@prisma/client"
-import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import type { Browser, Page } from "puppeteer-core"
 
@@ -133,53 +130,28 @@ async function openPrintPage(page: Page, printUrl: string) {
 
 export async function GET(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ token: string }> }
 ) {
   let browser: Browser | null = null
 
   try {
-    const { id } = await context.params
+    
+    const { token } = await context.params
 
-    if (!id) {
+    if (!token) {
       return NextResponse.json(
-        { error: "ID de cotización requerido" },
+        { error: "Token de respuesta requerido" },
         { status: 400 }
       )
     }
 
-    const url = new URL(req.url)
-    const token = url.searchParams.get("token")?.trim() || null
-    const session = await getServerSession(authOptions)
-    const userId = (session?.user as { id?: string } | undefined)?.id
-
-    if (!userId && !token) {
-      return NextResponse.json(
-        { error: "No autorizado. Falta sesión o token público." },
-        { status: 401 }
-      )
-    }
-
-    const accessConditions: Prisma.QuoteWhereInput[] = []
-    if (userId) {
-      accessConditions.push({
-        userId,
-      })
-    }
-
-    if (token) {
-      accessConditions.push({
+    const quote = await prisma.quote.findFirst({
+      where: {
         responseToken: token,
         OR: [
           { responseExpiresAt: null },
           { responseExpiresAt: { gt: new Date() } },
         ],
-      })
-    }
-
-    const quote = await prisma.quote.findFirst({
-      where: {
-        id,
-        OR: accessConditions,
       },
       select: {
         id: true,
@@ -198,7 +170,7 @@ export async function GET(
 
     if (!quote) {
       return NextResponse.json(
-        { error: "Cotización no encontrada o token inválido" },
+        { error: "Cotización no encontrada, token inválido o enlace vencido" },
         { status: 404 }
       )
     }
@@ -213,20 +185,20 @@ export async function GET(
     )}.pdf`
 
     const baseUrl = getBaseUrl(req)
-    const printUrl = token
-      ? `${baseUrl}/quotes/${quote.id}/print?token=${encodeURIComponent(token)}`
-      : `${baseUrl}/quotes/${quote.id}/print`
+    const printUrl = `${baseUrl}/quotes/${quote.id}/print?token=${encodeURIComponent(
+      token
+    )}`
 
     browser = await launchBrowser()
 
     const page = await browser.newPage()
 
     page.on("pageerror", (error) => {
-      console.error("PDF PAGE ERROR:", error)
+      console.error("RESPOND PDF PAGE ERROR:", error)
     })
 
     page.on("requestfailed", (request) => {
-      console.error("PDF REQUEST FAILED:", {
+      console.error("RESPOND PDF REQUEST FAILED:", {
         url: request.url(),
         error: request.failure()?.errorText || "Unknown error",
       })
@@ -234,7 +206,7 @@ export async function GET(
 
     page.on("console", (message) => {
       if (message.type() === "error") {
-        console.error("PDF BROWSER CONSOLE:", message.text())
+        console.error("RESPOND PDF BROWSER CONSOLE:", message.text())
       }
     })
 
@@ -272,7 +244,7 @@ export async function GET(
       },
     })
   } catch (error) {
-    console.error("PDF ERROR:", error)
+    console.error("RESPOND PDF ERROR:", error)
 
     const message = error instanceof Error ? error.message : "Error desconocido"
 

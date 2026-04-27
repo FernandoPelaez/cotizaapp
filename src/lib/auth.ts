@@ -149,48 +149,55 @@ export const authOptions: NextAuthOptions = {
         return false
       }
     },
+        async jwt({ token, user, trigger, session }) {
+          try {
+            const shouldHydrateFromDb = Boolean(user) || trigger === "update"
 
-    async jwt({ token, user, trigger, session }) {
-      try {
-        if (user) {
-          token.id = user.id
-          token.email = user.email
-          token.name = user.name
-          token.image = user.image
-          token.plan = (user as any).plan || "free"
-          token.profileType = (user as any).profileType ?? null
-          token.profileCompleted = (user as any).profileCompleted ?? false
-          token.onboardingStep = (user as any).onboardingStep ?? 1
-        }
+            if (trigger === "update" && session?.user?.email) {
+              token.email = session.user.email
+            }
 
-        if (trigger === "update" && session?.user?.email) {
-          token.email = session.user.email
-        }
+            if (shouldHydrateFromDb) {
+              const email = (user?.email ?? token.email)?.toLowerCase().trim()
 
-        if (token?.email) {
-          const dbUser = await prisma.user.findUnique({
-            where: { email: token.email as string },
-            include: { plan: true },
-          })
+              if (email) {
+                const dbUser = await prisma.user.findUnique({
+                  where: { email },
+                  include: { plan: true },
+                })
 
-          if (dbUser) {
-            token.id = dbUser.id
-            token.email = dbUser.email
-            token.name = dbUser.name
-            token.image = dbUser.image
-            token.plan = dbUser.plan?.slug ?? "free"
-            token.profileType = dbUser.profileType ?? null
-            token.profileCompleted = dbUser.profileCompleted
-            token.onboardingStep = dbUser.onboardingStep ?? 1
+                if (dbUser) {
+                  token.id = dbUser.id
+                  token.email = dbUser.email
+                  token.name = dbUser.name
+                  token.image = dbUser.image
+                  token.plan = dbUser.plan?.slug ?? "free"
+                  token.profileType = dbUser.profileType ?? null
+                  token.profileCompleted = dbUser.profileCompleted
+                  token.onboardingStep = dbUser.onboardingStep ?? 1
+
+                  return token
+                }
+              }
+            }
+
+            if (user) {
+              token.id = user.id
+              token.email = user.email
+              token.name = user.name
+              token.image = user.image
+              token.plan = (user as any).plan || "free"
+              token.profileType = (user as any).profileType ?? null
+              token.profileCompleted = (user as any).profileCompleted ?? false
+              token.onboardingStep = (user as any).onboardingStep ?? 1
+            }
+
+            return token
+          } catch (error) {
+            console.error("[AUTH][JWT_ERROR]", error)
+            return token
           }
-        }
-
-        return token
-      } catch (error) {
-        console.error("[AUTH][JWT_ERROR]", error)
-        return token
-      }
-    },
+        },
 
     async session({ session, token }) {
       if (session.user) {

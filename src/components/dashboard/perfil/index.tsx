@@ -230,14 +230,46 @@ export default function Perfil() {
     return (
       <section className="min-h-full">
         <div className="mx-auto w-full max-w-[1360px] space-y-5">
-          <div className="animate-pulse space-y-2">
-            <div className="h-9 w-64 rounded-2xl bg-slate-200" />
-            <div className="h-5 w-80 rounded-xl bg-slate-200" />
+          <div className="space-y-2">
+            <div
+              className="h-9 w-64 rounded-2xl"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--foreground) 10%, var(--card))",
+              }}
+            />
+
+            <div
+              className="h-5 w-80 rounded-xl"
+              style={{
+                backgroundColor:
+                  "color-mix(in srgb, var(--foreground) 8%, var(--card))",
+              }}
+            />
           </div>
 
           <div className="grid gap-5 xl:grid-cols-[620px_minmax(0,1fr)] xl:items-start">
-            <div className="h-[430px] rounded-[30px] border border-slate-200 bg-white shadow-sm" />
-            <div className="h-[430px] rounded-[30px] border border-slate-200 bg-white shadow-sm" />
+            <div
+              className="h-[430px] rounded-[30px] border"
+              style={{
+                backgroundColor: "var(--card)",
+                borderColor:
+                  "color-mix(in srgb, var(--border) 45%, transparent)",
+                boxShadow:
+                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+              }}
+            />
+
+            <div
+              className="h-[430px] rounded-[30px] border"
+              style={{
+                backgroundColor: "var(--card)",
+                borderColor:
+                  "color-mix(in srgb, var(--border) 45%, transparent)",
+                boxShadow:
+                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+              }}
+            />
           </div>
         </div>
       </section>
@@ -247,12 +279,26 @@ export default function Perfil() {
   if (!user) {
     return (
       <section className="min-h-full">
-        <div className="mx-auto w-full max-w-3xl rounded-[28px] border border-red-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">
+        <div
+          className="mx-auto w-full max-w-3xl rounded-[28px] border p-6"
+          style={{
+            backgroundColor: "var(--card)",
+            borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
+            boxShadow:
+              "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+          }}
+        >
+          <h2
+            className="text-lg font-semibold"
+            style={{ color: "var(--foreground)" }}
+          >
             No se pudo cargar el perfil
           </h2>
 
-          <p className="mt-2 text-sm leading-6 text-slate-500">
+          <p
+            className="mt-2 text-sm leading-6"
+            style={{ color: "var(--text-muted)" }}
+          >
             {error || "Ocurrió un problema al obtener la información del perfil."}
           </p>
 
@@ -260,7 +306,11 @@ export default function Perfil() {
             <button
               type="button"
               onClick={() => void loadProfile()}
-              className="inline-flex items-center justify-center rounded-2xl bg-[#062b78] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#0b348e]"
+              className="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
+              style={{
+                backgroundColor: "var(--primary)",
+                color: "var(--card)",
+              }}
             >
               Reintentar
             </button>
@@ -274,11 +324,14 @@ export default function Perfil() {
     <section className="min-h-full">
       <div className="mx-auto w-full max-w-[1360px] space-y-5">
         <div className="space-y-1">
-          <h1 className="text-[2rem] font-semibold tracking-tight text-[#10254d]">
+          <h1
+            className="text-[2rem] font-semibold tracking-tight"
+            style={{ color: "var(--foreground)" }}
+          >
             Información principal
           </h1>
 
-          <p className="text-sm text-slate-500">
+          <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Actualiza tus datos base y deja listo tu perfil real.
           </p>
         </div>

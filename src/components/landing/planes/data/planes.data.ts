@@ -25,8 +25,8 @@ export const landingPlans: LandingPlan[] = [
     desc: "Ideal para comenzar y probar la herramienta",
     precio: "$0",
     periodo: "para siempre",
-    cta: "Elegir plan",
-    href: "/auth/signup?plan=free",
+    cta: "Empezar gratis",
+    href: "/auth/register?plan=free",
     features: [
       "5 cotizaciones de prueba",
       "Acceso a 10 plantillas básicas",
@@ -42,7 +42,7 @@ export const landingPlans: LandingPlan[] = [
     precio: "$99",
     periodo: "/ mes",
     cta: "Elegir plan",
-    href: "/auth/signup?plan=pro",
+    href: "/auth/register?plan=pro",
     popular: true,
     features: [
       "Cotizaciones ilimitadas",
@@ -60,7 +60,7 @@ export const landingPlans: LandingPlan[] = [
     precio: "$199",
     periodo: "/ mes",
     cta: "Elegir plan",
-    href: "/auth/signup?plan=empresa",
+    href: "/auth/register?plan=empresa",
     premium: true,
     features: [
       "Todo lo de Pro",

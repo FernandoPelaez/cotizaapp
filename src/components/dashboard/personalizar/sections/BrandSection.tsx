@@ -4,22 +4,8 @@ import { Check, Palette } from "lucide-react"
 import { BRAND_COLOR_PRESET_LIST } from "@/lib/theme/theme-presets"
 import { useThemeContext } from "@/components/providers/ThemeProvider"
 
-function hexToRgba(hex: string, alpha: number) {
-  const clean = hex.replace("#", "").trim()
-
-  const normalized =
-    clean.length === 3
-      ? clean
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : clean
-
-  const r = parseInt(normalized.slice(0, 2), 16)
-  const g = parseInt(normalized.slice(2, 4), 16)
-  const b = parseInt(normalized.slice(4, 6), 16)
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+function mixColor(color: string, amount: number, base = "transparent") {
+  return `color-mix(in srgb, ${color} ${amount}%, ${base})`
 }
 
 export default function BrandSection() {
@@ -31,7 +17,8 @@ export default function BrandSection() {
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }}
     >
       <div className="mb-4 space-y-1">
@@ -67,19 +54,20 @@ export default function BrandSection() {
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
-                  ? `linear-gradient(180deg, ${hexToRgba(
+                  ? `linear-gradient(180deg, ${mixColor(
                       preset.hex,
-                      0.12
+                      12,
+                      "var(--card)"
                     )} 0%, var(--card) 100%)`
                   : "var(--background)",
 
                 borderColor: isActive
-                  ? hexToRgba(preset.hex, 0.48)
+                  ? mixColor(preset.hex, 48, "var(--border)")
                   : "color-mix(in srgb, var(--border) 45%, transparent)",
 
                 boxShadow: isActive
-                  ? `0 10px 24px ${hexToRgba(preset.hex, 0.12)}`
-                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                  ? `0 10px 24px ${mixColor(preset.hex, 12)}`
+                  : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
               }}
             >
               <div className="mb-3 flex items-start justify-between gap-3">
@@ -87,16 +75,15 @@ export default function BrandSection() {
                   <span
                     className="block h-10 w-10 flex-shrink-0 rounded-full border"
                     style={{
-                      background: `linear-gradient(135deg, ${hexToRgba(
-                        preset.hex,
-                        1
-                      )} 0%, ${hexToRgba(preset.hex, 0.82)} 100%)`,
+                      background: `linear-gradient(135deg, ${
+                        preset.hex
+                      } 0%, ${mixColor(preset.hex, 82, "var(--card)")} 100%)`,
                       borderColor: isActive
-                        ? hexToRgba(preset.hex, 0.5)
-                        : "rgba(255, 255, 255, 0.35)",
+                        ? mixColor(preset.hex, 50, "var(--border)")
+                        : "color-mix(in srgb, var(--card) 35%, var(--border))",
                       boxShadow: isActive
-                        ? `0 0 0 4px ${hexToRgba(preset.hex, 0.12)}`
-                        : "0 0 0 1px rgba(15, 23, 42, 0.06)",
+                        ? `0 0 0 4px ${mixColor(preset.hex, 12)}`
+                        : "0 0 0 1px color-mix(in srgb, var(--foreground) 6%, transparent)",
                     }}
                   />
 
@@ -121,8 +108,8 @@ export default function BrandSection() {
                   <span
                     className="inline-flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border"
                     style={{
-                      backgroundColor: hexToRgba(preset.hex, 0.14),
-                      borderColor: hexToRgba(preset.hex, 0.22),
+                      backgroundColor: mixColor(preset.hex, 14, "var(--card)"),
+                      borderColor: mixColor(preset.hex, 22, "var(--border)"),
                       color: preset.hex,
                     }}
                   >
@@ -143,10 +130,11 @@ export default function BrandSection() {
                     className="h-full rounded-full"
                     style={{
                       width: "68%",
-                      background: `linear-gradient(90deg, ${hexToRgba(
+                      background: `linear-gradient(90deg, ${mixColor(
                         preset.hex,
-                        0.92
-                      )} 0%, ${hexToRgba(preset.hex, 0.7)} 100%)`,
+                        92,
+                        "var(--card)"
+                      )} 0%, ${mixColor(preset.hex, 70, "var(--card)")} 100%)`,
                     }}
                   />
                 </div>

@@ -29,28 +29,14 @@ function getSystemPreference(): ResolvedThemeMode {
     : "light"
 }
 
-function hexToRgba(hex: string, alpha: number) {
-  const clean = hex.replace("#", "").trim()
-
-  const normalized =
-    clean.length === 3
-      ? clean
-          .split("")
-          .map((char) => char + char)
-          .join("")
-      : clean
-
-  const r = parseInt(normalized.slice(0, 2), 16)
-  const g = parseInt(normalized.slice(2, 4), 16)
-  const b = parseInt(normalized.slice(4, 6), 16)
-
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`
+function themeMix(color: string, amount: number, base = "transparent") {
+  return `color-mix(in srgb, ${color} ${amount}%, ${base})`
 }
 
 export default function ThemePreview() {
   const { draft } = useThemeContext()
   const [systemPreference, setSystemPreference] =
-    useState<ResolvedThemeMode>("light")
+    useState<ResolvedThemeMode>(() => getSystemPreference())
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -109,71 +95,77 @@ export default function ThemePreview() {
   const cardShadow =
     draft.shadowStyle !== "none"
       ? isDark
-        ? "0 12px 28px rgba(0, 0, 0, 0.22)"
-        : "0 10px 24px rgba(15, 23, 42, 0.055)"
+        ? `0 12px 28px ${themeMix("var(--background)", 55)}`
+        : `0 10px 24px ${themeMix("var(--foreground)", 6)}`
       : "none"
 
   const sectionShadow =
     draft.shadowStyle !== "none"
       ? isDark
-        ? "0 18px 42px rgba(0, 0, 0, 0.24)"
-        : "0 14px 35px rgba(15, 23, 42, 0.06)"
+        ? `0 18px 42px ${themeMix("var(--background)", 58)}`
+        : `0 14px 35px ${themeMix("var(--foreground)", 6)}`
       : "none"
 
   const sidebarBg = isDark
-    ? `linear-gradient(180deg, ${hexToRgba(
-        preview.tokens.brandHex,
-        0.2
+    ? `linear-gradient(180deg, ${themeMix(
+        "var(--primary)",
+        20,
+        "var(--card)"
       )} 0%, var(--card) 100%)`
-    : `linear-gradient(180deg, ${hexToRgba(
-        preview.tokens.brandHex,
-        0.98
-      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.88)} 100%)`
+    : "linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%)"
 
-  const heroBg = `linear-gradient(135deg, ${hexToRgba(
-    preview.tokens.brandHex,
-    0.96
-  )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.78)} 100%)`
+  const heroBg =
+    "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)"
 
   const planBg = isDark
-    ? `linear-gradient(135deg, ${hexToRgba(
-        preview.tokens.brandHex,
-        0.2
+    ? `linear-gradient(135deg, ${themeMix(
+        "var(--primary)",
+        20,
+        "var(--card)"
       )} 0%, var(--card) 100%)`
-    : `linear-gradient(135deg, ${hexToRgba(
-        preview.tokens.brandHex,
-        0.12
-      )} 0%, ${hexToRgba(preview.tokens.brandHex, 0.04)} 100%)`
+    : `linear-gradient(135deg, ${themeMix(
+        "var(--primary)",
+        12,
+        "var(--card)"
+      )} 0%, ${themeMix("var(--primary)", 4, "var(--card)")} 100%)`
 
   const mainAreaBg = isDark
-    ? "linear-gradient(180deg, rgba(255,255,255,0.025) 0%, rgba(255,255,255,0) 100%)"
-    : "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(248,250,252,0.72) 100%)"
+    ? `linear-gradient(180deg, ${themeMix(
+        "var(--card)",
+        12,
+        "var(--background)"
+      )} 0%, var(--background) 100%)`
+    : `linear-gradient(180deg, ${themeMix(
+        "var(--card)",
+        82,
+        "var(--background)"
+      )} 0%, var(--background) 100%)`
 
   const sidebarDivider = isDark
     ? "color-mix(in srgb, var(--border) 42%, transparent)"
-    : "rgba(255,255,255,0.18)"
+    : "color-mix(in srgb, var(--card) 18%, transparent)"
 
-  const sidebarText = isDark
-    ? "var(--foreground)"
-    : "rgba(255,255,255,0.96)"
+  const sidebarText = isDark ? "var(--foreground)" : "var(--card)"
 
   const sidebarMutedText = isDark
     ? "var(--text-muted)"
-    : "rgba(255,255,255,0.72)"
+    : "color-mix(in srgb, var(--card) 72%, transparent)"
 
   const expiredBadgeStyle = {
-    backgroundColor: hexToRgba("#F59E0B", isDark ? 0.22 : 0.14),
-    color: isDark ? "#FCD34D" : "#B45309",
+    backgroundColor: isDark
+      ? "color-mix(in srgb, var(--foreground) 10%, var(--card))"
+      : "color-mix(in srgb, var(--foreground) 6%, var(--card))",
+    color: "var(--foreground)",
   }
 
   const approvedBadgeStyle = {
-    backgroundColor: hexToRgba("#22C55E", isDark ? 0.2 : 0.14),
-    color: isDark ? "#86EFAC" : "#15803D",
+    backgroundColor: "var(--primary-soft)",
+    color: "var(--primary)",
   }
 
   const freeBadgeStyle = {
-    backgroundColor: hexToRgba("#F59E0B", isDark ? 0.22 : 0.14),
-    color: isDark ? "#FCD34D" : "#B45309",
+    backgroundColor: "var(--primary-soft)",
+    color: "var(--primary)",
   }
 
   return (
@@ -207,8 +199,8 @@ export default function ThemePreview() {
           ...previewStyle,
           borderColor: softBorderColor,
           boxShadow: isDark
-            ? "inset 0 1px 0 rgba(255,255,255,0.04)"
-            : "inset 0 1px 0 rgba(255,255,255,0.75)",
+            ? `inset 0 1px 0 ${themeMix("var(--card)", 8)}`
+            : `inset 0 1px 0 ${themeMix("var(--card)", 75)}`,
         }}
       >
         <div className="grid h-[420px] grid-cols-[72px_minmax(0,1fr)]">
@@ -231,7 +223,7 @@ export default function ThemePreview() {
                   style={{
                     backgroundColor: isDark
                       ? "var(--primary)"
-                      : "rgba(255,255,255,0.95)",
+                      : "var(--card)",
                   }}
                 />
 
@@ -259,14 +251,14 @@ export default function ThemePreview() {
                     style={{
                       backgroundColor: item.active
                         ? isDark
-                          ? hexToRgba(preview.tokens.brandHex, 0.2)
-                          : "rgba(255,255,255,0.18)"
+                          ? "color-mix(in srgb, var(--primary) 20%, var(--card))"
+                          : "color-mix(in srgb, var(--card) 18%, transparent)"
                         : "transparent",
                       border: item.active
                         ? `1px solid ${
                             isDark
-                              ? hexToRgba(preview.tokens.brandHex, 0.34)
-                              : "rgba(255,255,255,0.22)"
+                              ? "color-mix(in srgb, var(--primary) 34%, var(--border))"
+                              : "color-mix(in srgb, var(--card) 22%, transparent)"
                           }`
                         : "1px solid transparent",
                       color: item.active ? sidebarText : sidebarMutedText,
@@ -335,20 +327,27 @@ export default function ThemePreview() {
                 className="relative overflow-hidden rounded-[var(--radius)] border p-2.5"
                 style={{
                   background: heroBg,
-                  borderColor: hexToRgba(preview.tokens.brandHex, 0.22),
+                  borderColor:
+                    "color-mix(in srgb, var(--primary) 22%, var(--border))",
                   boxShadow: cardShadow,
                 }}
               >
                 <div className="max-w-[155px] space-y-1.5">
-                  <p className="text-[10px] font-semibold text-white">
+                  <p
+                    className="text-[10px] font-semibold"
+                    style={{
+                      color: isDark ? "var(--foreground)" : "var(--card)",
+                    }}
+                  >
                     Elige una plantilla y obtén un PDF profesional.
                   </p>
 
                   <div
                     className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-medium"
                     style={{
-                      backgroundColor: "rgba(255,255,255,0.94)",
-                      color: preview.tokens.brandHex,
+                      backgroundColor:
+                        "color-mix(in srgb, var(--card) 94%, transparent)",
+                      color: "var(--primary)",
                     }}
                   >
                     <Plus size={9} />
@@ -359,16 +358,20 @@ export default function ThemePreview() {
                 <div
                   className="absolute right-2.5 top-2 h-12 w-8 rounded-md"
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.90)",
-                    boxShadow: "0 8px 18px rgba(0,0,0,0.08)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--card) 90%, var(--foreground))",
+                    boxShadow:
+                      "0 8px 18px color-mix(in srgb, var(--background) 14%, transparent)",
                   }}
                 />
 
                 <div
                   className="absolute right-8 top-3.5 h-10 w-7 rotate-[-8deg] rounded-md"
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.72)",
-                    boxShadow: "0 8px 18px rgba(0,0,0,0.06)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--card) 72%, var(--foreground))",
+                    boxShadow:
+                      "0 8px 18px color-mix(in srgb, var(--background) 12%, transparent)",
                   }}
                 />
               </div>
@@ -531,8 +534,8 @@ export default function ThemePreview() {
                   style={{
                     background: planBg,
                     borderColor: isDark
-                      ? hexToRgba(preview.tokens.brandHex, 0.22)
-                      : hexToRgba(preview.tokens.brandHex, 0.16),
+                      ? "color-mix(in srgb, var(--primary) 22%, var(--border))"
+                      : "color-mix(in srgb, var(--primary) 16%, var(--border))",
                     boxShadow: cardShadow,
                   }}
                 >

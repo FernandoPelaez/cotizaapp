@@ -43,13 +43,14 @@ export default function Personalizar() {
             <span
               className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
+                
                 backgroundColor: isLoading
                   ? "var(--background)"
                   : hasChanges
-                  ? "var(--warning)"
-                  : "var(--success)",
-                color: isLoading ? "var(--foreground)" : "white",
-                border: isLoading ? "1px solid var(--border)" : "none",
+                  ? "color-mix(in srgb, var(--primary) 16%, var(--card))"
+                  : "var(--primary-soft)",
+                color: isLoading ? "var(--foreground)" : "var(--primary)",
+                border: "1px solid var(--border)",
               }}
             >
               {isLoading

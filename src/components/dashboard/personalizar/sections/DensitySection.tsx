@@ -37,7 +37,8 @@ export default function DensitySection() {
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }}
     >
       <div className="mb-4 space-y-1">
@@ -84,8 +85,8 @@ export default function DensitySection() {
                   ? "color-mix(in srgb, var(--primary) 65%, transparent)"
                   : "color-mix(in srgb, var(--border) 42%, transparent)",
                 boxShadow: isActive
-                  ? "0 10px 24px rgba(45, 107, 255, 0.11)"
-                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                  ? "0 10px 24px color-mix(in srgb, var(--primary) 11%, transparent)"
+                  : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
               }}
             >
               <div className="mb-3 flex items-start justify-between gap-3">
@@ -129,7 +130,8 @@ export default function DensitySection() {
                   borderColor:
                     "color-mix(in srgb, var(--border) 38%, transparent)",
                   padding: preview.cardPadding,
-                  boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.42)",
+                  boxShadow:
+                    "inset 0 1px 0 color-mix(in srgb, var(--card) 42%, transparent)",
                 }}
               >
                 <div
@@ -185,7 +187,8 @@ export default function DensitySection() {
                         height: preview.btnHeight,
                         width: preview.btnWidth,
                         backgroundColor: "var(--primary)",
-                        boxShadow: "0 8px 18px rgba(45, 107, 255, 0.18)",
+                        boxShadow:
+                          "0 8px 18px color-mix(in srgb, var(--primary) 18%, transparent)",
                       }}
                     />
                   </div>

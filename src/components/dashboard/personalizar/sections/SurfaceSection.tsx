@@ -17,7 +17,8 @@ function getCardPreviewStyles(value: string): CSSProperties {
       return {
         backgroundColor: "var(--card)",
         borderColor: softBorder,
-        boxShadow: "0 10px 24px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 10px 24px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }
 
     case "bordered":
@@ -31,7 +32,8 @@ function getCardPreviewStyles(value: string): CSSProperties {
       return {
         backgroundColor: "var(--background)",
         borderColor: "color-mix(in srgb, var(--border) 32%, transparent)",
-        boxShadow: "0 8px 20px rgba(15, 23, 42, 0.045)",
+        boxShadow:
+          "0 8px 20px color-mix(in srgb, var(--foreground) 5%, transparent)",
       }
 
     case "solid":
@@ -61,12 +63,12 @@ function getShadowPreview(value: string) {
     case "none":
       return "none"
     case "soft":
-      return "0 8px 22px rgba(15, 23, 42, 0.07)"
+      return "0 8px 22px color-mix(in srgb, var(--foreground) 7%, transparent)"
     case "medium":
-      return "0 12px 30px rgba(15, 23, 42, 0.10)"
+      return "0 12px 30px color-mix(in srgb, var(--foreground) 10%, transparent)"
     case "strong":
     default:
-      return "0 16px 42px rgba(15, 23, 42, 0.14)"
+      return "0 16px 42px color-mix(in srgb, var(--foreground) 14%, transparent)"
   }
 }
 
@@ -79,7 +81,8 @@ export default function SurfaceSection() {
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }}
     >
       <div className="mb-4 space-y-1">
@@ -136,8 +139,8 @@ export default function SurfaceSection() {
                       ? "color-mix(in srgb, var(--primary) 65%, transparent)"
                       : "color-mix(in srgb, var(--border) 42%, transparent)",
                     boxShadow: isActive
-                      ? "0 10px 24px rgba(45, 107, 255, 0.11)"
-                      : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                      ? "0 10px 24px color-mix(in srgb, var(--primary) 11%, transparent)"
+                      : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
                   }}
                 >
                   <div className="space-y-3">
@@ -268,8 +271,8 @@ export default function SurfaceSection() {
                         ? "color-mix(in srgb, var(--primary) 65%, transparent)"
                         : "color-mix(in srgb, var(--border) 42%, transparent)",
                       boxShadow: isActive
-                        ? "0 10px 24px rgba(45, 107, 255, 0.11)"
-                        : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                        ? "0 10px 24px color-mix(in srgb, var(--primary) 11%, transparent)"
+                        : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">
@@ -349,8 +352,8 @@ export default function SurfaceSection() {
                         ? "color-mix(in srgb, var(--primary) 65%, transparent)"
                         : "color-mix(in srgb, var(--border) 42%, transparent)",
                       boxShadow: isActive
-                        ? "0 10px 24px rgba(45, 107, 255, 0.11)"
-                        : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                        ? "0 10px 24px color-mix(in srgb, var(--primary) 11%, transparent)"
+                        : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
                     }}
                   >
                     <div className="flex items-center justify-between gap-3">

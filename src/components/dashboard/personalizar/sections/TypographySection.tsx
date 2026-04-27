@@ -16,7 +16,8 @@ export default function TypographySection() {
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }}
     >
       <div className="mb-4 space-y-1">
@@ -59,8 +60,8 @@ export default function TypographySection() {
                   ? "color-mix(in srgb, var(--primary) 65%, transparent)"
                   : "color-mix(in srgb, var(--border) 42%, transparent)",
                 boxShadow: isActive
-                  ? "0 10px 24px rgba(45, 107, 255, 0.11)"
-                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                  ? "0 10px 24px color-mix(in srgb, var(--primary) 11%, transparent)"
+                  : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
               }}
             >
               <div className="space-y-3">
@@ -88,7 +89,7 @@ export default function TypographySection() {
                       className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold"
                       style={{
                         backgroundColor: "var(--primary)",
-                        color: "white",
+                        color: "var(--card)",
                       }}
                     >
                       Activa
@@ -100,10 +101,12 @@ export default function TypographySection() {
                   className="rounded-2xl border px-3.5 py-3"
                   style={{
                     backgroundColor: "var(--card)",
-                    borderColor: "color-mix(in srgb, var(--border) 38%, transparent)",
+                    borderColor:
+                      "color-mix(in srgb, var(--border) 38%, transparent)",
                     fontFamily: FONT_FAMILY_STACKS[option.value],
                     color: "var(--foreground)",
-                    boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.45)",
+                    boxShadow:
+                      "inset 0 1px 0 color-mix(in srgb, var(--card) 45%, transparent)",
                   }}
                 >
                   <p className="text-sm font-semibold">

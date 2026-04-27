@@ -20,7 +20,8 @@ export default function AppearanceSection() {
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-        boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+        boxShadow:
+          "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
       }}
     >
       <div className="mb-4 space-y-1">
@@ -59,8 +60,8 @@ export default function AppearanceSection() {
                   ? "color-mix(in srgb, var(--primary) 75%, transparent)"
                   : "color-mix(in srgb, var(--border) 45%, transparent)",
                 boxShadow: isActive
-                  ? "0 10px 24px rgba(45, 107, 255, 0.12)"
-                  : "0 8px 20px rgba(15, 23, 42, 0.035)",
+                  ? "0 10px 24px color-mix(in srgb, var(--primary) 12%, transparent)"
+                  : "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
               }}
             >
               <div className="mb-3 flex items-center justify-between">
@@ -70,7 +71,7 @@ export default function AppearanceSection() {
                     backgroundColor: isActive
                       ? "var(--primary)"
                       : "var(--primary-soft)",
-                    color: isActive ? "white" : "var(--primary)",
+                    color: isActive ? "var(--card)" : "var(--primary)",
                   }}
                 >
                   <Icon size={16} />
@@ -81,7 +82,7 @@ export default function AppearanceSection() {
                     className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
                     style={{
                       backgroundColor: "var(--primary)",
-                      color: "white",
+                      color: "var(--card)",
                     }}
                   >
                     Activo

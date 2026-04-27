@@ -33,17 +33,35 @@ type AvatarProps = {
   size?: "lg" | "sm"
 }
 
-function Avatar({ showImage, src, initials, onError, size = "lg" }: AvatarProps) {
+function Avatar({
+  showImage,
+  src,
+  initials,
+  onError,
+  size = "lg",
+}: AvatarProps) {
   return (
     <div
       className={
         size === "lg"
-          ? "flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#dbe6ff] text-[26px] font-bold tracking-tight text-[#2f5fe3]"
-          : "flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-[14px] font-bold tracking-tight text-white"
+          ? "flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full text-[26px] font-bold tracking-tight"
+          : "flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full text-[14px] font-bold tracking-tight"
       }
+      style={{
+        backgroundColor:
+          size === "lg"
+            ? "var(--primary-soft)"
+            : "color-mix(in srgb, var(--card) 20%, transparent)",
+        color: size === "lg" ? "var(--primary)" : "var(--card)",
+      }}
     >
       {showImage ? (
-        <img src={src} alt="Logo" className="h-full w-full object-cover" onError={onError} />
+        <img
+          src={src}
+          alt="Logo"
+          className="h-full w-full object-cover"
+          onError={onError}
+        />
       ) : (
         <span>{initials}</span>
       )}
@@ -53,16 +71,27 @@ function Avatar({ showImage, src, initials, onError, size = "lg" }: AvatarProps)
 
 function ContactRow({ icon, text }: { icon: ReactNode; text: string }) {
   return (
-    <div className="flex items-center gap-2.5 text-[13px] text-slate-500">
-      <div className="flex h-4 w-4 shrink-0 items-center justify-center text-[#2f5fe3]">
+    <div
+      className="flex items-center gap-2.5 text-[13px]"
+      style={{ color: "var(--text-muted)" }}
+    >
+      <div
+        className="flex h-4 w-4 shrink-0 items-center justify-center"
+        style={{ color: "var(--primary)" }}
+      >
         {icon}
       </div>
+
       <span className="truncate">{text}</span>
     </div>
   )
 }
 
-export default function PerfilOverviewCard({ user, values, initials }: PerfilOverviewCardProps) {
+export default function PerfilOverviewCard({
+  user,
+  values,
+  initials,
+}: PerfilOverviewCardProps) {
   const [imageError, setImageError] = useState(false)
 
   const profileTypeLabel = getProfileTypeLabel(user.profileType)
@@ -79,26 +108,47 @@ export default function PerfilOverviewCard({ user, values, initials }: PerfilOve
 
   return (
     <aside className="h-full w-full">
-      <section className="h-full w-full overflow-hidden rounded-[16px] border border-slate-200 bg-white shadow-sm">
+      <section
+        className="h-full w-full overflow-hidden rounded-[16px] border"
+        style={{
+          backgroundColor: "var(--card)",
+          borderColor: "color-mix(in srgb, var(--border) 75%, transparent)",
+          boxShadow:
+            "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+        }}
+      >
         <div className="flex h-full w-full flex-col px-6 py-6">
-
-          {/* Chip superior */}
           <div className="mb-5 flex justify-end">
-            <span className="inline-flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 text-[11px] font-medium text-slate-500 shadow-sm">
-              <svg className="h-2.5 w-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+            <span
+              className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-medium"
+              style={{
+                backgroundColor: "var(--card)",
+                borderColor:
+                  "color-mix(in srgb, var(--border) 75%, transparent)",
+                color: "var(--text-muted)",
+                boxShadow:
+                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+              }}
+            >
+              <svg
+                className="h-2.5 w-2.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
               </svg>
               Vista previa en cotización
             </span>
           </div>
 
-          {/* Layout 2 columnas */}
           <div className="flex flex-1 items-start gap-6">
-
-            {/* ── Columna izquierda: datos del usuario ── */}
             <div className="flex min-w-0 flex-1 flex-col gap-5">
-
-              {/* Avatar + nombre + tipo en fila horizontal */}
               <div className="flex items-center gap-3">
                 <Avatar
                   showImage={showLogoImage}
@@ -107,83 +157,163 @@ export default function PerfilOverviewCard({ user, values, initials }: PerfilOve
                   onError={() => setImageError(true)}
                   size="lg"
                 />
+
                 <div className="min-w-0">
-                  <p className="truncate text-[18px] font-bold leading-snug text-[#10254d]">
+                  <p
+                    className="truncate text-[18px] font-bold leading-snug"
+                    style={{ color: "var(--foreground)" }}
+                  >
                     {businessName}
                   </p>
-                  <span className="mt-1 inline-flex items-center rounded-full bg-[#dbe6ff] px-2.5 py-0.5 text-[11px] font-semibold text-[#2f5fe3]">
+
+                  <span
+                    className="mt-1 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                    style={{
+                      backgroundColor: "var(--primary-soft)",
+                      color: "var(--primary)",
+                    }}
+                  >
                     {profileTypeLabel}
                   </span>
                 </div>
               </div>
 
-              {/* Datos de contacto */}
               <div className="flex flex-col gap-3">
                 <ContactRow icon={<Mail className="h-4 w-4" />} text={email} />
                 <ContactRow icon={<Phone className="h-4 w-4" />} text={phone} />
-                <ContactRow icon={<MapPin className="h-4 w-4" />} text={location} />
+                <ContactRow
+                  icon={<MapPin className="h-4 w-4" />}
+                  text={location}
+                />
               </div>
             </div>
 
-            {/* ── Columna derecha: mini plantilla de cotización ── */}
             <div className="w-[270px] shrink-0">
-              <div className="overflow-hidden rounded-[12px] border border-slate-200 bg-white shadow-[0_8px_24px_rgba(15,35,90,0.13)]">
-
-                {/* Header azul oscuro */}
-                <div className="bg-[#062b78] px-5 py-5">
+              <div
+                className="overflow-hidden rounded-[12px] border"
+                style={{
+                  backgroundColor: "var(--card)",
+                  borderColor:
+                    "color-mix(in srgb, var(--border) 75%, transparent)",
+                  boxShadow:
+                    "0 8px 24px color-mix(in srgb, var(--primary) 13%, transparent)",
+                }}
+              >
+                <div
+                  className="px-5 py-5"
+                  style={{ backgroundColor: "var(--primary)" }}
+                >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-[14px] font-bold tracking-tight text-white">
-                      {showLogoImage ? (
-                        <img
-                          src={previewLogo}
-                          alt="Logo"
-                          className="h-full w-full object-cover"
-                          onError={() => setImageError(true)}
-                        />
-                      ) : (
-                        <span>{initials}</span>
-                      )}
-                    </div>
+                    <Avatar
+                      showImage={showLogoImage}
+                      src={previewLogo}
+                      initials={initials}
+                      onError={() => setImageError(true)}
+                      size="sm"
+                    />
+
                     <div className="min-w-0">
-                      <p className="truncate text-[13px] font-bold uppercase tracking-wide text-white">
+                      <p
+                        className="truncate text-[13px] font-bold uppercase tracking-wide"
+                        style={{ color: "var(--card)" }}
+                      >
                         {businessName}
                       </p>
-                      <p className="mt-0.5 text-[11px] text-blue-200">{profileTypeLabel}</p>
+
+                      <p
+                        className="mt-0.5 text-[11px]"
+                        style={{
+                          color:
+                            "color-mix(in srgb, var(--card) 72%, transparent)",
+                        }}
+                      >
+                        {profileTypeLabel}
+                      </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Cuerpo blanco */}
-                <div className="space-y-3.5 px-5 pt-5 pb-8">
+                <div className="space-y-3.5 px-5 pb-8 pt-5">
+                  <div
+                    className="flex items-center justify-between border-b pb-3"
+                    style={{
+                      borderColor:
+                        "color-mix(in srgb, var(--border) 45%, transparent)",
+                    }}
+                  >
+                    <span
+                      className="text-[13px] font-semibold"
+                      style={{ color: "var(--foreground)" }}
+                    >
+                      Cotización
+                    </span>
 
-                  {/* Folio */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <span className="text-[13px] font-semibold text-slate-700">Cotización</span>
-                    <span className="text-[12px] text-slate-400">#CTZ-0001</span>
+                    <span
+                      className="text-[12px]"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      #CTZ-0001
+                    </span>
                   </div>
 
-                  {/* Conceptos */}
                   <div className="space-y-2.5">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="min-w-0 truncate text-[12px] text-slate-500">Diseño y Desarrollo</span>
-                      <span className="shrink-0 text-[12px] text-slate-500">$12,500.00</span>
+                      <span
+                        className="min-w-0 truncate text-[12px]"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Diseño y Desarrollo
+                      </span>
+
+                      <span
+                        className="shrink-0 text-[12px]"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        $12,500.00
+                      </span>
                     </div>
+
                     <div className="flex items-center justify-between gap-2">
-                      <span className="min-w-0 truncate text-[12px] text-slate-500">Mantenimiento</span>
-                      <span className="shrink-0 text-[12px] text-slate-500">$2,800.00</span>
+                      <span
+                        className="min-w-0 truncate text-[12px]"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        Mantenimiento
+                      </span>
+
+                      <span
+                        className="shrink-0 text-[12px]"
+                        style={{ color: "var(--text-muted)" }}
+                      >
+                        $2,800.00
+                      </span>
                     </div>
                   </div>
 
-                  {/* Total */}
-                  <div className="flex items-center justify-between gap-2 border-t border-slate-200 pt-3">
-                    <span className="text-[13px] font-bold text-slate-900">Total</span>
-                    <span className="text-[13px] font-bold text-[#2f5fe3]">$15,300.00</span>
-                  </div>
+                  <div
+                    className="flex items-center justify-between gap-2 border-t pt-3"
+                    style={{
+                      borderColor:
+                        "color-mix(in srgb, var(--border) 75%, transparent)",
+                    }}
+                  >
+                    <span
+                      className="text-[13px] font-bold"
+                      style={{ color: "var(--foreground)" }}
+                    >
+                      Total
+                    </span>
 
+                    <span
+                      className="text-[13px] font-bold"
+                      style={{ color: "var(--primary)" }}
+                    >
+                      $15,300.00
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>

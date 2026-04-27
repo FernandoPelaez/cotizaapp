@@ -60,13 +60,14 @@ model Settings {
   createdAt           DateTime          @default(now())
   updatedAt           DateTime          @updatedAt
   defaultSendChannel  SendChannel       @default(PDF)
-  brandColor          String            @default("#1b3d7a")
+
+  brandColor          String            @default("blue")
   cardStyle           ThemeCardStyle    @default(SUAVE)
   densityStyle        ThemeDensityStyle @default(COMODA)
-  fontFamily          ThemeFontFamily   @default(GEIST)
+  fontFamily          ThemeFontFamily   @default(INTER)
   radiusStyle         ThemeRadiusStyle  @default(MEDIO)
   shadowStyle         ThemeShadowStyle  @default(SUAVE)
-  themeMode           ThemeMode         @default(SISTEMA)
+  themeMode           ThemeMode         @default(CLARO)
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

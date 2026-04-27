@@ -1,4 +1,5 @@
 "use client";
+
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
@@ -36,12 +37,15 @@ export default function Configuracion() {
   const handleInvalidSession = async () => {
     if (isHandlingSession.current) return;
     isHandlingSession.current = true;
-    setPageLoading (false);
+    setPageLoading(false);
     await signOut({ redirect: false });
     router.replace("/auth/signin");
   };
 
-  const [toast, setToast] = useState<{ msg: string; type: "success" | "error" | "warning" } | null>(null);
+  const [toast, setToast] = useState<{
+    msg: string;
+    type: "success" | "error" | "warning";
+  } | null>(null);
   const [usage, setUsage] = useState<Usage | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [isEditingEmail, setIsEditingEmail] = useState(false);
@@ -54,32 +58,31 @@ export default function Configuracion() {
   const [userMeta, setUserMeta] = useState<UserMeta | null>(null);
   const [activeSessions, setActiveSessions] = useState<number | null>(null);
 
-      const refreshUserData = async () => {
-      try {
-        const data = await fetchWithAuth<MeResponse>(
-          "/api/user/me",
-          {},
-          handleInvalidSession
-        );
+  const refreshUserData = async () => {
+    try {
+      const data = await fetchWithAuth<MeResponse>(
+        "/api/user/me",
+        {},
+        handleInvalidSession
+      );
 
-        if (!data) return;
+      if (!data) return;
 
-        setUserMeta(data.user);
-        setPlan(data.plan);
-        setUsage(data.usage);
-        setActiveSessions(data.activeSessions);
-
-      } catch (err: any) {
-        if (err?.error === "USER_NOT_FOUND") {
-          await signOut({ redirect: false });
-          router.replace("/auth/register");
-          showToast("Tu cuenta fue eliminada. Regístrate nuevamente.", "error");
-          return;
-        }
-
-        showToast(getErrorMessage(err?.error), "error");
+      setUserMeta(data.user);
+      setPlan(data.plan);
+      setUsage(data.usage);
+      setActiveSessions(data.activeSessions);
+    } catch (err: any) {
+      if (err?.error === "USER_NOT_FOUND") {
+        await signOut({ redirect: false });
+        router.replace("/auth/register");
+        showToast("Tu cuenta fue eliminada. Regístrate nuevamente.", "error");
+        return;
       }
-    };
+
+      showToast(getErrorMessage(err?.error), "error");
+    }
+  };
 
   useEffect(() => {
     if (status !== "authenticated") {
@@ -89,7 +92,7 @@ export default function Configuracion() {
 
     let isMounted = true;
 
-      const fetchData = async () => {
+    const fetchData = async () => {
       try {
         const data = await fetchWithAuth<MeResponse>(
           "/api/user/me",
@@ -105,9 +108,9 @@ export default function Configuracion() {
         setPlan(data.plan);
         setUsage(data.usage);
         setActiveSessions(data.activeSessions);
-
       } catch (err: any) {
         if (!isMounted) return;
+
         if (err?.error === "USER_NOT_FOUND") {
           await signOut({ redirect: false });
           router.replace("/auth/register");
@@ -116,7 +119,6 @@ export default function Configuracion() {
         }
 
         showToast(getErrorMessage(err?.error), "error");
-
       } finally {
         if (isMounted) setPageLoading(false);
       }
@@ -145,7 +147,10 @@ export default function Configuracion() {
     return diffYears === 1 ? "hace 1 año" : `hace ${diffYears} años`;
   };
 
-  const showToast = (msg: string, type: "success" | "error" | "warning" = "success") => {
+  const showToast = (
+    msg: string,
+    type: "success" | "error" | "warning" = "success"
+  ) => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3500);
   };
@@ -193,12 +198,30 @@ export default function Configuracion() {
 
   const handleUpdateEmail = async () => {
     if (loading) return;
+
     const email = newEmail.trim().toLowerCase();
-    if (!email) { showToast("El correo es requerido", "warning"); return; }
-    if (!email.includes("@") || !email.includes(".")) { showToast("Formato de correo inválido", "warning"); return; }
+
+    if (!email) {
+      showToast("El correo es requerido", "warning");
+      return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+      showToast("Formato de correo inválido", "warning");
+      return;
+    }
+
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) { showToast("Correo inválido, verifica el formato", "warning"); return; }
-    if (email === session?.user?.email?.toLowerCase()) { showToast("Ese ya es tu correo actual", "warning"); return; }
+
+    if (!emailRegex.test(email)) {
+      showToast("Correo inválido, verifica el formato", "warning");
+      return;
+    }
+
+    if (email === session?.user?.email?.toLowerCase()) {
+      showToast("Ese ya es tu correo actual", "warning");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -222,51 +245,40 @@ export default function Configuracion() {
     } catch {
       showToast("Error de conexión al actualizar correo", "error");
     } finally {
-       setLoading(false); 
+      setLoading(false);
     }
   };
 
-  const usedPct = usage && usage.maxQuotes > 0
-    ? Math.min((usage.quotesUsed / usage.maxQuotes) * 100, 100)
-    : 0;
+  const usedPct =
+    usage && usage.maxQuotes > 0
+      ? Math.min((usage.quotesUsed / usage.maxQuotes) * 100, 100)
+      : 0;
 
   const isGoogleUser = !!session?.user?.image?.includes("googleusercontent");
 
-  const toastColors: Record<string, { bg: string; shadow: string }> = {
-    success: { bg: "#1B3D7A", shadow: "rgba(27,61,122,0.35)" },
-    error:   { bg: "#DC2626", shadow: "rgba(220,38,38,0.35)" },
-    warning: { bg: "#D97706", shadow: "rgba(217,119,6,0.35)" },
+  const toastColors: Record<
+    "success" | "error" | "warning",
+    { bg: string; shadow: string }
+  > = {
+    success: {
+      bg: "var(--success)",
+      shadow: "color-mix(in srgb, var(--success) 35%, transparent)",
+    },
+    error: {
+      bg: "var(--error)",
+      shadow: "color-mix(in srgb, var(--error) 35%, transparent)",
+    },
+    warning: {
+      bg: "var(--warning)",
+      shadow: "color-mix(in srgb, var(--warning) 35%, transparent)",
+    },
   };
 
   return (
     <>
       <style>{`
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(14px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes toastIn {
-          from { opacity: 0; transform: translate(-50%, -60%); }
-          to   { opacity: 1; transform: translate(-50%, -50%); }
-        }
-        @keyframes modalIn {
-          from { opacity: 0; transform: scale(0.92) translateY(12px); }
-          to   { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        @keyframes fadeUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -600px 0; }
-          100% { background-position: 600px 0; }
-        }
-
         .sk {
-          background: linear-gradient(90deg, #ECEEF2 25%, #F5F6F8 50%, #ECEEF2 75%);
-          background-size: 600px 100%;
-          animation: shimmer 1.4s infinite linear;
+          background: color-mix(in srgb, var(--foreground) 8%, var(--card));
           border-radius: 8px;
         }
 
@@ -278,69 +290,87 @@ export default function Configuracion() {
           align-items: start;
           max-width: 860px;
         }
+
         @media (max-width: 860px) {
-          .cfg-wrap { grid-template-columns: 1fr; max-width: 480px; }
+          .cfg-wrap {
+            grid-template-columns: 1fr;
+            max-width: 480px;
+          }
         }
 
         .cfg-card {
-          background: #fff;
-          border: 1.5px solid #E4E7EF;
+          background: var(--card);
+          border: 1.5px solid color-mix(in srgb, var(--border) 75%, transparent);
           border-radius: 18px;
           overflow: hidden;
-          box-shadow: 0 2px 12px rgba(0,0,0,0.055);
+          box-shadow: 0 2px 12px color-mix(in srgb, var(--foreground) 6%, transparent);
           display: flex;
           flex-direction: column;
-          animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both;
         }
-        .cfg-card:nth-child(2) { animation-delay: 0.07s; }
 
         .cfg-head {
           padding: 15px 22px;
           display: flex;
           align-items: center;
           gap: 10px;
-          background: #1B3D7A;
+          background: var(--primary);
         }
+
         .cfg-head-icon {
-          width: 32px; height: 32px;
+          width: 32px;
+          height: 32px;
           border-radius: 9px;
-          display: flex; align-items: center; justify-content: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           flex-shrink: 0;
-          background: rgba(255,255,255,0.15);
+          background: color-mix(in srgb, var(--card) 18%, transparent);
+          color: var(--card);
         }
+
         .cfg-head-title {
           font-size: 11px;
           font-weight: 800;
           text-transform: uppercase;
           letter-spacing: 0.1em;
-          color: #fff;
+          color: var(--card);
           margin: 0;
         }
 
-        .cfg-body { flex: 1; display: flex; flex-direction: column; }
+        .cfg-body {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+        }
 
         .cfg-row {
           display: flex;
           align-items: center;
           justify-content: space-between;
           padding: 16px 22px;
-          border-bottom: 1px solid #F1F3F8;
+          border-bottom: 1px solid color-mix(in srgb, var(--border) 48%, transparent);
           gap: 1rem;
-          transition: background 0.15s;
         }
-        .cfg-row:last-child { border-bottom: none; }
-        .cfg-row:hover { background: #FAFBFD; }
+
+        .cfg-row:last-child {
+          border-bottom: none;
+        }
+
+        .cfg-row:hover {
+          background: color-mix(in srgb, var(--background) 45%, var(--card));
+        }
 
         .cfg-label {
           font-size: 13px;
           font-weight: 600;
-          color: #1F2937;
+          color: var(--foreground);
           margin: 0 0 2px;
           line-height: 1;
         }
+
         .cfg-hint {
           font-size: 11.5px;
-          color: #A0AAB8;
+          color: var(--text-muted);
           margin: 0;
           line-height: 1.4;
         }
@@ -357,66 +387,104 @@ export default function Configuracion() {
           align-items: center;
           gap: 5px;
           font-family: inherit;
-          transition: transform 0.12s, opacity 0.12s, box-shadow 0.12s;
           border: none;
           outline: none;
         }
-        .cfg-btn:hover   { transform: translateY(-1px); opacity: 0.9; }
-        .cfg-btn:active  { transform: translateY(0px); }
-        .cfg-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-        .btn-outline { background: #fff; border: 1.5px solid #D4D8E2; color: #374151; }
-        .btn-outline:hover { border-color: #1B3D7A; color: #1B3D7A; box-shadow: 0 0 0 3px rgba(27,61,122,0.08); }
+        .cfg-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
 
-        .btn-primary { background: #1B3D7A; color: #fff; box-shadow: 0 2px 6px rgba(27,61,122,0.25); }
-        .btn-primary:hover { box-shadow: 0 4px 12px rgba(27,61,122,0.3); }
+        .btn-outline {
+          background: var(--card);
+          border: 1.5px solid color-mix(in srgb, var(--border) 85%, transparent);
+          color: var(--foreground);
+        }
 
-        .btn-green { background: #16A34A; color: #fff; box-shadow: 0 2px 6px rgba(22,163,74,0.25); }
-        .btn-green:hover { box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+        .btn-outline:hover {
+          border-color: var(--primary);
+          color: var(--primary);
+          background: var(--primary-soft);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 8%, transparent);
+        }
 
-        .btn-danger-soft { background: #FEF2F2; border: 1.5px solid #FECACA; color: #DC2626; }
-        .btn-danger-soft:hover { background: #FEE2E2; }
+        .btn-primary {
+          background: var(--primary);
+          color: var(--card);
+          box-shadow: 0 2px 6px color-mix(in srgb, var(--primary) 25%, transparent);
+        }
+
+        .btn-primary:hover {
+          background: var(--primary-hover);
+          box-shadow: 0 4px 12px color-mix(in srgb, var(--primary) 30%, transparent);
+        }
+
+        .btn-green {
+          background: var(--success);
+          color: var(--card);
+          box-shadow: 0 2px 6px color-mix(in srgb, var(--success) 25%, transparent);
+        }
+
+        .btn-green:hover {
+          box-shadow: 0 4px 12px color-mix(in srgb, var(--success) 30%, transparent);
+        }
+
+        .btn-danger-soft {
+          background: var(--error-bg);
+          border: 1.5px solid color-mix(in srgb, var(--error) 35%, var(--border));
+          color: var(--error);
+        }
+
+        .btn-danger-soft:hover {
+          background: color-mix(in srgb, var(--error) 16%, var(--card));
+        }
 
         .cfg-input {
           width: 100%;
           height: 38px;
           padding: 0 12px;
-          border: 1.5px solid #E2E5EC;
+          border: 1.5px solid color-mix(in srgb, var(--border) 85%, transparent);
           border-radius: 9px;
           font-size: 13px;
-          color: #111827;
+          color: var(--foreground);
           outline: none;
-          background: #fff;
+          background: var(--card);
           font-family: inherit;
           box-sizing: border-box;
-          transition: border-color 0.15s, box-shadow 0.15s;
         }
+
         .cfg-input:focus {
-          border-color: #1B3D7A;
-          box-shadow: 0 0 0 3px rgba(27,61,122,0.1);
+          border-color: var(--primary);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
         }
-        .cfg-input.danger { border-color: #FECACA; }
+
+        .cfg-input.danger {
+          border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+        }
+
         .cfg-input.danger:focus {
-          border-color: #DC2626;
-          box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+          border-color: var(--error);
+          box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 10%, transparent);
         }
 
         .email-panel {
-          background: #F5F7FB;
-          border: 1.5px solid #E2E6F0;
+          background: color-mix(in srgb, var(--background) 55%, var(--card));
+          border: 1.5px solid color-mix(in srgb, var(--border) 75%, transparent);
           border-radius: 12px;
           padding: 14px 16px;
           margin-top: 12px;
-          animation: slideUp 0.22s cubic-bezier(0.16,1,0.3,1);
         }
+
         .email-panel-label {
           font-size: 10px;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.09em;
-          color: #A0AAB8;
+          color: var(--text-muted);
           margin: 0 0 8px;
         }
+
         .email-panel-actions {
           display: flex;
           gap: 8px;
@@ -425,28 +493,32 @@ export default function Configuracion() {
 
         .danger-zone {
           margin: 0 22px;
-          border-top: 1px dashed #FECACA;
+          border-top: 1px dashed color-mix(in srgb, var(--error) 35%, var(--border));
         }
+
         .danger-row {
-          background: #FFFAFA;
+          background: color-mix(in srgb, var(--error) 5%, var(--card));
           padding: 16px 22px;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 1rem;
         }
-        .danger-row:hover { background: #FFF5F5; }
+
+        .danger-row:hover {
+          background: color-mix(in srgb, var(--error) 8%, var(--card));
+        }
 
         .progress-track {
           height: 6px;
-          background: #EEF0F5;
+          background: color-mix(in srgb, var(--border) 42%, transparent);
           border-radius: 99px;
           overflow: hidden;
         }
+
         .progress-fill {
           height: 100%;
           border-radius: 99px;
-          transition: width 0.8s cubic-bezier(0.16,1,0.3,1);
         }
 
         .badge {
@@ -463,86 +535,139 @@ export default function Configuracion() {
           gap: 9px;
           padding: 7px 0;
         }
+
         .pro-feature-check {
-          width: 20px; height: 20px;
+          width: 20px;
+          height: 20px;
           border-radius: 50%;
-          background: #ECFDF5;
-          display: flex; align-items: center; justify-content: center;
+          background: var(--success-bg);
+          display: flex;
+          align-items: center;
+          justify-content: center;
           flex-shrink: 0;
+          color: var(--success);
         }
+
         .pro-feature-text {
           font-size: 13px;
-          color: #374151;
+          color: var(--foreground);
           font-weight: 500;
         }
 
         .cfg-footer {
           padding: 16px 22px;
-          border-top: 1px solid #F1F3F8;
+          border-top: 1px solid color-mix(in srgb, var(--border) 48%, transparent);
         }
 
         .confirm-box {
-          background: #FFF5F5;
-          border: 1.5px solid #FECACA;
+          background: color-mix(in srgb, var(--error) 6%, var(--card));
+          border: 1.5px solid color-mix(in srgb, var(--error) 35%, var(--border));
           border-radius: 10px;
           padding: 12px 14px;
           margin-top: 14px;
         }
+
         .confirm-label {
           font-size: 10px;
           font-weight: 700;
-          color: #DC2626;
+          color: var(--error);
           text-transform: uppercase;
           letter-spacing: 0.08em;
           margin: 0 0 8px;
         }
       `}</style>
 
-      {/* ── Toast ── */}
       {toast && (
-        <div style={{
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          zIndex: 1000,
-          background: toastColors[toast.type].bg,
-          color: "#fff",
-          padding: "13px 22px",
-          borderRadius: 14,
-          fontSize: 13,
-          fontWeight: 600,
-          boxShadow: `0 8px 32px ${toastColors[toast.type].shadow}`,
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          animation: "toastIn 0.3s cubic-bezier(0.16,1,0.3,1)",
-          fontFamily: "'Segoe UI', system-ui, sans-serif",
-          whiteSpace: "nowrap",
-          pointerEvents: "none",
-        }}>
-          <span style={{
-            width: 22, height: 22, borderRadius: "50%",
-            background: "rgba(255,255,255,0.2)",
-            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-          }}>
-            {toast.type === "success" && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
-            {toast.type === "error"   && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>}
-            {toast.type === "warning" && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3"><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>}
+        <div
+          style={{
+            position: "fixed",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            zIndex: 1000,
+            background: toastColors[toast.type].bg,
+            color: "var(--card)",
+            padding: "13px 22px",
+            borderRadius: 14,
+            fontSize: 13,
+            fontWeight: 600,
+            boxShadow: `0 8px 32px ${toastColors[toast.type].shadow}`,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+            whiteSpace: "nowrap",
+            pointerEvents: "none",
+          }}
+        >
+          <span
+            style={{
+              width: 22,
+              height: 22,
+              borderRadius: "50%",
+              background: "color-mix(in srgb, var(--card) 20%, transparent)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            {toast.type === "success" && (
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            )}
+            {toast.type === "error" && (
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            )}
+            {toast.type === "warning" && (
+              <svg
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="3"
+              >
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            )}
           </span>
           {toast.msg}
         </div>
       )}
 
-      {/* ── Modal eliminar ── */}
       {showDeleteModal && (
         <div
-          onClick={(e) => { if (e.target === e.currentTarget) { setShowDeleteModal(false); setDeleteConfirmText(""); } }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowDeleteModal(false);
+              setDeleteConfirmText("");
+            }
+          }}
           style={{
             position: "fixed",
             inset: 0,
             zIndex: 9999,
-            background: "rgba(10,18,35,0.65)",
+            background: "color-mix(in srgb, var(--foreground) 65%, transparent)",
             backdropFilter: "blur(6px)",
             WebkitBackdropFilter: "blur(6px)",
             display: "flex",
@@ -554,35 +679,69 @@ export default function Configuracion() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              background: "#fff",
+              background: "var(--card)",
               borderRadius: 22,
               padding: "2.25rem",
               width: "90%",
               maxWidth: 420,
-              boxShadow: "0 32px 80px rgba(0,0,0,0.25)",
-              animation: "modalIn 0.28s cubic-bezier(0.16,1,0.3,1)",
+              boxShadow:
+                "0 32px 80px color-mix(in srgb, var(--foreground) 25%, transparent)",
             }}
           >
-            <div style={{
-              width: 56, height: 56, borderRadius: 16,
-              background: "linear-gradient(135deg,#FEF2F2,#FFE4E4)",
-              border: "1.5px solid #FECACA",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              marginBottom: "1.25rem",
-            }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.8">
-                <polyline points="3 6 5 6 21 6"/>
-                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                <path d="M10 11v6M14 11v6"/>
-                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+            <div
+              style={{
+                width: 56,
+                height: 56,
+                borderRadius: 16,
+                background: "var(--error-bg)",
+                border: "1.5px solid color-mix(in srgb, var(--error) 35%, var(--border))",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "1.25rem",
+                color: "var(--error)",
+              }}
+            >
+              <svg
+                width="26"
+                height="26"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                <path d="M10 11v6M14 11v6" />
+                <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
               </svg>
             </div>
 
-            <h3 style={{ fontSize: 18, fontWeight: 800, color: "#111827", margin: "0 0 0.45rem", letterSpacing: "-0.02em" }}>
+            <h3
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: "var(--foreground)",
+                margin: "0 0 0.45rem",
+                letterSpacing: "-0.02em",
+              }}
+            >
               ¿Eliminar tu cuenta?
             </h3>
-            <p style={{ fontSize: 13.5, color: "#6B7280", lineHeight: 1.65, margin: 0 }}>
-              Esta acción es <strong style={{ color: "#DC2626" }}>permanente e irreversible</strong>. Se eliminarán todos tus datos, cotizaciones y configuraciones.
+
+            <p
+              style={{
+                fontSize: 13.5,
+                color: "var(--text-muted)",
+                lineHeight: 1.65,
+                margin: 0,
+              }}
+            >
+              Esta acción es{" "}
+              <strong style={{ color: "var(--error)" }}>
+                permanente e irreversible
+              </strong>
+              . Se eliminarán todos tus datos, cotizaciones y configuraciones.
             </p>
 
             <div className="confirm-box">
@@ -598,41 +757,80 @@ export default function Configuracion() {
 
             <div style={{ display: "flex", gap: 10, marginTop: 18 }}>
               <button
-                onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(""); }}
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setDeleteConfirmText("");
+                }}
                 className="cfg-btn btn-outline"
-                style={{ flex: 1, justifyContent: "center", height: 42, borderRadius: 11, fontSize: 13 }}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  height: 42,
+                  borderRadius: 11,
+                  fontSize: 13,
+                }}
               >
                 Cancelar
               </button>
+
               <button
                 onClick={deleteAccount}
                 disabled={deleteLoading || deleteConfirmText !== "ELIMINAR"}
                 style={{
-                  flex: 1, height: 42, borderRadius: 11,
+                  flex: 1,
+                  height: 42,
+                  borderRadius: 11,
                   border: "none",
-                  background: deleteConfirmText === "ELIMINAR" ? "#DC2626" : "#FECACA",
-                  fontSize: 13, fontWeight: 700, color: "#fff",
-                  cursor: (deleteLoading || deleteConfirmText !== "ELIMINAR") ? "not-allowed" : "pointer",
+                  background:
+                    deleteConfirmText === "ELIMINAR"
+                      ? "var(--error)"
+                      : "color-mix(in srgb, var(--error) 24%, var(--card))",
+                  fontSize: 13,
+                  fontWeight: 700,
+                  color: "var(--card)",
+                  cursor:
+                    deleteLoading || deleteConfirmText !== "ELIMINAR"
+                      ? "not-allowed"
+                      : "pointer",
                   opacity: deleteLoading ? 0.7 : 1,
-                  display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 7,
                   fontFamily: "inherit",
-                  boxShadow: deleteConfirmText === "ELIMINAR" ? "0 4px 14px rgba(220,38,38,0.3)" : "none",
-                  transition: "all 0.2s",
+                  boxShadow:
+                    deleteConfirmText === "ELIMINAR"
+                      ? "0 4px 14px color-mix(in srgb, var(--error) 30%, transparent)"
+                      : "none",
                 }}
               >
                 {deleteLoading ? (
                   <>
-                    <svg style={{ animation: "spin 0.8s linear infinite" }} width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                      <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
-                      <path d="M12 2a10 10 0 0 1 10 10"/>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    >
+                      <circle cx="12" cy="12" r="10" strokeOpacity="0.25" />
+                      <path d="M12 2a10 10 0 0 1 10 10" />
                     </svg>
                     Eliminando...
                   </>
                 ) : (
                   <>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2">
-                      <polyline points="3 6 5 6 21 6"/>
-                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
+                    <svg
+                      width="13"
+                      height="13"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.2"
+                    >
+                      <polyline points="3 6 5 6 21 6" />
+                      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
                     </svg>
                     Sí, eliminar cuenta
                   </>
@@ -643,22 +841,84 @@ export default function Configuracion() {
         </div>
       )}
 
-      {/* ── Skeleton ── */}
       {pageLoading ? (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", maxWidth: 860, fontFamily: "'Segoe UI', system-ui, sans-serif" }}>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "1.25rem",
+            maxWidth: 860,
+            fontFamily: "'Segoe UI', system-ui, sans-serif",
+          }}
+        >
           {[0, 1].map((i) => (
-            <div key={i} style={{ background: "#fff", border: "1.5px solid #E4E7EF", borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-              <div style={{ padding: "15px 22px", background: "#1B3D7A", display: "flex", alignItems: "center", gap: 10 }}>
-                <div style={{ width: 32, height: 32, borderRadius: 9, background: "rgba(255,255,255,0.2)" }} />
-                <div style={{ width: 120, height: 12, borderRadius: 6, background: "rgba(255,255,255,0.2)" }} />
+            <div
+              key={i}
+              style={{
+                background: "var(--card)",
+                border:
+                  "1.5px solid color-mix(in srgb, var(--border) 75%, transparent)",
+                borderRadius: 18,
+                overflow: "hidden",
+                boxShadow:
+                  "0 2px 12px color-mix(in srgb, var(--foreground) 5%, transparent)",
+              }}
+            >
+              <div
+                style={{
+                  padding: "15px 22px",
+                  background: "var(--primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 10,
+                }}
+              >
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 9,
+                    background:
+                      "color-mix(in srgb, var(--card) 20%, transparent)",
+                  }}
+                />
+                <div
+                  style={{
+                    width: 120,
+                    height: 12,
+                    borderRadius: 6,
+                    background:
+                      "color-mix(in srgb, var(--card) 20%, transparent)",
+                  }}
+                />
               </div>
+
               {[1, 2, 3].map((j) => (
-                <div key={j} style={{ padding: "18px 22px", borderBottom: "1px solid #F1F3F8", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div
+                  key={j}
+                  style={{
+                    padding: "18px 22px",
+                    borderBottom:
+                      "1px solid color-mix(in srgb, var(--border) 48%, transparent)",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <div>
-                    <div className="sk" style={{ width: 110 + j * 20, height: 12, marginBottom: 7 }} />
-                    <div className="sk" style={{ width: 80 + j * 10, height: 10 }} />
+                    <div
+                      className="sk"
+                      style={{ width: 110 + j * 20, height: 12, marginBottom: 7 }}
+                    />
+                    <div
+                      className="sk"
+                      style={{ width: 80 + j * 10, height: 10 }}
+                    />
                   </div>
-                  <div className="sk" style={{ width: 80, height: 33, borderRadius: 8 }} />
+                  <div
+                    className="sk"
+                    style={{ width: 80, height: 33, borderRadius: 8 }}
+                  />
                 </div>
               ))}
             </div>
@@ -666,33 +926,56 @@ export default function Configuracion() {
         </div>
       ) : (
         <div className="cfg-wrap">
-
-          {/* ══ CARD 1 — Cuenta y seguridad ══ */}
           <div className="cfg-card">
             <div className="cfg-head">
               <div className="cfg-head-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                  <circle cx="12" cy="7" r="4"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
                 </svg>
               </div>
               <p className="cfg-head-title">Cuenta y seguridad</p>
             </div>
 
             <div className="cfg-body">
-              {/* Email */}
-              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                className="cfg-row"
+                style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <div>
                     <p className="cfg-label">Correo electrónico</p>
-                    <p className="cfg-hint">{session?.user?.email || "Sin correo"}</p>
+                    <p className="cfg-hint">
+                      {session?.user?.email || "Sin correo"}
+                    </p>
                   </div>
+
                   {!isEditingEmail && (
-                    <button className="cfg-btn btn-outline" onClick={() => { setIsEditingEmail(true); setNewEmail(session?.user?.email || ""); }}>
+                    <button
+                      className="cfg-btn btn-outline"
+                      onClick={() => {
+                        setIsEditingEmail(true);
+                        setNewEmail(session?.user?.email || "");
+                      }}
+                    >
                       Cambiar
                     </button>
                   )}
                 </div>
+
                 {isEditingEmail && (
                   <div className="email-panel">
                     <p className="email-panel-label">Nuevo correo electrónico</p>
@@ -704,26 +987,59 @@ export default function Configuracion() {
                       type="email"
                       autoFocus
                     />
+
                     <div className="email-panel-actions">
-                      <button className="cfg-btn btn-primary" onClick={handleUpdateEmail} disabled={loading} style={{ flex: 1, justifyContent: "center" }}>
+                      <button
+                        className="cfg-btn btn-primary"
+                        onClick={handleUpdateEmail}
+                        disabled={loading}
+                        style={{ flex: 1, justifyContent: "center" }}
+                      >
                         {loading ? (
                           <>
-                            <svg style={{ animation: "spin 0.8s linear infinite" }} width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                              <circle cx="12" cy="12" r="10" strokeOpacity="0.25"/>
-                              <path d="M12 2a10 10 0 0 1 10 10"/>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                            >
+                              <circle
+                                cx="12"
+                                cy="12"
+                                r="10"
+                                strokeOpacity="0.25"
+                              />
+                              <path d="M12 2a10 10 0 0 1 10 10" />
                             </svg>
                             Guardando...
                           </>
                         ) : (
                           <>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                              <polyline points="20 6 9 17 4 12"/>
+                            <svg
+                              width="12"
+                              height="12"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2.5"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
                             </svg>
                             Guardar cambio
                           </>
                         )}
                       </button>
-                      <button className="cfg-btn btn-outline" onClick={() => { setIsEditingEmail(false); setNewEmail(""); }} style={{ flex: 1, justifyContent: "center" }}>
+
+                      <button
+                        className="cfg-btn btn-danger-soft"
+                        onClick={() => {
+                          setIsEditingEmail(false);
+                          setNewEmail("");
+                        }}
+                        style={{ flex: 1, justifyContent: "center" }}
+                      >
                         Cancelar
                       </button>
                     </div>
@@ -731,22 +1047,23 @@ export default function Configuracion() {
                 )}
               </div>
 
-              {/* Contraseña */}
               <div className="cfg-row">
                 <div>
                   <p className="cfg-label">Contraseña</p>
                   <p className="cfg-hint">
                     {userMeta?.updatedAt
-                      ? `Última actualización ${formatRelativeTime(userMeta.updatedAt)}`
+                      ? `Última actualización ${formatRelativeTime(
+                          userMeta.updatedAt
+                        )}`
                       : "Sin datos"}
                   </p>
                 </div>
+
                 <button className="cfg-btn btn-outline" onClick={changePassword}>
                   Cambiar
                 </button>
               </div>
 
-              {/* Sesiones */}
               <div className="cfg-row">
                 <div>
                   <p className="cfg-label">Sesiones activas</p>
@@ -754,12 +1071,13 @@ export default function Configuracion() {
                     {isGoogleUser
                       ? "Sesión activa vía Google"
                       : activeSessions !== null
-                        ? activeSessions === 1
-                          ? "1 dispositivo conectado"
-                          : `${activeSessions} dispositivos conectados`
-                        : "Sin datos"}
+                      ? activeSessions === 1
+                        ? "1 dispositivo conectado"
+                        : `${activeSessions} dispositivos conectados`
+                      : "Sin datos"}
                   </p>
                 </div>
+
                 <button className="cfg-btn btn-outline" onClick={logoutAll}>
                   Cerrar sesiones
                 </button>
@@ -770,14 +1088,27 @@ export default function Configuracion() {
               <div className="danger-zone" />
               <div className="danger-row">
                 <div>
-                  <p className="cfg-label" style={{ color: "#DC2626" }}>Eliminar cuenta</p>
+                  <p className="cfg-label" style={{ color: "var(--error)" }}>
+                    Eliminar cuenta
+                  </p>
                   <p className="cfg-hint">Acción permanente e irreversible</p>
                 </div>
-                <button className="cfg-btn btn-danger-soft" onClick={() => setShowDeleteModal(true)}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <polyline points="3 6 5 6 21 6"/>
-                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/>
-                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+
+                <button
+                  className="cfg-btn btn-danger-soft"
+                  onClick={() => setShowDeleteModal(true)}
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                  >
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                    <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
                   </svg>
                   Eliminar
                 </button>
@@ -785,12 +1116,18 @@ export default function Configuracion() {
             </div>
           </div>
 
-          {/* ══ CARD 2 — Plan y uso ══ */}
           <div className="cfg-card">
             <div className="cfg-head">
               <div className="cfg-head-icon">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                 </svg>
               </div>
               <p className="cfg-head-title">Plan y uso</p>
@@ -800,54 +1137,125 @@ export default function Configuracion() {
               <div className="cfg-row">
                 <div>
                   <p className="cfg-label">Plan actual</p>
-                  <span style={{
-                    display: "inline-block", marginTop: 5,
-                    fontSize: 10.5, fontWeight: 700, padding: "2px 10px",
-                    borderRadius: 20, background: "#F3F4F6", color: "#6B7280",
-                    letterSpacing: "0.07em", border: "1px solid #E5E7EB",
-                  }}>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      marginTop: 5,
+                      fontSize: 10.5,
+                      fontWeight: 700,
+                      padding: "2px 10px",
+                      borderRadius: 20,
+                      background:
+                        "color-mix(in srgb, var(--foreground) 6%, var(--card))",
+                      color: "var(--text-muted)",
+                      letterSpacing: "0.07em",
+                      border:
+                        "1px solid color-mix(in srgb, var(--border) 75%, transparent)",
+                    }}
+                  >
                     {plan?.name ?? "FREE"}
                   </span>
                 </div>
               </div>
 
-              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 12 }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <div
+                className="cfg-row"
+                style={{ flexDirection: "column", alignItems: "stretch", gap: 12 }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
                   <div>
                     <p className="cfg-label">Cotizaciones usadas</p>
                     <p className="cfg-hint">
-                      {usage ? `${usage.quotesUsed} de ${usage.maxQuotes} utilizadas` : "Sin datos"}
+                      {usage
+                        ? `${usage.quotesUsed} de ${usage.maxQuotes} utilizadas`
+                        : "Sin datos"}
                     </p>
                   </div>
+
                   {usage && (
-                    <span className="badge" style={{
-                      color: usage.quotesUsed >= usage.maxQuotes ? "#DC2626" : "#16A34A",
-                      background: usage.quotesUsed >= usage.maxQuotes ? "#FEF2F2" : "#ECFDF5",
-                      border: `1px solid ${usage.quotesUsed >= usage.maxQuotes ? "#FECACA" : "#BBF7D0"}`,
-                    }}>
+                    <span
+                      className="badge"
+                      style={{
+                        color:
+                          usage.quotesUsed >= usage.maxQuotes
+                            ? "var(--error)"
+                            : "var(--success)",
+                        background:
+                          usage.quotesUsed >= usage.maxQuotes
+                            ? "var(--error-bg)"
+                            : "var(--success-bg)",
+                        border: `1px solid ${
+                          usage.quotesUsed >= usage.maxQuotes
+                            ? "color-mix(in srgb, var(--error) 35%, var(--border))"
+                            : "color-mix(in srgb, var(--success) 35%, var(--border))"
+                        }`,
+                      }}
+                    >
                       {usage.quotesUsed >= usage.maxQuotes
                         ? "Límite alcanzado"
-                        : `${usage.remaining} disponible${usage.remaining !== 1 ? "s" : ""}`}
+                        : `${usage.remaining} disponible${
+                            usage.remaining !== 1 ? "s" : ""
+                          }`}
                     </span>
                   )}
                 </div>
+
                 <div className="progress-track">
-                  <div className="progress-fill" style={{
-                    width: `${usedPct}%`,
-                    background: usedPct >= 100 ? "#DC2626" : usedPct >= 66 ? "#D97706" : "#16A34A",
-                  }} />
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${usedPct}%`,
+                      background:
+                        usedPct >= 100
+                          ? "var(--error)"
+                          : usedPct >= 66
+                          ? "var(--warning)"
+                          : "var(--success)",
+                    }}
+                  />
                 </div>
               </div>
 
-              <div className="cfg-row" style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}>
-                <p style={{ fontSize: 11.5, fontWeight: 700, color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.08em", margin: "0 0 8px" }}>
+              <div
+                className="cfg-row"
+                style={{ flexDirection: "column", alignItems: "stretch", gap: 0 }}
+              >
+                <p
+                  style={{
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    color: "var(--text-muted)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                    margin: "0 0 8px",
+                  }}
+                >
                   Incluido en Pro
                 </p>
-                {["Cotizaciones ilimitadas", "Plantillas premium exclusivas", "PDF con tu marca personalizada", "Soporte prioritario 24/7"].map((text) => (
+
+                {[
+                  "Cotizaciones ilimitadas",
+                  "Plantillas premium exclusivas",
+                  "PDF con tu marca personalizada",
+                  "Soporte prioritario 24/7",
+                ].map((text) => (
                   <div key={text} className="pro-feature">
                     <div className="pro-feature-check">
-                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3">
-                        <polyline points="20 6 9 17 4 12"/>
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="3"
+                      >
+                        <polyline points="20 6 9 17 4 12" />
                       </svg>
                     </div>
                     <span className="pro-feature-text">{text}</span>
@@ -860,17 +1268,29 @@ export default function Configuracion() {
               <button
                 className="cfg-btn btn-green"
                 onClick={() => router.push("/planes")}
-                style={{ width: "100%", justifyContent: "center", height: 40, borderRadius: 10, fontSize: 13 }}
+                style={{
+                  width: "100%",
+                  justifyContent: "center",
+                  height: 40,
+                  borderRadius: 10,
+                  fontSize: 13,
+                }}
               >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
-                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
-                  <polyline points="17 6 23 6 23 12"/>
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                >
+                  <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                  <polyline points="17 6 23 6 23 12" />
                 </svg>
                 Mejorar a Pro — Ver planes
               </button>
             </div>
           </div>
-
         </div>
       )}
     </>

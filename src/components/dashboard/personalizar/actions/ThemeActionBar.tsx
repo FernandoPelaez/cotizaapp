@@ -57,8 +57,7 @@ export default function ThemeActionBar() {
   const isSameAsDefaults =
     JSON.stringify(draft) === JSON.stringify(createDefaultThemeSettings())
 
-  const isSameAsSaved =
-    JSON.stringify(draft) === JSON.stringify(settings)
+  const isSameAsSaved = JSON.stringify(draft) === JSON.stringify(settings)
 
   return (
     <div className="space-y-3">
@@ -66,10 +65,11 @@ export default function ThemeActionBar() {
         <div
           className="rounded-2xl border px-4 py-3 text-sm font-medium"
           style={{
-            backgroundColor: "rgba(239, 68, 68, 0.08)",
-            borderColor: "rgba(239, 68, 68, 0.20)",
-            color: "rgb(153, 27, 27)",
-            boxShadow: "0 10px 24px rgba(239, 68, 68, 0.08)",
+            backgroundColor: "var(--error-bg)",
+            borderColor: "color-mix(in srgb, var(--error) 35%, var(--border))",
+            color: "var(--error)",
+            boxShadow:
+              "0 10px 24px color-mix(in srgb, var(--error) 12%, transparent)",
           }}
         >
           {error}
@@ -82,19 +82,22 @@ export default function ThemeActionBar() {
           style={{
             backgroundColor: "var(--card)",
             borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-            boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
+            boxShadow:
+              "0 14px 35px color-mix(in srgb, var(--foreground) 6%, transparent)",
           }}
         >
           <button
             type="button"
             onClick={handleRestoreDefaults}
             disabled={isLoading || isSaving || isSameAsDefaults}
-            className="inline-flex items-center justify-center gap-1.5 rounded-2xl border px-3.5 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-1.5 rounded-2xl border px-3.5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              backgroundColor: "var(--background)",
-              borderColor: "color-mix(in srgb, var(--border) 42%, transparent)",
-              color: "var(--foreground)",
-              boxShadow: "0 8px 20px rgba(15, 23, 42, 0.035)",
+              backgroundColor: "var(--warning-bg)",
+              borderColor:
+                "color-mix(in srgb, var(--warning) 35%, var(--border))",
+              color: "var(--warning)",
+              boxShadow:
+                "0 8px 20px color-mix(in srgb, var(--warning) 10%, transparent)",
             }}
           >
             <RotateCcw size={14} strokeWidth={2.2} />
@@ -105,12 +108,14 @@ export default function ThemeActionBar() {
             type="button"
             onClick={handleCancelChanges}
             disabled={isLoading || isSaving || isSameAsSaved}
-            className="inline-flex items-center justify-center gap-1.5 rounded-2xl border px-3.5 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-1.5 rounded-2xl border px-3.5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              backgroundColor: "rgba(239, 68, 68, 0.08)",
-              borderColor: "rgba(239, 68, 68, 0.18)",
-              color: "rgb(185, 28, 28)",
-              boxShadow: "0 8px 20px rgba(239, 68, 68, 0.06)",
+              backgroundColor: "var(--error-bg)",
+              borderColor:
+                "color-mix(in srgb, var(--error) 35%, var(--border))",
+              color: "var(--error)",
+              boxShadow:
+                "0 8px 20px color-mix(in srgb, var(--error) 10%, transparent)",
             }}
           >
             <X size={14} strokeWidth={2.2} />
@@ -121,13 +126,13 @@ export default function ThemeActionBar() {
             type="button"
             onClick={handleSave}
             disabled={isLoading || isSaving || !hasChanges}
-            className="inline-flex items-center justify-center gap-1.5 rounded-2xl px-3.5 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-1.5 rounded-2xl px-3.5 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
             style={{
               backgroundColor: saved ? "var(--success)" : "var(--primary)",
-              color: "white",
+              color: "var(--card)",
               boxShadow: saved
-                ? "0 10px 24px rgba(34, 197, 94, 0.20)"
-                : "0 10px 24px rgba(37, 99, 235, 0.18)",
+                ? "0 10px 24px color-mix(in srgb, var(--success) 22%, transparent)"
+                : "0 10px 24px color-mix(in srgb, var(--primary) 22%, transparent)",
             }}
           >
             {saved ? (

@@ -14,14 +14,15 @@ import {
   TrendingDown,
   TrendingUp,
   XCircle,
-} from "lucide-react"
+  } from "lucide-react" 
+
 import {
   Cell,
   Pie,
   PieChart as RechartsPieChart,
-  ResponsiveContainer,
   Tooltip,
 } from "recharts"
+
 import type { Cotizacion } from "@/types/dashboard"
 
 type DashboardTemplatesSectionProps = {
@@ -478,33 +479,29 @@ export default function DashboardTemplatesSection({
         <div className="grid flex-1 gap-4 px-4 py-4 xl:grid-cols-[260px_minmax(0,1fr)]">
           <div className="grid gap-3 sm:grid-cols-[170px_minmax(0,1fr)] xl:block">
             <div className="flex justify-center">
-              <div className="relative h-[168px] w-[168px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsPieChart>
-                    <Pie
-                      data={chartData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={52}
-                      outerRadius={84}
-                      paddingAngle={totalQuotes > 0 ? 2 : 0}
-                      cornerRadius={totalQuotes > 0 ? 8 : 0}
-                      stroke="var(--card, #ffffff)"
-                      strokeWidth={2}
-                      isAnimationActive
-                    >
-                      {chartData.map((item) => (
-                        <Cell key={item.name} fill={item.color} />
-                      ))}
-                    </Pie>
+            <div className="relative h-[168px] w-[168px] min-h-[168px] min-w-[168px]">
+          <RechartsPieChart width={168} height={168}>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              nameKey="name"
+              cx="50%"
+              cy="50%"
+              innerRadius={52}
+              outerRadius={84}
+              paddingAngle={totalQuotes > 0 ? 2 : 0}
+              cornerRadius={totalQuotes > 0 ? 8 : 0}
+              stroke="var(--card, #ffffff)"
+              strokeWidth={2}
+              isAnimationActive
+            >
+              {chartData.map((item) => (
+                <Cell key={item.name} fill={item.color} />
+              ))}
+            </Pie>
 
-                    {totalQuotes > 0 ? (
-                      <Tooltip cursor={false} />
-                    ) : null}
-                  </RechartsPieChart>
-                </ResponsiveContainer>
+            {totalQuotes > 0 ? <Tooltip cursor={false} /> : null}
+          </RechartsPieChart>
 
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div className="text-center">

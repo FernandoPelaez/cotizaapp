@@ -266,31 +266,24 @@ export async function POST(req: Request) {
       )
     }
 
-    let safeTemplateId: string | null = null
+        let safeTemplateId: string | null = null
 
-    if (templateId || templateKey) {
-      const existingTemplate = await prisma.template.findFirst({
-        where: {
-          OR: [
-            ...(templateId ? [{ id: templateId }] : []),
-            ...(templateKey ? [{ name: templateKey }] : []),
-          ],
-        },
-        select: {
-          id: true,
-          name: true,
-        },
-      })
+        if (templateId || templateKey) {
+          const existingTemplate = await prisma.template.findFirst({
+            where: {
+              OR: [
+                ...(templateId ? [{ id: templateId }] : []),
+                ...(templateKey ? [{ name: templateKey }] : []),
+              ],
+            },
+            select: {
+              id: true,
+              name: true,
+            },
+          })
 
-      if (!existingTemplate) {
-        return NextResponse.json(
-          { error: "La plantilla seleccionada no existe" },
-          { status: 400 }
-        )
-      }
-
-      safeTemplateId = existingTemplate.id
-    }
+          safeTemplateId = existingTemplate?.id ?? null
+        }
 
     const quote = await prisma.quote.create({
       data: {

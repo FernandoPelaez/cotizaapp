@@ -29,18 +29,18 @@ export default function BrandSection() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border) / 0.45)",
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
       <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
-          <Palette size={15} style={{ color: "hsl(var(--primary))" }} />
+          <Palette size={15} style={{ color: "var(--primary)" }} />
 
           <h2
             className="text-sm font-semibold"
-            style={{ color: "hsl(var(--foreground))" }}
+            style={{ color: "var(--foreground)" }}
           >
             Marca
           </h2>
@@ -48,7 +48,7 @@ export default function BrandSection() {
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Elige el color principal que dará identidad visual al dashboard.
         </p>
@@ -70,12 +70,13 @@ export default function BrandSection() {
                   ? `linear-gradient(180deg, ${hexToRgba(
                       preset.hex,
                       0.12
-                    )} 0%, hsl(var(--card)) 100%)`
-                  : "hsl(var(--background))",
+                    )} 0%, var(--card) 100%)`
+                  : "var(--background)",
 
                 borderColor: isActive
                   ? hexToRgba(preset.hex, 0.48)
-                  : "hsl(var(--border) / 0.45)",
+                  : "color-mix(in srgb, var(--border) 45%, transparent)",
+
                 boxShadow: isActive
                   ? `0 10px 24px ${hexToRgba(preset.hex, 0.12)}`
                   : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -102,14 +103,14 @@ export default function BrandSection() {
                   <div className="min-w-0 space-y-0.5">
                     <p
                       className="truncate text-sm font-semibold"
-                      style={{ color: "hsl(var(--foreground))" }}
+                      style={{ color: "var(--foreground)" }}
                     >
                       {preset.label}
                     </p>
 
                     <p
                       className="text-[11px] uppercase tracking-wide"
-                      style={{ color: "hsl(var(--text-muted))" }}
+                      style={{ color: "var(--text-muted)" }}
                     >
                       {preset.hex}
                     </p>
@@ -134,8 +135,8 @@ export default function BrandSection() {
                 <div
                   className="h-1.5 w-full overflow-hidden rounded-full"
                   style={{
-                 
-                    backgroundColor: "hsl(var(--border) / 0.35)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--border) 35%, transparent)",
                   }}
                 >
                   <div
@@ -158,7 +159,7 @@ export default function BrandSection() {
 
                   <span
                     className="text-[11px] leading-4"
-                    style={{ color: "hsl(var(--text-muted))" }}
+                    style={{ color: "var(--text-muted)" }}
                   >
                     {isActive
                       ? "Color activo en tu tema actual"

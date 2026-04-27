@@ -1,11 +1,8 @@
 "use client"
 
-import { useRouter } from "next/navigation"
-
 import type { Cotizacion, UserConfig } from "@/types/dashboard"
 import PlanFreeCard from "../cards/PlanFreeCard"
 import QuickActionsCard from "../cards/QuickActionsCard"
-import QuoteSummaryCard from "../cards/QuoteSummaryCard"
 import RecentQuotesCard from "../cards/RecentQuotesCard"
 import DashboardTemplatesSection from "./DashboardTemplatesSection"
 
@@ -14,54 +11,52 @@ type DashboardTopGridProps = {
   cotizaciones?: Cotizacion[]
 }
 
-type CotizacionWithOptionalId = Cotizacion & {
-  id?: string | number | null
-}
+const DASHBOARD_ROW_HEIGHT = 470
+const CENTER_CARD_GAP = 16
+const CENTER_CARD_HEIGHT = (DASHBOARD_ROW_HEIGHT - CENTER_CARD_GAP) / 2
 
 export default function DashboardTopGrid({
   userConfig,
   cotizaciones = [],
 }: DashboardTopGridProps) {
-  const router = useRouter()
-
-  const cotizacionesRecientes = cotizaciones.slice(0, 4)
-
-  const handleVerTodo = () => {
-    router.push("/cotizaciones")
-  }
-
-  const handleVerDetalle = (cotizacion: Cotizacion) => {
-    const quoteId = String(
-      (cotizacion as CotizacionWithOptionalId).id ?? ""
-    ).trim()
-
-    if (!quoteId) {
-      router.push("/cotizaciones")
-      return
-    }
-
-    router.push(`/quotes/${quoteId}`)
-  }
-
   return (
-    <section className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_290px]">
-      <div className="min-w-0 space-y-6">
-        <div className="grid items-stretch gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <QuoteSummaryCard
-            cotizaciones={cotizaciones}
-            onVerTodo={handleVerTodo}
-            onVerDetalle={handleVerDetalle}
-          />
-
-          <QuickActionsCard />
-
-          <RecentQuotesCard cotizaciones={cotizacionesRecientes} />
-        </div>
-
-        <DashboardTemplatesSection />
+    <section
+      className="grid items-stretch gap-6 xl:grid-cols-[minmax(0,1fr)_360px_290px]"
+      style={{ minHeight: `${DASHBOARD_ROW_HEIGHT}px` }}
+    >
+      <div
+        className="min-w-0 [&>section]:h-full [&>section>article]:h-full"
+        style={{ height: `${DASHBOARD_ROW_HEIGHT}px` }}
+      >
+        <DashboardTemplatesSection cotizaciones={cotizaciones} />
       </div>
 
-      <div className="xl:justify-self-end">
+      <div
+        className="grid min-w-0"
+        style={{
+          gap: `${CENTER_CARD_GAP}px`,
+          height: `${DASHBOARD_ROW_HEIGHT}px`,
+        }}
+      >
+        <div
+          className="[&>article]:!h-full"
+          style={{ height: `${CENTER_CARD_HEIGHT}px` }}
+        >
+          <QuickActionsCard />
+        </div>
+
+        <div
+          className="[&>article]:!h-full"
+          style={{ height: `${CENTER_CARD_HEIGHT}px` }}
+        >
+          <RecentQuotesCard cotizaciones={cotizaciones} />
+        </div>
+      </div>
+
+      <div
+        className="xl:justify-self-end [&>article]:!h-full"
+        style={{ height: `${DASHBOARD_ROW_HEIGHT}px` }}
+      >
         <PlanFreeCard userConfig={userConfig} />
       </div>
     </section>

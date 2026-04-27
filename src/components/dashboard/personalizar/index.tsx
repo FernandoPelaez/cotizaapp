@@ -20,10 +20,9 @@ export default function Personalizar() {
       <header className="space-y-2">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-1">
-            
             <p
               className="max-w-2xl text-sm leading-6"
-              style={{ color: "hsl(var(--text-muted))" }}
+              style={{ color: "var(--text-muted)" }}
             >
               Ajusta la apariencia global del dashboard con un sistema de tema
               controlado, consistente y persistente.
@@ -34,8 +33,8 @@ export default function Personalizar() {
             <span
               className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
-                backgroundColor: "hsl(var(--primary-soft))",
-                color: "hsl(var(--primary))",
+                backgroundColor: "var(--primary-soft)",
+                color: "var(--primary)",
               }}
             >
               Tema global
@@ -45,14 +44,12 @@ export default function Personalizar() {
               className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
                 backgroundColor: isLoading
-                  ? "hsl(var(--background))"
+                  ? "var(--background)"
                   : hasChanges
-                  ? "hsl(var(--warning))"
-                  : "hsl(var(--success))",
-                color: isLoading ? "hsl(var(--foreground))" : "white",
-                border: isLoading
-                  ? "1px solid hsl(var(--border))"
-                  : "none",
+                  ? "var(--warning)"
+                  : "var(--success)",
+                color: isLoading ? "var(--foreground)" : "white",
+                border: isLoading ? "1px solid var(--border)" : "none",
               }}
             >
               {isLoading

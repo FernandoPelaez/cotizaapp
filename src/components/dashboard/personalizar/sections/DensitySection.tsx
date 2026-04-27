@@ -35,18 +35,18 @@ export default function DensitySection() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border) / 0.45)",
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
       <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
-          <Rows3 size={15} style={{ color: "hsl(var(--primary))" }} />
+          <Rows3 size={15} style={{ color: "var(--primary)" }} />
 
           <h2
             className="text-sm font-semibold"
-            style={{ color: "hsl(var(--foreground))" }}
+            style={{ color: "var(--foreground)" }}
           >
             Densidad visual
           </h2>
@@ -54,7 +54,7 @@ export default function DensitySection() {
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Controla cuánto espacio visual tienen los bloques, tarjetas,
           formularios y listas dentro del dashboard.
@@ -78,12 +78,11 @@ export default function DensitySection() {
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
-                  ? "linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--card)) 100%)"
-                  : "hsl(var(--background))",
+                  ? "linear-gradient(180deg, var(--primary-soft) 0%, var(--card) 100%)"
+                  : "var(--background)",
                 borderColor: isActive
-                  ? "hsl(var(--primary) / 0.65)"
-                  : "hsl(var(--border) / 0.42)",
-
+                  ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                  : "color-mix(in srgb, var(--border) 42%, transparent)",
                 boxShadow: isActive
                   ? "0 10px 24px rgba(45, 107, 255, 0.11)"
                   : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -93,7 +92,7 @@ export default function DensitySection() {
                 <div className="min-w-0">
                   <p
                     className="text-sm font-semibold"
-                    style={{ color: "hsl(var(--foreground))" }}
+                    style={{ color: "var(--foreground)" }}
                   >
                     {option.label}
                   </p>
@@ -101,7 +100,7 @@ export default function DensitySection() {
                   {option.description ? (
                     <p
                       className="mt-1 text-xs leading-5"
-                      style={{ color: "hsl(var(--text-muted))" }}
+                      style={{ color: "var(--text-muted)" }}
                     >
                       {option.description}
                     </p>
@@ -112,9 +111,10 @@ export default function DensitySection() {
                   <span
                     className="shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold"
                     style={{
-                      backgroundColor: "hsl(var(--primary-soft))",
-                      borderColor: "hsl(var(--primary) / 0.45)",
-                      color: "hsl(var(--primary))",
+                      backgroundColor: "var(--primary-soft)",
+                      borderColor:
+                        "color-mix(in srgb, var(--primary) 45%, transparent)",
+                      color: "var(--primary)",
                     }}
                   >
                     Activa
@@ -125,9 +125,9 @@ export default function DensitySection() {
               <div
                 className="rounded-2xl border"
                 style={{
-                  backgroundColor: "hsl(var(--card))",
-                  borderColor: "hsl(var(--border) / 0.38)",
-
+                  backgroundColor: "var(--card)",
+                  borderColor:
+                    "color-mix(in srgb, var(--border) 38%, transparent)",
                   padding: preview.cardPadding,
                   boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.42)",
                 }}
@@ -142,7 +142,7 @@ export default function DensitySection() {
                       style={{
                         height: "7px",
                         width: "55%",
-                        backgroundColor: "hsl(var(--foreground))",
+                        backgroundColor: "var(--foreground)",
                         opacity: 0.13,
                       }}
                     />
@@ -152,7 +152,7 @@ export default function DensitySection() {
                       style={{
                         height: "5px",
                         width: "34%",
-                        backgroundColor: "hsl(var(--foreground))",
+                        backgroundColor: "var(--foreground)",
                         opacity: 0.075,
                       }}
                     />
@@ -162,8 +162,9 @@ export default function DensitySection() {
                     className="rounded-xl border"
                     style={{
                       height: preview.inputHeight,
-                      backgroundColor: "hsl(var(--background))",
-                      borderColor: "hsl(var(--border) / 0.35)",
+                      backgroundColor: "var(--background)",
+                      borderColor:
+                        "color-mix(in srgb, var(--border) 35%, transparent)",
                     }}
                   />
 
@@ -171,8 +172,9 @@ export default function DensitySection() {
                     className="rounded-xl border"
                     style={{
                       height: preview.inputHeight,
-                      backgroundColor: "hsl(var(--background))",
-                      borderColor: "hsl(var(--border) / 0.35)",
+                      backgroundColor: "var(--background)",
+                      borderColor:
+                        "color-mix(in srgb, var(--border) 35%, transparent)",
                     }}
                   />
 
@@ -182,7 +184,7 @@ export default function DensitySection() {
                       style={{
                         height: preview.btnHeight,
                         width: preview.btnWidth,
-                        backgroundColor: "hsl(var(--primary))",
+                        backgroundColor: "var(--primary)",
                         boxShadow: "0 8px 18px rgba(45, 107, 255, 0.18)",
                       }}
                     />

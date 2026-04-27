@@ -89,9 +89,9 @@ export default function ThemePreview() {
     () => ({
       ...(preview.variables as CSSProperties),
       fontFamily: "var(--font-family)",
-      backgroundColor: "hsl(var(--background))",
-      color: "hsl(var(--foreground))",
-      borderColor: "hsl(var(--border) / 0.42)",
+      backgroundColor: "var(--background)",
+      color: "var(--foreground)",
+      borderColor: "color-mix(in srgb, var(--border) 42%, transparent)",
     }),
     [preview.variables]
   )
@@ -99,12 +99,12 @@ export default function ThemePreview() {
   const isDark = preview.tokens.mode === "dark"
 
   const softBorderColor = isDark
-    ? "hsl(var(--border) / 0.52)"
-    : "hsl(var(--border) / 0.42)"
+    ? "color-mix(in srgb, var(--border) 52%, transparent)"
+    : "color-mix(in srgb, var(--border) 42%, transparent)"
 
   const subtleBorderColor = isDark
-    ? "hsl(var(--border) / 0.38)"
-    : "hsl(var(--border) / 0.32)"
+    ? "color-mix(in srgb, var(--border) 38%, transparent)"
+    : "color-mix(in srgb, var(--border) 32%, transparent)"
 
   const cardShadow =
     draft.shadowStyle !== "none"
@@ -123,8 +123,8 @@ export default function ThemePreview() {
   const sidebarBg = isDark
     ? `linear-gradient(180deg, ${hexToRgba(
         preview.tokens.brandHex,
-        0.20
-      )} 0%, hsl(var(--card)) 100%)`
+        0.2
+      )} 0%, var(--card) 100%)`
     : `linear-gradient(180deg, ${hexToRgba(
         preview.tokens.brandHex,
         0.98
@@ -138,8 +138,8 @@ export default function ThemePreview() {
   const planBg = isDark
     ? `linear-gradient(135deg, ${hexToRgba(
         preview.tokens.brandHex,
-        0.20
-      )} 0%, hsl(var(--card)) 100%)`
+        0.2
+      )} 0%, var(--card) 100%)`
     : `linear-gradient(135deg, ${hexToRgba(
         preview.tokens.brandHex,
         0.12
@@ -150,15 +150,15 @@ export default function ThemePreview() {
     : "linear-gradient(180deg, rgba(248,250,252,0.95) 0%, rgba(248,250,252,0.72) 100%)"
 
   const sidebarDivider = isDark
-    ? "hsl(var(--border) / 0.42)"
+    ? "color-mix(in srgb, var(--border) 42%, transparent)"
     : "rgba(255,255,255,0.18)"
 
   const sidebarText = isDark
-    ? "hsl(var(--foreground))"
+    ? "var(--foreground)"
     : "rgba(255,255,255,0.96)"
 
   const sidebarMutedText = isDark
-    ? "hsl(var(--text-muted))"
+    ? "var(--text-muted)"
     : "rgba(255,255,255,0.72)"
 
   const expiredBadgeStyle = {
@@ -167,7 +167,7 @@ export default function ThemePreview() {
   }
 
   const approvedBadgeStyle = {
-    backgroundColor: hexToRgba("#22C55E", isDark ? 0.20 : 0.14),
+    backgroundColor: hexToRgba("#22C55E", isDark ? 0.2 : 0.14),
     color: isDark ? "#86EFAC" : "#15803D",
   }
 
@@ -180,22 +180,22 @@ export default function ThemePreview() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border) / 0.45)",
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: sectionShadow,
       }}
     >
       <div className="mb-4 space-y-1">
         <h2
           className="text-sm font-semibold"
-          style={{ color: "hsl(var(--foreground))" }}
+          style={{ color: "var(--foreground)" }}
         >
           Vista previa en vivo
         </h2>
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Aquí solo se muestran las zonas donde realmente se notará el tema.
         </p>
@@ -206,7 +206,6 @@ export default function ThemePreview() {
         style={{
           ...previewStyle,
           borderColor: softBorderColor,
-
           boxShadow: isDark
             ? "inset 0 1px 0 rgba(255,255,255,0.04)"
             : "inset 0 1px 0 rgba(255,255,255,0.75)",
@@ -231,7 +230,7 @@ export default function ThemePreview() {
                   className="h-2 w-2 rounded-full"
                   style={{
                     backgroundColor: isDark
-                      ? "hsl(var(--primary))"
+                      ? "var(--primary)"
                       : "rgba(255,255,255,0.95)",
                   }}
                 />
@@ -260,7 +259,7 @@ export default function ThemePreview() {
                     style={{
                       backgroundColor: item.active
                         ? isDark
-                          ? hexToRgba(preview.tokens.brandHex, 0.20)
+                          ? hexToRgba(preview.tokens.brandHex, 0.2)
                           : "rgba(255,255,255,0.18)"
                         : "transparent",
                       border: item.active
@@ -285,7 +284,7 @@ export default function ThemePreview() {
             <header
               className="flex items-center justify-between border-b px-2.5 py-2"
               style={{
-                backgroundColor: "hsl(var(--background))",
+                backgroundColor: "var(--background)",
                 borderColor: softBorderColor,
               }}
             >
@@ -296,7 +295,7 @@ export default function ThemePreview() {
 
                 <p
                   className="truncate text-[9px]"
-                  style={{ color: "hsl(var(--text-muted))" }}
+                  style={{ color: "var(--text-muted)" }}
                 >
                   Vista previa enfocada
                 </p>
@@ -306,9 +305,9 @@ export default function ThemePreview() {
                 <div
                   className="flex h-7 min-w-[82px] items-center gap-1 rounded-lg border px-2"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
                     borderColor: subtleBorderColor,
-                    color: "hsl(var(--text-muted))",
+                    color: "var(--text-muted)",
                   }}
                 >
                   <Bell size={9} />
@@ -318,9 +317,9 @@ export default function ThemePreview() {
                 <div
                   className="flex h-7 w-7 items-center justify-center rounded-full border"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
                     borderColor: subtleBorderColor,
-                    color: "hsl(var(--primary))",
+                    color: "var(--primary)",
                   }}
                 >
                   <CircleUserRound size={10} />
@@ -378,7 +377,7 @@ export default function ThemePreview() {
                 <div
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
                     borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
@@ -387,7 +386,7 @@ export default function ThemePreview() {
                     <div>
                       <p
                         className="text-[9px] font-medium uppercase tracking-wide"
-                        style={{ color: "hsl(var(--text-muted))" }}
+                        style={{ color: "var(--text-muted)" }}
                       >
                         Cot-001
                       </p>
@@ -411,7 +410,7 @@ export default function ThemePreview() {
                     <div className="flex gap-1">
                       <span
                         className="h-1.5 w-4 rounded-full"
-                        style={{ backgroundColor: "hsl(var(--primary))" }}
+                        style={{ backgroundColor: "var(--primary)" }}
                       />
 
                       <span
@@ -428,8 +427,8 @@ export default function ThemePreview() {
                     <span
                       className="rounded-full px-2 py-0.5 text-[9px] font-medium"
                       style={{
-                        backgroundColor: "hsl(var(--primary-soft))",
-                        color: "hsl(var(--primary))",
+                        backgroundColor: "var(--primary-soft)",
+                        color: "var(--primary)",
                       }}
                     >
                       Ver detalle
@@ -440,7 +439,7 @@ export default function ThemePreview() {
                 <div
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
                     borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
@@ -459,7 +458,7 @@ export default function ThemePreview() {
                         key={item}
                         className="flex items-center justify-between rounded-lg border px-2 py-1.5"
                         style={{
-                          backgroundColor: "hsl(var(--background))",
+                          backgroundColor: "var(--background)",
                           borderColor: subtleBorderColor,
                         }}
                       >
@@ -468,7 +467,7 @@ export default function ThemePreview() {
                         <span
                           className="h-1.5 w-1.5 rounded-full"
                           style={{
-                            backgroundColor: "hsl(var(--primary))",
+                            backgroundColor: "var(--primary)",
                           }}
                         />
                       </div>
@@ -479,7 +478,7 @@ export default function ThemePreview() {
                 <div
                   className="rounded-[var(--radius)] border p-2.5"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
+                    backgroundColor: "var(--card)",
                     borderColor: softBorderColor,
                     boxShadow: cardShadow,
                   }}
@@ -490,7 +489,7 @@ export default function ThemePreview() {
 
                   <p
                     className="mb-1.5 text-[9px]"
-                    style={{ color: "hsl(var(--text-muted))" }}
+                    style={{ color: "var(--text-muted)" }}
                   >
                     Últimos movimientos
                   </p>
@@ -504,7 +503,7 @@ export default function ThemePreview() {
                         key={item.title}
                         className="flex items-center justify-between rounded-lg border px-2 py-1.5"
                         style={{
-                          backgroundColor: "hsl(var(--background))",
+                          backgroundColor: "var(--background)",
                           borderColor: subtleBorderColor,
                         }}
                       >
@@ -546,7 +545,7 @@ export default function ThemePreview() {
 
                   <div
                     className="mt-2 space-y-1"
-                    style={{ color: "hsl(var(--foreground))" }}
+                    style={{ color: "var(--foreground)" }}
                   >
                     <p className="text-[11px] font-semibold">
                       Estás en el plan gratuito
@@ -554,7 +553,7 @@ export default function ThemePreview() {
 
                     <p
                       className="text-[9px]"
-                      style={{ color: "hsl(var(--text-muted))" }}
+                      style={{ color: "var(--text-muted)" }}
                     >
                       Desbloquea plantillas y más.
                     </p>
@@ -562,7 +561,7 @@ export default function ThemePreview() {
                     <div className="pt-1">
                       <div
                         className="mb-1 flex items-center justify-between text-[8px]"
-                        style={{ color: "hsl(var(--text-muted))" }}
+                        style={{ color: "var(--text-muted)" }}
                       >
                         <span>Cotizaciones usadas</span>
                         <span>3 / 5</span>
@@ -570,13 +569,13 @@ export default function ThemePreview() {
 
                       <div
                         className="h-1.5 rounded-full"
-                        style={{ backgroundColor: "hsl(var(--primary-soft))" }}
+                        style={{ backgroundColor: "var(--primary-soft)" }}
                       >
                         <div
                           className="h-1.5 rounded-full"
                           style={{
                             width: "60%",
-                            backgroundColor: "hsl(var(--primary))",
+                            backgroundColor: "var(--primary)",
                           }}
                         />
                       </div>
@@ -588,7 +587,7 @@ export default function ThemePreview() {
               <div
                 className="flex items-center justify-between rounded-[var(--radius)] border px-2.5 py-2"
                 style={{
-                  backgroundColor: "hsl(var(--card))",
+                  backgroundColor: "var(--card)",
                   borderColor: softBorderColor,
                   boxShadow: cardShadow,
                 }}
@@ -600,7 +599,7 @@ export default function ThemePreview() {
 
                   <p
                     className="truncate text-[9px]"
-                    style={{ color: "hsl(var(--text-muted))" }}
+                    style={{ color: "var(--text-muted)" }}
                   >
                     {preview.tokens.mode === "dark"
                       ? "Modo oscuro"
@@ -612,8 +611,8 @@ export default function ThemePreview() {
                 <span
                   className="rounded-full px-2 py-0.5 text-[9px] font-medium"
                   style={{
-                    backgroundColor: "hsl(var(--primary-soft))",
-                    color: "hsl(var(--primary))",
+                    backgroundColor: "var(--primary-soft)",
+                    color: "var(--primary)",
                   }}
                 >
                   Preview

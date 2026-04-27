@@ -10,36 +10,34 @@ import {
 } from "@/lib/theme/theme-presets"
 
 function getCardPreviewStyles(value: string): CSSProperties {
-  const softBorder = "hsl(var(--border) / 0.42)"
+  const softBorder = "color-mix(in srgb, var(--border) 42%, transparent)"
 
   switch (value) {
     case "elevated":
       return {
-        backgroundColor: "hsl(var(--card))",
+        backgroundColor: "var(--card)",
         borderColor: softBorder,
-
         boxShadow: "0 10px 24px rgba(15, 23, 42, 0.06)",
       }
 
     case "bordered":
       return {
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--primary) / 0.55)",
-
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--primary) 55%, transparent)",
         boxShadow: "none",
       }
 
     case "soft":
       return {
-        backgroundColor: "hsl(var(--background))",
-        borderColor: "hsl(var(--border) / 0.32)",
+        backgroundColor: "var(--background)",
+        borderColor: "color-mix(in srgb, var(--border) 32%, transparent)",
         boxShadow: "0 8px 20px rgba(15, 23, 42, 0.045)",
       }
 
     case "solid":
     default:
       return {
-        backgroundColor: "hsl(var(--card))",
+        backgroundColor: "var(--card)",
         borderColor: softBorder,
         boxShadow: "none",
       }
@@ -79,18 +77,18 @@ export default function SurfaceSection() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border) / 0.45)",
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
       <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
-          <Layers3 size={15} style={{ color: "hsl(var(--primary))" }} />
+          <Layers3 size={15} style={{ color: "var(--primary)" }} />
 
           <h2
             className="text-sm font-semibold"
-            style={{ color: "hsl(var(--foreground))" }}
+            style={{ color: "var(--foreground)" }}
           >
             Tarjetas y contenedores
           </h2>
@@ -98,7 +96,7 @@ export default function SurfaceSection() {
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Ajusta cómo se sienten las superficies del dashboard: tarjetas,
           bordes y profundidad visual.
@@ -108,11 +106,11 @@ export default function SurfaceSection() {
       <div className="space-y-5">
         <div className="space-y-3">
           <div className="flex items-center gap-2">
-            <SquareStack size={14} style={{ color: "hsl(var(--primary))" }} />
+            <SquareStack size={14} style={{ color: "var(--primary)" }} />
 
             <p
               className="text-sm font-semibold"
-              style={{ color: "hsl(var(--foreground))" }}
+              style={{ color: "var(--foreground)" }}
             >
               Estilo de tarjetas
             </p>
@@ -132,12 +130,11 @@ export default function SurfaceSection() {
                   className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                   style={{
                     background: isActive
-                      ? "linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--card)) 100%)"
-                      : "hsl(var(--background))",
+                      ? "linear-gradient(180deg, var(--primary-soft) 0%, var(--card) 100%)"
+                      : "var(--background)",
                     borderColor: isActive
-                      ? "hsl(var(--primary) / 0.65)"
-                      : "hsl(var(--border) / 0.42)",
-
+                      ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                      : "color-mix(in srgb, var(--border) 42%, transparent)",
                     boxShadow: isActive
                       ? "0 10px 24px rgba(45, 107, 255, 0.11)"
                       : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -148,7 +145,7 @@ export default function SurfaceSection() {
                       <div className="min-w-0">
                         <p
                           className="text-sm font-semibold"
-                          style={{ color: "hsl(var(--foreground))" }}
+                          style={{ color: "var(--foreground)" }}
                         >
                           {option.label}
                         </p>
@@ -156,7 +153,7 @@ export default function SurfaceSection() {
                         {option.description ? (
                           <p
                             className="mt-1 text-xs leading-5"
-                            style={{ color: "hsl(var(--text-muted))" }}
+                            style={{ color: "var(--text-muted)" }}
                           >
                             {option.description}
                           </p>
@@ -167,9 +164,10 @@ export default function SurfaceSection() {
                         <span
                           className="shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-semibold"
                           style={{
-                            backgroundColor: "hsl(var(--primary-soft))",
-                            borderColor: "hsl(var(--primary) / 0.45)",
-                            color: "hsl(var(--primary))",
+                            backgroundColor: "var(--primary-soft)",
+                            borderColor:
+                              "color-mix(in srgb, var(--primary) 45%, transparent)",
+                            color: "var(--primary)",
                           }}
                         >
                           Activo
@@ -187,7 +185,7 @@ export default function SurfaceSection() {
                             <div
                               className="h-2 w-16 rounded-full"
                               style={{
-                                backgroundColor: "hsl(var(--foreground))",
+                                backgroundColor: "var(--foreground)",
                                 opacity: 0.13,
                               }}
                             />
@@ -195,7 +193,7 @@ export default function SurfaceSection() {
                             <div
                               className="h-1.5 w-24 rounded-full"
                               style={{
-                                backgroundColor: "hsl(var(--foreground))",
+                                backgroundColor: "var(--foreground)",
                                 opacity: 0.075,
                               }}
                             />
@@ -204,8 +202,8 @@ export default function SurfaceSection() {
                           <span
                             className="rounded-full px-2.5 py-1 text-[9px] font-medium"
                             style={{
-                              backgroundColor: "hsl(var(--primary-soft))",
-                              color: "hsl(var(--primary))",
+                              backgroundColor: "var(--primary-soft)",
+                              color: "var(--primary)",
                             }}
                           >
                             Preview
@@ -215,14 +213,15 @@ export default function SurfaceSection() {
                         <div
                           className="rounded-xl border px-2.5 py-2"
                           style={{
-                            backgroundColor: "hsl(var(--background))",
-                            borderColor: "hsl(var(--border) / 0.35)",
+                            backgroundColor: "var(--background)",
+                            borderColor:
+                              "color-mix(in srgb, var(--border) 35%, transparent)",
                           }}
                         >
                           <div
                             className="h-1.5 w-20 rounded-full"
                             style={{
-                              backgroundColor: "hsl(var(--foreground))",
+                              backgroundColor: "var(--foreground)",
                               opacity: 0.09,
                             }}
                           />
@@ -239,11 +238,11 @@ export default function SurfaceSection() {
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Radius size={14} style={{ color: "hsl(var(--primary))" }} />
+              <Radius size={14} style={{ color: "var(--primary)" }} />
 
               <p
                 className="text-sm font-semibold"
-                style={{ color: "hsl(var(--foreground))" }}
+                style={{ color: "var(--foreground)" }}
               >
                 Radio de bordes
               </p>
@@ -263,12 +262,11 @@ export default function SurfaceSection() {
                     className="w-full rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                     style={{
                       background: isActive
-                        ? "linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--card)) 100%)"
-                        : "hsl(var(--background))",
+                        ? "linear-gradient(180deg, var(--primary-soft) 0%, var(--card) 100%)"
+                        : "var(--background)",
                       borderColor: isActive
-                        ? "hsl(var(--primary) / 0.65)"
-                        : "hsl(var(--border) / 0.42)",
-
+                        ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                        : "color-mix(in srgb, var(--border) 42%, transparent)",
                       boxShadow: isActive
                         ? "0 10px 24px rgba(45, 107, 255, 0.11)"
                         : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -278,7 +276,7 @@ export default function SurfaceSection() {
                       <div className="min-w-0">
                         <p
                           className="text-sm font-semibold"
-                          style={{ color: "hsl(var(--foreground))" }}
+                          style={{ color: "var(--foreground)" }}
                         >
                           {option.label}
                         </p>
@@ -286,7 +284,7 @@ export default function SurfaceSection() {
                         {option.description ? (
                           <p
                             className="mt-1 text-xs leading-5"
-                            style={{ color: "hsl(var(--text-muted))" }}
+                            style={{ color: "var(--text-muted)" }}
                           >
                             {option.description}
                           </p>
@@ -296,18 +294,19 @@ export default function SurfaceSection() {
                       <div
                         className="flex shrink-0 items-center justify-center rounded-2xl border p-2"
                         style={{
-                          backgroundColor: "hsl(var(--card))",
-                          borderColor: "hsl(var(--border) / 0.38)",
+                          backgroundColor: "var(--card)",
+                          borderColor:
+                            "color-mix(in srgb, var(--border) 38%, transparent)",
                         }}
                       >
                         <div
                           className="h-9 w-14 border"
                           style={{
                             borderRadius: previewRadius,
-                            backgroundColor: "hsl(var(--background))",
+                            backgroundColor: "var(--background)",
                             borderColor: isActive
-                              ? "hsl(var(--primary) / 0.65)"
-                              : "hsl(var(--border) / 0.42)",
+                              ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                              : "color-mix(in srgb, var(--border) 42%, transparent)",
                           }}
                         />
                       </div>
@@ -320,11 +319,11 @@ export default function SurfaceSection() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-2">
-              <Layers3 size={14} style={{ color: "hsl(var(--primary))" }} />
+              <Layers3 size={14} style={{ color: "var(--primary)" }} />
 
               <p
                 className="text-sm font-semibold"
-                style={{ color: "hsl(var(--foreground))" }}
+                style={{ color: "var(--foreground)" }}
               >
                 Intensidad de sombra
               </p>
@@ -344,12 +343,11 @@ export default function SurfaceSection() {
                     className="w-full rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                     style={{
                       background: isActive
-                        ? "linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--card)) 100%)"
-                        : "hsl(var(--background))",
+                        ? "linear-gradient(180deg, var(--primary-soft) 0%, var(--card) 100%)"
+                        : "var(--background)",
                       borderColor: isActive
-                        ? "hsl(var(--primary) / 0.65)"
-                        : "hsl(var(--border) / 0.42)",
-
+                        ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                        : "color-mix(in srgb, var(--border) 42%, transparent)",
                       boxShadow: isActive
                         ? "0 10px 24px rgba(45, 107, 255, 0.11)"
                         : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -359,7 +357,7 @@ export default function SurfaceSection() {
                       <div className="min-w-0">
                         <p
                           className="text-sm font-semibold capitalize"
-                          style={{ color: "hsl(var(--foreground))" }}
+                          style={{ color: "var(--foreground)" }}
                         >
                           {option.label}
                         </p>
@@ -367,7 +365,7 @@ export default function SurfaceSection() {
                         {option.description ? (
                           <p
                             className="mt-1 text-xs leading-5"
-                            style={{ color: "hsl(var(--text-muted))" }}
+                            style={{ color: "var(--text-muted)" }}
                           >
                             {option.description}
                           </p>
@@ -377,17 +375,18 @@ export default function SurfaceSection() {
                       <div
                         className="flex shrink-0 items-center justify-center rounded-2xl border p-2"
                         style={{
-                          backgroundColor: "hsl(var(--card))",
-                          borderColor: "hsl(var(--border) / 0.38)",
+                          backgroundColor: "var(--card)",
+                          borderColor:
+                            "color-mix(in srgb, var(--border) 38%, transparent)",
                         }}
                       >
                         <div
                           className="h-9 w-14 rounded-xl border"
                           style={{
-                            backgroundColor: "hsl(var(--card))",
+                            backgroundColor: "var(--card)",
                             borderColor: isActive
-                              ? "hsl(var(--primary) / 0.65)"
-                              : "hsl(var(--border) / 0.42)",
+                              ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                              : "color-mix(in srgb, var(--border) 42%, transparent)",
                             boxShadow: previewShadow,
                           }}
                         />

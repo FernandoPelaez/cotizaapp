@@ -1,3 +1,5 @@
+"use client"
+
 import type { ReactNode } from "react"
 import { BookOpen, ChevronRight, FileClock, PlusCircle } from "lucide-react"
 
@@ -19,23 +21,26 @@ type ActionItemProps = {
   iconColor: string
 }
 
-const CARD_BACKGROUND = "hsl(var(--card, 0 0% 100%))"
-const CARD_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
-const CARD_FOREGROUND = "hsl(var(--foreground, 222 47% 11%))"
-const CARD_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
+const CARD_BACKGROUND = "var(--card, #ffffff)"
+const CARD_BORDER =
+  "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const CARD_FOREGROUND = "var(--foreground, #0f172a)"
+const CARD_TEXT_MUTED = "var(--text-muted, #64748b)"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
 const ACTION_DEFAULT_BG = "transparent"
-const ACTION_DEFAULT_BG_HOVER = "hsl(var(--primary-soft, 214 100% 94%))"
+const ACTION_DEFAULT_BG_HOVER = "var(--primary-soft, #eef2fa)"
 
-const ACTION_ICON_BG = "hsl(var(--primary, 216 64% 29%))"
-const ACTION_ICON_BG_ALT = "hsl(var(--primary, 216 64% 29%) / 0.10)"
-const ACTION_ICON_BG_SUCCESS = "hsl(var(--success, 142 76% 36%) / 0.12)"
+const ACTION_ICON_BG = "var(--primary, #1b3d7a)"
+const ACTION_ICON_BG_ALT =
+  "color-mix(in srgb, var(--primary, #1b3d7a) 10%, transparent)"
+const ACTION_ICON_BG_SUCCESS =
+  "color-mix(in srgb, var(--success, #16a34a) 12%, transparent)"
 
-const ACTION_ICON_TEXT_LIGHT = "#FFFFFF"
-const ACTION_BRAND = "hsl(var(--primary, 216 64% 29%))"
-const ACTION_SUCCESS = "hsl(var(--success, 142 76% 36%))"
-const ACTION_CHEVRON = "hsl(var(--primary, 216 64% 29%))"
+const ACTION_ICON_TEXT_LIGHT = "#ffffff"
+const ACTION_BRAND = "var(--primary, #1b3d7a)"
+const ACTION_SUCCESS = "var(--success, #16a34a)"
+const ACTION_CHEVRON = "var(--primary, #1b3d7a)"
 
 const CARD_RADIUS = "20px"
 const ACTION_RADIUS = "14px"
@@ -54,7 +59,7 @@ function ActionItem({
     <button
       type="button"
       onClick={onClick}
-      className="flex w-full items-center justify-between gap-2 px-3 py-3 text-left transition-all duration-200"
+      className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-all duration-200"
       style={{
         borderTop: showDivider ? `1px solid ${CARD_BORDER}` : "none",
         borderRadius: ACTION_RADIUS,
@@ -113,7 +118,7 @@ export default function QuickActionsCard({
 }: QuickActionsCardProps) {
   return (
     <article
-      className="flex h-[216px] w-full flex-col p-4"
+      className="flex h-[184px] w-full flex-col p-4"
       style={{
         background: CARD_BACKGROUND,
         border: `1px solid ${CARD_BORDER}`,

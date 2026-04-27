@@ -1,0 +1,359 @@
+.section {
+  width: 100%;
+  min-height: auto;
+  box-sizing: border-box;
+  position: relative;
+  scroll-margin-top: 64px;
+  padding: 42px 32px 56px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1040px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #1b3d7a;
+  border: 1.5px solid #1b3d7a;
+  background: #eef2fa;
+  border-radius: 999px;
+  padding: 5px 15px;
+  margin-bottom: 12px;
+}
+
+.title {
+  margin: 0 0 10px;
+  color: #0f172a;
+  font-size: clamp(1.9rem, 3.5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.titleAccent {
+  color: #1b3d7a;
+}
+
+.subtitle {
+  max-width: 500px;
+  margin: 0 auto;
+  color: #64748b;
+  font-size: 0.98rem;
+  line-height: 1.6;
+}
+
+/* Tabs / pasos */
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  margin-top: 24px;
+}
+
+.tabGroup {
+  display: flex;
+  align-items: center;
+}
+
+.tabButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 15px;
+  border-radius: 999px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.tabButton:hover {
+  color: #1b3d7a;
+  border-color: #1b3d7a;
+  background: #eef2fa;
+}
+
+.tabButtonActive {
+  background: #1b3d7a;
+  color: #ffffff;
+  border-color: #1b3d7a;
+  box-shadow: 0 8px 20px rgba(27, 61, 122, 0.22);
+}
+
+.tabNumber {
+  font-size: 0.6rem;
+  font-weight: 800;
+  opacity: 0.62;
+}
+
+.tabConnector {
+  width: 20px;
+  height: 1px;
+  background: #e2e8f0;
+  margin: 0 5px;
+  flex-shrink: 0;
+}
+
+/* Contenido principal */
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.8fr) minmax(390px, 1fr);
+  gap: 34px;
+  align-items: center;
+}
+
+.stepTextPanel {
+  min-width: 0;
+}
+
+.stepTextInner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.stepMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepNumber {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #1b3d7a;
+  color: #ffffff;
+  font-size: 0.9rem;
+  font-weight: 800;
+  box-shadow: 0 10px 22px rgba(27, 61, 122, 0.2);
+}
+
+.stepLabel {
+  color: #94a3b8;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.stepTitle {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.45rem, 2.6vw, 1.75rem);
+  line-height: 1.15;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+}
+
+.stepDescription {
+  max-width: 330px;
+  margin: 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.68;
+}
+
+.stepActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 2px;
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.navButtonOutline {
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #374151;
+}
+
+.navButtonOutline:hover {
+  border-color: #1b3d7a;
+  color: #1b3d7a;
+  background: #f8fafc;
+}
+
+.navButtonFilled {
+  border: 1.5px solid #1b3d7a;
+  background: #1b3d7a;
+  color: #ffffff;
+  box-shadow: 0 10px 22px rgba(27, 61, 122, 0.16);
+}
+
+.navButtonFilled:hover {
+  background: #163466;
+  border-color: #163466;
+}
+
+/* Mockup derecho */
+.mockupPanel {
+  /* AJUSTE: más contraste para que la tarjeta no se pierda sobre el fondo blanco */
+  width: 100%;
+  max-width: 500px;
+  justify-self: center;
+  min-height: auto;
+  padding: 20px;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, #f3f7fd 0%, #eef4fb 100%);
+  border: 1.5px solid #cbd8ea;
+  box-shadow:
+    0 22px 56px rgba(15, 23, 42, 0.12),
+    0 10px 28px rgba(27, 61, 122, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.95) inset;
+}
+
+.mockupInner {
+  width: 100%;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border: none;
+  border-radius: 999px;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition:
+    width 0.25s ease,
+    background 0.25s ease;
+}
+
+.dotActive {
+  width: 28px;
+  background: #1b3d7a;
+}
+
+@media (max-width: 980px) {
+  .section {
+    padding: 54px 28px;
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .stepDescription {
+    max-width: 620px;
+  }
+
+  .mockupPanel {
+    max-width: 620px;
+  }
+}
+
+@media (max-width: 720px) {
+  .section {
+    padding: 50px 20px;
+  }
+
+  .header {
+    margin-bottom: 30px;
+  }
+
+  .tabs {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tabs {
+    scrollbar-width: none;
+  }
+
+  .tabConnector {
+    width: 16px;
+    margin: 0 4px;
+  }
+
+  .contentGrid {
+    gap: 28px;
+  }
+
+  .mockupPanel {
+    padding: 18px;
+    border-radius: 20px;
+  }
+}
+
+@media (max-width: 520px) {
+  .title {
+    font-size: 1.9rem;
+  }
+
+  .subtitle {
+    font-size: 0.94rem;
+  }
+
+  .stepMeta {
+    align-items: flex-start;
+  }
+
+  .stepActions {
+    width: 100%;
+  }
+
+  .navButton {
+    width: 100%;
+  }
+
+  .mockupPanel {
+    padding: 16px;
+  }
+}

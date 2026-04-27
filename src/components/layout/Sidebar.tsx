@@ -24,25 +24,27 @@ type SidebarProfileResponse = {
   error?: string
 }
 
-const SIDEBAR_BG = "hsl(var(--primary, 216 64% 29%))"
-const SIDEBAR_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
-const SIDEBAR_TEXT = "var(--sidebar-text, #FFFFFF)"
-const SIDEBAR_TEXT_MUTED = "var(--sidebar-text-muted, rgba(255,255,255,0.72))"
-const SIDEBAR_TEXT_SOFT = "var(--sidebar-text-soft, rgba(255,255,255,0.5))"
-const SIDEBAR_TEXT_FAINT = "var(--sidebar-text-faint, rgba(255,255,255,0.2))"
-const SIDEBAR_BORDER = "var(--sidebar-border, rgba(255,255,255,0.08))"
-const SIDEBAR_DIVIDER = "var(--sidebar-divider, rgba(255,255,255,0.1))"
+const SIDEBAR_BG = "var(--primary, #1b3d7a)"
+const SIDEBAR_BG_HOVER = "var(--primary-hover, #2a5298)"
+const SIDEBAR_BRAND_ACCENT = "var(--primary-light, #d1dcf5)"
+
+const SIDEBAR_TEXT = "var(--sidebar-text, #ffffff)"
+const SIDEBAR_TEXT_MUTED = "var(--sidebar-text-muted, rgba(255,255,255,0.78))"
+const SIDEBAR_TEXT_SOFT = "var(--sidebar-text-soft, rgba(255,255,255,0.62))"
+const SIDEBAR_TEXT_FAINT = "var(--sidebar-text-faint, rgba(255,255,255,0.32))"
+
+const SIDEBAR_BORDER = "var(--sidebar-border, rgba(255,255,255,0.10))"
+const SIDEBAR_DIVIDER = "var(--sidebar-divider, rgba(255,255,255,0.14))"
 const SIDEBAR_SURFACE = "var(--sidebar-surface, rgba(255,255,255,0.08))"
 const SIDEBAR_SURFACE_BORDER =
-  "var(--sidebar-surface-border, rgba(255,255,255,0.12))"
-const SIDEBAR_HOVER_BG = "var(--sidebar-hover-bg, rgba(255,255,255,0.1))"
-const SIDEBAR_BRAND_ACCENT = "hsl(var(--primary-light, 214 100% 79%))"
-const SIDEBAR_ICON_SOFT = "var(--sidebar-icon-soft, #E5E7EB)"
+  "var(--sidebar-surface-border, rgba(255,255,255,0.14))"
+const SIDEBAR_HOVER_BG = "var(--sidebar-hover-bg, rgba(255,255,255,0.10))"
+const SIDEBAR_ICON_SOFT = "var(--sidebar-icon-soft, #e5e7eb)"
 
-const SIDEBAR_DANGER_BG = "var(--sidebar-danger-bg, rgba(220,38,38,0.2))"
+const SIDEBAR_DANGER_BG = "var(--sidebar-danger-bg, rgba(220,38,38,0.20))"
 const SIDEBAR_DANGER_BORDER =
   "var(--sidebar-danger-border, rgba(252,165,165,0.35))"
-const SIDEBAR_DANGER_TEXT = "var(--sidebar-danger-text, #FCA5A5)"
+const SIDEBAR_DANGER_TEXT = "var(--sidebar-danger-text, #fca5a5)"
 
 export default function Sidebar() {
   const pathname = usePathname()
@@ -52,6 +54,7 @@ export default function Sidebar() {
   const [logoError, setLogoError] = useState(false)
 
   const fullName = session?.user?.name || "Usuario"
+
   const initials = fullName
     .split(" ")
     .filter(Boolean)
@@ -136,7 +139,11 @@ export default function Sidebar() {
       className="hidden h-screen w-64 md:flex md:flex-col"
       initial={{ clipPath: "inset(0 100% 0 0)", x: -8 }}
       animate={{ clipPath: "inset(0 0% 0 0)", x: 0 }}
-      transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+      transition={{
+        duration: 0.55,
+        ease: [0.16, 1, 0.3, 1],
+        delay: 0.3,
+      }}
       style={{
         background: SIDEBAR_BG,
         borderRight: `1px solid ${SIDEBAR_BORDER}`,

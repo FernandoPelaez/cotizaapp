@@ -19,51 +19,52 @@ type StatusStyle = {
 const STATUS_STYLES: Record<Cotizacion["estado"], StatusStyle> = {
   borrador: {
     label: "Borrador",
-    background: "#F3E8FF",
-    color: "#7E22CE",
+    background: "#f3e8ff",
+    color: "#7e22ce",
   },
   pendiente: {
     label: "Pendiente",
-    background: "#FEF3C7",
-    color: "#B45309",
+    background: "#fef3c7",
+    color: "#b45309",
   },
   aprobada: {
     label: "Aceptada",
-    background: "#DCFCE7",
-    color: "#15803D",
+    background: "#dcfce7",
+    color: "#15803d",
   },
   rechazada: {
     label: "Rechazada",
-    background: "#FFE4E6",
-    color: "#BE123C",
+    background: "#ffe4e6",
+    color: "#be123c",
   },
   expirada: {
     label: "Expirada",
-    background: "#FFEDD5",
-    color: "#C2410C",
+    background: "#ffedd5",
+    color: "#c2410c",
   },
 }
 
 const CHANGE_EVERY_MS = 10000
 const FADE_DURATION_MS = 220
-
-const CARD_BACKGROUND = "hsl(var(--card, 0 0% 100%))"
-const CARD_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
-const CARD_FOREGROUND = "hsl(var(--foreground, 222 47% 11%))"
-const CARD_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
-const CARD_TEXT_SOFT = "hsl(var(--text-muted, 215 16% 47%) / 0.78)"
-const CARD_EMPTY_BG = "hsl(var(--background, 220 23% 98%))"
-const CARD_ACTIVE_DOT = "hsl(var(--primary, 216 64% 29%))"
-const CARD_INACTIVE_DOT = "hsl(var(--border, 214 32% 91%))"
+const CARD_BACKGROUND = "var(--card, #ffffff)"
+const CARD_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const CARD_FOREGROUND = "var(--foreground, #0f172a)"
+const CARD_TEXT_MUTED = "var(--text-muted, #64748b)"
+const CARD_TEXT_SOFT =
+  "color-mix(in srgb, var(--text-muted, #64748b) 78%, transparent)"
+const CARD_EMPTY_BG = "var(--background, #e5e5e5)"
+const CARD_ACTIVE_DOT = "var(--primary, #1b3d7a)"
+const CARD_INACTIVE_DOT = "var(--border, #d1d5db)"
 const CARD_SHADOW = "var(--shadow, 0 1px 2px rgba(15, 23, 42, 0.06))"
 
-const CARD_ICON_BG = "hsl(var(--primary, 216 64% 29%))"
-const CARD_ICON_TEXT = "#FFFFFF"
+const CARD_ICON_BG = "var(--primary, #1b3d7a)"
+const CARD_ICON_TEXT = "#ffffff"
 
-const CARD_ACTION_BG = "hsl(var(--primary, 216 64% 29%))"
-const CARD_ACTION_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
-const CARD_ACTION_TEXT = "#FFFFFF"
-const CARD_ACTION_BORDER = "hsl(var(--primary, 216 64% 29%) / 0.18)"
+const CARD_ACTION_BG = "var(--primary, #1b3d7a)"
+const CARD_ACTION_BG_HOVER = "var(--primary-hover, #2a5298)"
+const CARD_ACTION_TEXT = "#ffffff"
+const CARD_ACTION_BORDER =
+  "color-mix(in srgb, var(--primary, #1b3d7a) 18%, transparent)"
 
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "14px"

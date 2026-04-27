@@ -144,21 +144,6 @@ select {
   color: inherit;
 }
 
-@keyframes fadeUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-fadeUp {
-  animation: fadeUp 0.6s ease forwards;
-}
-
 .btn {
   padding: 0.9rem 1.8rem;
   border-radius: 999px;
@@ -212,7 +197,6 @@ select {
   background: linear-gradient(180deg, var(--primary), var(--primary-hover));
   transform: translate(-50%, -50%) rotate(0deg);
   transform-origin: center;
-  animation: rotateCard 5s linear infinite;
   opacity: 0.6;
   pointer-events: none;
   z-index: 0;
@@ -283,15 +267,6 @@ select {
   color: var(--text-muted);
 }
 
-@keyframes rotateCard {
-  from {
-    transform: translate(-50%, -50%) rotate(0deg);
-  }
-  to {
-    transform: translate(-50%, -50%) rotate(360deg);
-  }
-}
-
 .segment-card {
   position: relative;
   border-radius: 20px;
@@ -355,41 +330,6 @@ select {
   transform: scale(1.03);
 }
 
-@keyframes modalBackdropIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes modalPanelIn {
-  from {
-    opacity: 0;
-    transform: translateY(18px) scale(0.96);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes premiumGlow {
-  0% {
-    opacity: 0.45;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  50% {
-    opacity: 0.85;
-    transform: translate(-50%, -50%) scale(1.08);
-  }
-  100% {
-    opacity: 0.45;
-    transform: translate(-50%, -50%) scale(1);
-  }
-}
-
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -401,7 +341,6 @@ select {
   background: rgba(5, 10, 25, 0.72);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  animation: modalBackdropIn 0.22s ease;
 }
 
 .modal-panel {
@@ -418,7 +357,6 @@ select {
   box-shadow:
     0 30px 90px rgba(0, 0, 0, 0.48),
     0 0 0 1px rgba(255, 255, 255, 0.04);
-  animation: modalPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .modal-panel::before {
@@ -432,7 +370,6 @@ select {
   background: radial-gradient(circle, rgba(122, 92, 255, 0.38) 0%, rgba(122, 92, 255, 0) 70%);
   filter: blur(10px);
   pointer-events: none;
-  animation: premiumGlow 4.2s ease-in-out infinite;
 }
 
 .modal-close-btn {

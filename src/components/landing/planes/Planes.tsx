@@ -1,109 +1,82 @@
 "use client"
 
-import { motion, type Variants } from "framer-motion"
+import type { CSSProperties } from "react"
+import { motion } from "framer-motion"
 
-import PlanesGrid from "./PlanesGrid"
-import PlanesStyles from "./PlanesStyles"
+import {
+  planesHeaderVariants,
+  planesNoteVariants,
+} from "./animations/planes.motion"
+import PlanesGrid from "./components/PlanesGrid"
+import { planesSectionContent } from "./data/planes.data"
+import styles from "./Planes.module.css"
 
-const easeOut: [number, number, number, number] = [0.22, 1, 0.36, 1]
-
-const headerVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 24,
+const decorativeCircles: CSSProperties[] = [
+  {
+    width: 400,
+    height: 400,
+    top: -110,
+    right: -90,
   },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.8,
-      ease: easeOut,
-    },
+  {
+    width: 240,
+    height: 240,
+    bottom: -60,
+    left: -50,
   },
-}
-
-const noteVariants: Variants = {
-  hidden: {
-    opacity: 0,
-    y: 12,
+  {
+    width: 160,
+    height: 160,
+    top: "38%",
+    left: "43%",
   },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.7,
-      delay: 1.4,
-      ease: easeOut,
-    },
-  },
-}
+]
 
 export default function Planes() {
   return (
-    <>
-      <PlanesStyles />
-
-      <section className="planes-section" id="planes">
+    <section className={styles.planesSection} id="planes">
+      {decorativeCircles.map((circle, index) => (
         <div
-          className="deco-circle"
-          style={{
-            width: 400,
-            height: 400,
-            top: -110,
-            right: -90,
-          }}
+          key={`planes-deco-${index}`}
+          className={styles.decoCircle}
+          style={circle}
+          aria-hidden="true"
         />
+      ))}
 
-        <div
-          className="deco-circle"
-          style={{
-            width: 240,
-            height: 240,
-            bottom: -60,
-            left: -50,
-          }}
-        />
+      <div className={styles.planesInner}>
+        <motion.div
+          className={styles.planesHeader}
+          variants={planesHeaderVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.4 }}
+        >
+          <div className={styles.planesBadge}>
+            {planesSectionContent.badge}
+          </div>
 
-        <div
-          className="deco-circle"
-          style={{
-            width: 160,
-            height: 160,
-            top: "38%",
-            left: "43%",
-          }}
-        />
+          <h2 className={styles.planesTitle}>
+            {planesSectionContent.title}
+          </h2>
 
-        <div className="planes-inner">
-          <motion.div
-            variants={headerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.3 }}
-          >
-            <div className="planes-badge">Precios</div>
+          <p className={styles.planesSub}>
+            {planesSectionContent.subtitle}
+          </p>
+        </motion.div>
 
-            <h2 className="planes-title">Planes para cada necesidad</h2>
+        <PlanesGrid />
 
-            <p className="planes-sub">
-              Empieza gratis y escala conforme tu negocio crece. Sin contratos,
-              cancela cuando quieras.
-            </p>
-          </motion.div>
-
-          <PlanesGrid />
-
-          <motion.p
-            className="planes-note"
-            variants={noteVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-          >
-            Precios en MXN · IVA no incluido · Cancela en cualquier momento
-          </motion.p>
-        </div>
-      </section>
-    </>
+        <motion.p
+          className={styles.planesNote}
+          variants={planesNoteVariants}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.5 }}
+        >
+          {planesSectionContent.note}
+        </motion.p>
+      </div>
+    </section>
   )
 }

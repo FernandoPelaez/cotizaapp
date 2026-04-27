@@ -48,27 +48,27 @@ const SIDEBAR_COLLAPSIBLE_ROUTES = [
   "/plantillas",
 ]
 
-const HEADER_BG = "hsl(var(--card, 0 0% 100%))"
-const HEADER_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
-const HEADER_TEXT = "hsl(var(--foreground, 222 47% 11%))"
-const HEADER_TEXT_MUTED = "hsl(var(--text-muted, 215 16% 47%))"
-const HEADER_TEXT_SOFT = "hsl(var(--text-muted, 215 16% 47%) / 0.78)"
+const HEADER_BG = "var(--card, #ffffff)"
+const HEADER_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_TEXT = "var(--foreground, #0f172a)"
+const HEADER_TEXT_MUTED = "var(--text-muted, #64748b)"
+const HEADER_TEXT_SOFT = "color-mix(in srgb, var(--text-muted, #64748b) 78%, transparent)"
 
-const HEADER_BUTTON_BG = "hsl(var(--card, 0 0% 100%))"
-const HEADER_BUTTON_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
-const HEADER_BUTTON_ICON = "hsl(var(--primary, 216 64% 29%))"
-const HEADER_BUTTON_HOVER_BG = "hsl(var(--primary-soft, 214 100% 94%))"
-const HEADER_BUTTON_HOVER_BORDER = "hsl(var(--primary-light, 214 91% 75%))"
+const HEADER_BUTTON_BG = "var(--card, #ffffff)"
+const HEADER_BUTTON_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_BUTTON_ICON = "var(--primary, #1b3d7a)"
+const HEADER_BUTTON_HOVER_BG = "var(--primary-soft, #eef2fa)"
+const HEADER_BUTTON_HOVER_BORDER = "var(--primary-light, #d1dcf5)"
 
-const HEADER_DROPDOWN_BG = "hsl(var(--card, 0 0% 100%))"
-const HEADER_DROPDOWN_BORDER = "hsl(var(--border, 214 32% 91%) / 0.55)"
-const HEADER_DROPDOWN_SURFACE = "hsl(var(--background, 220 23% 98%))"
-const HEADER_TAG_BG = "hsl(var(--primary-soft, 214 100% 94%))"
-const HEADER_TAG_TEXT = "hsl(var(--primary, 216 64% 29%))"
-const HEADER_UNREAD_BADGE_BG = "hsl(var(--error, 0 84% 60%))"
-const HEADER_UNREAD_BADGE_TEXT = "#FFFFFF"
-const HEADER_PROFILE_BG = "hsl(var(--primary-light, 214 91% 75%))"
-const HEADER_PROFILE_TEXT = "hsl(var(--primary, 216 64% 29%))"
+const HEADER_DROPDOWN_BG = "var(--card, #ffffff)"
+const HEADER_DROPDOWN_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_DROPDOWN_SURFACE = "var(--background, #e5e5e5)"
+const HEADER_TAG_BG = "var(--primary-soft, #eef2fa)"
+const HEADER_TAG_TEXT = "var(--primary, #1b3d7a)"
+const HEADER_UNREAD_BADGE_BG = "var(--error, #dc2626)"
+const HEADER_UNREAD_BADGE_TEXT = "#ffffff"
+const HEADER_PROFILE_BG = "var(--primary-light, #d1dcf5)"
+const HEADER_PROFILE_TEXT = "var(--primary, #1b3d7a)"
 
 type EventVisualStyle = {
   border: string
@@ -79,8 +79,10 @@ type EventVisualStyle = {
 
 function getSaludo() {
   const h = new Date().getHours()
+
   if (h >= 5 && h < 12) return "Buenos días"
   if (h >= 12 && h < 19) return "Buenas tardes"
+
   return "Buenas noches"
 }
 
@@ -97,36 +99,40 @@ function getEventStyles(type: QuoteEventType): EventVisualStyle {
   switch (type) {
     case "QUOTE_SENT":
       return {
-        border: "#BFDBFE",
-        background: "#EFF6FF",
-        color: "#1D4ED8",
+        border: "#bfdbfe",
+        background: "#eff6ff",
+        color: "#1d4ed8",
         icon: <Send className="h-4 w-4" />,
       }
+
     case "QUOTE_ACCEPTED":
       return {
-        border: "#A7F3D0",
-        background: "#ECFDF5",
+        border: "#a7f3d0",
+        background: "#ecfdf5",
         color: "#047857",
         icon: <CheckCircle2 className="h-4 w-4" />,
       }
+
     case "QUOTE_REJECTED":
       return {
-        border: "#FECACA",
-        background: "#FEF2F2",
-        color: "#B91C1C",
+        border: "#fecaca",
+        background: "#fef2f2",
+        color: "#b91c1c",
         icon: <XCircle className="h-4 w-4" />,
       }
+
     case "QUOTE_EXPIRED":
       return {
-        border: "#E2E8F0",
-        background: "#F8FAFC",
+        border: "#e2e8f0",
+        background: "#f8fafc",
         color: "#475569",
         icon: <Clock3 className="h-4 w-4" />,
       }
+
     default:
       return {
-        border: "#E2E8F0",
-        background: "#F8FAFC",
+        border: "#e2e8f0",
+        background: "#f8fafc",
         color: "#475569",
         icon: <Bell className="h-4 w-4" />,
       }
@@ -212,7 +218,10 @@ export default function Header({
     const interval = setInterval(() => {
       i++
       setDisplayText(fullText.slice(0, i))
-      if (i >= fullText.length) clearInterval(interval)
+
+      if (i >= fullText.length) {
+        clearInterval(interval)
+      }
     }, i < saludo.length ? 35 : 65)
 
     return () => clearInterval(interval)
@@ -302,6 +311,7 @@ export default function Header({
     }
 
     document.addEventListener("mousedown", handleClickOutside)
+
     return () =>
       document.removeEventListener("mousedown", handleClickOutside)
   }, [])

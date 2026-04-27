@@ -14,18 +14,18 @@ export default function TypographySection() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-        borderColor: "hsl(var(--border) / 0.45)",
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
       <div className="mb-4 space-y-1">
         <div className="flex items-center gap-2">
-          <Type size={15} style={{ color: "hsl(var(--primary))" }} />
+          <Type size={15} style={{ color: "var(--primary)" }} />
 
           <h2
             className="text-sm font-semibold"
-            style={{ color: "hsl(var(--foreground))" }}
+            style={{ color: "var(--foreground)" }}
           >
             Tipografía
           </h2>
@@ -33,7 +33,7 @@ export default function TypographySection() {
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Selecciona la fuente principal del dashboard para mantener una
           identidad visual consistente.
@@ -53,12 +53,11 @@ export default function TypographySection() {
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 backgroundColor: isActive
-                  ? "hsl(var(--primary-soft))"
-                  : "hsl(var(--background))",
+                  ? "var(--primary-soft)"
+                  : "var(--background)",
                 borderColor: isActive
-                  ? "hsl(var(--primary) / 0.65)"
-                  : "hsl(var(--border) / 0.42)",
-
+                  ? "color-mix(in srgb, var(--primary) 65%, transparent)"
+                  : "color-mix(in srgb, var(--border) 42%, transparent)",
                 boxShadow: isActive
                   ? "0 10px 24px rgba(45, 107, 255, 0.11)"
                   : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -69,7 +68,7 @@ export default function TypographySection() {
                   <div className="min-w-0">
                     <p
                       className="text-sm font-semibold"
-                      style={{ color: "hsl(var(--foreground))" }}
+                      style={{ color: "var(--foreground)" }}
                     >
                       {option.label}
                     </p>
@@ -77,7 +76,7 @@ export default function TypographySection() {
                     {option.description ? (
                       <p
                         className="mt-1 text-xs leading-5"
-                        style={{ color: "hsl(var(--text-muted))" }}
+                        style={{ color: "var(--text-muted)" }}
                       >
                         {option.description}
                       </p>
@@ -88,7 +87,7 @@ export default function TypographySection() {
                     <span
                       className="shrink-0 rounded-full px-2.5 py-1 text-[10px] font-semibold"
                       style={{
-                        backgroundColor: "hsl(var(--primary))",
+                        backgroundColor: "var(--primary)",
                         color: "white",
                       }}
                     >
@@ -100,11 +99,10 @@ export default function TypographySection() {
                 <div
                   className="rounded-2xl border px-3.5 py-3"
                   style={{
-                    backgroundColor: "hsl(var(--card))",
-                    borderColor: "hsl(var(--border) / 0.38)",
-
+                    backgroundColor: "var(--card)",
+                    borderColor: "color-mix(in srgb, var(--border) 38%, transparent)",
                     fontFamily: FONT_FAMILY_STACKS[option.value],
-                    color: "hsl(var(--foreground))",
+                    color: "var(--foreground)",
                     boxShadow: "inset 0 1px 0 rgba(255, 255, 255, 0.45)",
                   }}
                 >
@@ -114,7 +112,7 @@ export default function TypographySection() {
 
                   <p
                     className="mt-1 text-xs leading-5"
-                    style={{ color: "hsl(var(--text-muted))" }}
+                    style={{ color: "var(--text-muted)" }}
                   >
                     Vista previa de títulos, textos y lectura general.
                   </p>

@@ -27,8 +27,8 @@ type CardStylePreset = {
 export const BRAND_COLOR_PRESETS: Record<BrandColorKey, ThemeColorPreset> = {
   blue: {
     key: "blue",
-    label: "Azul elegante",
-    hex: "#2D6BFF",
+    label: "Azul CotizaApp",
+    hex: "#1b3d7a",
   },
   violet: {
     key: "violet",

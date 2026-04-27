@@ -16,27 +16,7 @@ import type {
   ThemeSettings,
 } from "@/types/theme"
 
-type HslColor = {
-  h: number
-  s: number
-  l: number
-}
-
 type ResolvedThemeMode = Exclude<ThemeMode, "system">
-
-type SurfaceHslTokens = {
-  background: string
-  card: string
-  foreground: string
-  textMuted: string
-  border: string
-}
-
-type SemanticHslTokens = {
-  success: string
-  warning: string
-  error: string
-}
 
 type SurfaceTokens = Pick<
   ThemeDerivedTokens,
@@ -53,89 +33,91 @@ type BrandTokens = Pick<
   "primary" | "primaryHover" | "primaryLight" | "primarySoft"
 >
 
-const COTIZAAPP_PRIMARY_HEX = "#1B3D7A"
-const COTIZAAPP_PRIMARY_HOVER_HEX = "#2A5298"
+const COTIZAAPP_PRIMARY_HEX = "#1b3d7a"
+const COTIZAAPP_PRIMARY_HOVER_HEX = "#2a5298"
+const COTIZAAPP_PRIMARY_LIGHT_HEX = "#d1dcf5"
+const COTIZAAPP_PRIMARY_SOFT_HEX = "#eef2fa"
 
 const FALLBACK_BRAND_HEX = COTIZAAPP_PRIMARY_HEX
 
 const LIGHT_SURFACE_TOKENS: Record<
   ThemeSettings["cardStyle"],
-  SurfaceHslTokens
+  SurfaceTokens
 > = {
   soft: {
-    background: "220 23% 98%",
-    card: "0 0% 100%",
-    foreground: "222 47% 11%",
-    textMuted: "215 16% 47%",
-    border: "214 32% 91%",
+    background: "#e5e5e5",
+    card: "#ffffff",
+    foreground: "#0f172a",
+    textMuted: "#64748b",
+    border: "#d1d5db",
   },
   solid: {
-    background: "220 23% 97%",
-    card: "220 20% 99%",
-    foreground: "222 47% 11%",
-    textMuted: "215 16% 47%",
-    border: "214 28% 89%",
+    background: "#f1f5f9",
+    card: "#ffffff",
+    foreground: "#0f172a",
+    textMuted: "#64748b",
+    border: "#d1d5db",
   },
   bordered: {
-    background: "220 23% 98%",
-    card: "0 0% 100%",
-    foreground: "222 47% 11%",
-    textMuted: "215 16% 47%",
-    border: "214 32% 88%",
+    background: "#e5e5e5",
+    card: "#ffffff",
+    foreground: "#0f172a",
+    textMuted: "#64748b",
+    border: "#cbd5e1",
   },
   elevated: {
-    background: "220 23% 98%",
-    card: "0 0% 100%",
-    foreground: "222 47% 11%",
-    textMuted: "215 16% 47%",
-    border: "214 28% 91%",
+    background: "#f1f5f9",
+    card: "#ffffff",
+    foreground: "#0f172a",
+    textMuted: "#64748b",
+    border: "#d1d5db",
   },
 }
 
 const DARK_SURFACE_TOKENS: Record<
   ThemeSettings["cardStyle"],
-  SurfaceHslTokens
+  SurfaceTokens
 > = {
   soft: {
-    background: "222 47% 8%",
-    card: "222 38% 12%",
-    foreground: "210 40% 98%",
-    textMuted: "215 20% 70%",
-    border: "217 19% 24%",
+    background: "#0f172a",
+    card: "#1e293b",
+    foreground: "#f8fafc",
+    textMuted: "#94a3b8",
+    border: "#334155",
   },
   solid: {
-    background: "222 47% 8%",
-    card: "222 32% 14%",
-    foreground: "210 40% 98%",
-    textMuted: "215 20% 70%",
-    border: "217 19% 24%",
+    background: "#0f172a",
+    card: "#1e293b",
+    foreground: "#f8fafc",
+    textMuted: "#94a3b8",
+    border: "#334155",
   },
   bordered: {
-    background: "222 47% 8%",
-    card: "222 34% 11%",
-    foreground: "210 40% 98%",
-    textMuted: "215 20% 70%",
-    border: "217 18% 30%",
+    background: "#0f172a",
+    card: "#1e293b",
+    foreground: "#f8fafc",
+    textMuted: "#94a3b8",
+    border: "#475569",
   },
   elevated: {
-    background: "222 47% 8%",
-    card: "222 30% 14%",
-    foreground: "210 40% 98%",
-    textMuted: "215 20% 70%",
-    border: "217 19% 24%",
+    background: "#0f172a",
+    card: "#1e293b",
+    foreground: "#f8fafc",
+    textMuted: "#94a3b8",
+    border: "#334155",
   },
 }
 
-const LIGHT_SEMANTIC_TOKENS: SemanticHslTokens = {
-  success: "142 76% 36%",
-  warning: "38 92% 50%",
-  error: "0 84% 60%",
+const LIGHT_SEMANTIC_TOKENS: SemanticTokens = {
+  success: "#16a34a",
+  warning: "#d97706",
+  error: "#dc2626",
 }
 
-const DARK_SEMANTIC_TOKENS: SemanticHslTokens = {
-  success: "142 70% 45%",
-  warning: "38 96% 62%",
-  error: "0 80% 64%",
+const DARK_SEMANTIC_TOKENS: SemanticTokens = {
+  success: "#22c55e",
+  warning: "#f59e0b",
+  error: "#f87171",
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -146,22 +128,22 @@ function normalizeHex(hex: string): string {
   const clean = hex.replace("#", "").trim().replace(/[^0-9a-fA-F]/g, "")
 
   if (clean.length === 3) {
-    return clean
+    return `#${clean
       .split("")
       .map((char) => char + char)
       .join("")
-      .toLowerCase()
+      .toLowerCase()}`
   }
 
   if (clean.length === 6) {
-    return clean.toLowerCase()
+    return `#${clean.toLowerCase()}`
   }
 
-  return FALLBACK_BRAND_HEX.replace("#", "").toLowerCase()
+  return FALLBACK_BRAND_HEX
 }
 
 function hexToRgb(hex: string) {
-  const normalized = normalizeHex(hex)
+  const normalized = normalizeHex(hex).replace("#", "")
 
   return {
     r: parseInt(normalized.slice(0, 2), 16),
@@ -170,99 +152,23 @@ function hexToRgb(hex: string) {
   }
 }
 
-function rgbToHsl(r: number, g: number, b: number): HslColor {
-  const rn = r / 255
-  const gn = g / 255
-  const bn = b / 255
+function rgbToHex(r: number, g: number, b: number) {
+  const toHex = (value: number) =>
+    clamp(Math.round(value), 0, 255).toString(16).padStart(2, "0")
 
-  const max = Math.max(rn, gn, bn)
-  const min = Math.min(rn, gn, bn)
-  const delta = max - min
-
-  let h = 0
-  const l = (max + min) / 2
-  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
-
-  if (delta !== 0) {
-    switch (max) {
-      case rn:
-        h = 60 * (((gn - bn) / delta) % 6)
-        break
-      case gn:
-        h = 60 * ((bn - rn) / delta + 2)
-        break
-      case bn:
-        h = 60 * ((rn - gn) / delta + 4)
-        break
-      default:
-        h = 0
-    }
-  }
-
-  if (h < 0) h += 360
-
-  return {
-    h: Math.round(h),
-    s: Math.round(s * 100),
-    l: Math.round(l * 100),
-  }
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
 }
 
-function hexToHsl(hex: string): HslColor {
-  const { r, g, b } = hexToRgb(hex)
-  return rgbToHsl(r, g, b)
-}
+function mixHex(fromHex: string, toHex: string, amount: number) {
+  const from = hexToRgb(fromHex)
+  const to = hexToRgb(toHex)
+  const ratio = clamp(amount, 0, 1)
 
-function toHslToken(color: HslColor): string {
-  return `${Math.round(color.h)} ${Math.round(color.s)}% ${Math.round(
-    color.l
-  )}%`
-}
-
-function shiftLightness(color: HslColor, amount: number): HslColor {
-  return {
-    ...color,
-    l: clamp(color.l + amount, 0, 100),
-  }
-}
-
-function shiftSaturation(color: HslColor, amount: number): HslColor {
-  return {
-    ...color,
-    s: clamp(color.s + amount, 0, 100),
-  }
-}
-
-function createLightSoftBrandToken(color: HslColor): string {
-  return toHslToken({
-    h: color.h,
-    s: clamp(color.s + 18, 55, 95),
-    l: 94,
-  })
-}
-
-function createLightBrandToken(color: HslColor): string {
-  return toHslToken({
-    h: color.h,
-    s: clamp(color.s + 8, 55, 92),
-    l: clamp(color.l + 36, 68, 78),
-  })
-}
-
-function createDarkSoftBrandToken(color: HslColor): string {
-  return toHslToken({
-    h: color.h,
-    s: clamp(color.s - 12, 30, 72),
-    l: 20,
-  })
-}
-
-function createDarkBrandToken(color: HslColor): string {
-  return toHslToken({
-    h: color.h,
-    s: clamp(color.s - 6, 42, 78),
-    l: clamp(color.l + 20, 48, 62),
-  })
+  return rgbToHex(
+    from.r + (to.r - from.r) * ratio,
+    from.g + (to.g - from.g) * ratio,
+    from.b + (to.b - from.b) * ratio
+  )
 }
 
 function resolveThemeMode(
@@ -286,26 +192,26 @@ function resolveBrandHex(brandColor: ThemeSettings["brandColor"]) {
   }
 
   const preset = BRAND_COLOR_PRESETS[brandColor]
-  return preset?.hex ?? FALLBACK_BRAND_HEX
+  return normalizeHex(preset?.hex ?? FALLBACK_BRAND_HEX)
 }
 
 function createDefaultCotizaBrandTokens(
   mode: ResolvedThemeMode
 ): BrandTokens {
-  const base = hexToHsl(COTIZAAPP_PRIMARY_HEX)
-  const hover = hexToHsl(COTIZAAPP_PRIMARY_HOVER_HEX)
+  if (mode === "dark") {
+    return {
+      primary: COTIZAAPP_PRIMARY_HEX,
+      primaryHover: COTIZAAPP_PRIMARY_HOVER_HEX,
+      primaryLight: "rgba(255, 255, 255, 0.10)",
+      primarySoft: "rgba(255, 255, 255, 0.05)",
+    }
+  }
 
   return {
-    primary: toHslToken(base),
-    primaryHover: toHslToken(hover),
-    primaryLight:
-      mode === "light"
-        ? createLightBrandToken(base)
-        : createDarkBrandToken(base),
-    primarySoft:
-      mode === "light"
-        ? createLightSoftBrandToken(base)
-        : createDarkSoftBrandToken(base),
+    primary: COTIZAAPP_PRIMARY_HEX,
+    primaryHover: COTIZAAPP_PRIMARY_HOVER_HEX,
+    primaryLight: COTIZAAPP_PRIMARY_LIGHT_HEX,
+    primarySoft: COTIZAAPP_PRIMARY_SOFT_HEX,
   }
 }
 
@@ -313,24 +219,22 @@ function createPresetBrandTokens(
   brandHex: string,
   mode: ResolvedThemeMode
 ): BrandTokens {
-  const base = hexToHsl(brandHex)
+  const normalized = normalizeHex(brandHex)
 
-  const primaryHover =
-    mode === "light"
-      ? shiftLightness(base, -8)
-      : shiftLightness(base, 6)
+  if (mode === "dark") {
+    return {
+      primary: normalized,
+      primaryHover: mixHex(normalized, "#ffffff", 0.16),
+      primaryLight: mixHex(normalized, "#000000", 0.35),
+      primarySoft: "rgba(255, 255, 255, 0.05)",
+    }
+  }
 
   return {
-    primary: toHslToken(base),
-    primaryHover: toHslToken(primaryHover),
-    primaryLight:
-      mode === "light"
-        ? createLightBrandToken(base)
-        : createDarkBrandToken(base),
-    primarySoft:
-      mode === "light"
-        ? createLightSoftBrandToken(base)
-        : createDarkSoftBrandToken(base),
+    primary: normalized,
+    primaryHover: mixHex(normalized, "#000000", 0.12),
+    primaryLight: mixHex(normalized, "#ffffff", 0.72),
+    primarySoft: mixHex(normalized, "#ffffff", 0.9),
   }
 }
 
@@ -350,31 +254,13 @@ function createSurfaceTokens(
   mode: ResolvedThemeMode,
   cardStyle: ThemeSettings["cardStyle"]
 ): SurfaceTokens {
-  const source =
-    mode === "light"
-      ? LIGHT_SURFACE_TOKENS[cardStyle]
-      : DARK_SURFACE_TOKENS[cardStyle]
-
-  return {
-    background: source.background,
-    card: source.card,
-    foreground: source.foreground,
-    textMuted: source.textMuted,
-    border: source.border,
-  }
+  return mode === "light"
+    ? LIGHT_SURFACE_TOKENS[cardStyle]
+    : DARK_SURFACE_TOKENS[cardStyle]
 }
 
 function createSemanticTokens(mode: ResolvedThemeMode): SemanticTokens {
-  const source =
-    mode === "light"
-      ? LIGHT_SEMANTIC_TOKENS
-      : DARK_SEMANTIC_TOKENS
-
-  return {
-    success: source.success,
-    warning: source.warning,
-    error: source.error,
-  }
+  return mode === "light" ? LIGHT_SEMANTIC_TOKENS : DARK_SEMANTIC_TOKENS
 }
 
 export function deriveThemeTokens(

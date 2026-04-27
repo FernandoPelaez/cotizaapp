@@ -43,6 +43,7 @@ export default function Navbar() {
       const element = document.getElementById(id)
       if (element) return { element, id }
     }
+
     return null
   }, [])
 
@@ -59,12 +60,10 @@ export default function Navbar() {
       behavior: ScrollBehavior = "smooth"
     ) => {
       const navbarOffset = getNavbarOffset()
-      const extraOffset = 12
+
+      // AJUSTE: se quitó el extraOffset para que no se vea una franja del Hero al navegar
       const elementTop = Math.max(
-        element.getBoundingClientRect().top +
-          window.scrollY -
-          navbarOffset -
-          extraOffset,
+        element.getBoundingClientRect().top + window.scrollY - navbarOffset,
         0
       )
 
@@ -105,7 +104,6 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-
       if (window.scrollY < 40) {
         setActiveSection("")
         window.history.replaceState(null, "", window.location.pathname)
@@ -113,7 +111,9 @@ export default function Navbar() {
       }
 
       const navbarOffset = getNavbarOffset()
-      const currentPosition = window.scrollY + navbarOffset + 24
+
+      // AJUSTE: lectura más precisa de sección activa debajo del navbar
+      const currentPosition = window.scrollY + navbarOffset + 4
 
       let currentActive = ""
 
@@ -133,18 +133,21 @@ export default function Navbar() {
 
     const handleHashChange = () => {
       const hash = window.location.hash.replace("#", "")
+
       if (!hash) {
         setActiveSection("")
         return
       }
 
       const matchedItem = NAV_LINKS.find((item) => item.ids.includes(hash))
+
       if (!matchedItem) {
         setActiveSection("")
         return
       }
 
       const found = getSectionElement(matchedItem.ids)
+
       if (!found) {
         setActiveSection(matchedItem.hash)
         return
@@ -158,6 +161,7 @@ export default function Navbar() {
     if (window.location.hash) {
       window.history.replaceState(null, "", window.location.pathname)
     }
+
     setActiveSection("")
 
     window.addEventListener("hashchange", handleHashChange)

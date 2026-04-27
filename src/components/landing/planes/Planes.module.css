@@ -1,0 +1,364 @@
+.planesSection {
+  width: 100%;
+  min-height: calc(100svh - 72px);
+  padding: 62px 24px 110px;
+  background: #1b3d7a;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.decoCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+}
+
+.planesInner {
+  width: 100%;
+  max-width: 1060px;
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.planesHeader {
+  max-width: 620px;
+  margin: 0 auto 38px;
+}
+
+.planesBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.68);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  padding: 5px 17px;
+  margin-bottom: 14px;
+}
+
+.planesTitle {
+  font-size: clamp(28px, 4vw, 40px);
+  font-weight: 850;
+  color: #ffffff;
+  margin: 0 0 12px;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+}
+
+.planesSub {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.64);
+  max-width: 480px;
+  margin: 0 auto;
+  line-height: 1.65;
+}
+
+.planesGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.planWrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.planCard,
+.premiumCard {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 23px 24px 21px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.13);
+  transition: box-shadow 0.28s ease;
+}
+
+.planWrap:hover .planCard,
+.planWrap:hover .premiumCard {
+  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.22);
+}
+
+.proShell {
+  position: relative;
+  border-radius: 22px;
+  padding: 2.5px;
+  flex: 1;
+  box-sizing: border-box;
+  overflow: hidden;
+  box-shadow: 0 10px 38px rgba(27, 61, 122, 0.58);
+  transition: box-shadow 0.28s ease;
+}
+
+.planWrap:hover .proShell {
+  box-shadow: 0 24px 58px rgba(27, 61, 122, 0.74);
+}
+
+.proShellBg {
+  position: absolute;
+  inset: -50%;
+  background: conic-gradient(
+    from 0deg,
+    #60a5fa,
+    #1b3d7a 25%,
+    #818cf8 50%,
+    #60a5fa 75%,
+    #1b3d7a
+  );
+  animation: spinBorder 3.2s linear infinite;
+  z-index: 0;
+}
+
+.proInner {
+  position: relative;
+  z-index: 1;
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 23px 24px 21px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+.planTag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 5px;
+  line-height: 1.45;
+}
+
+.planName {
+  font-size: 20px;
+  font-weight: 850;
+  color: #0b1220;
+  margin: 0 0 16px;
+  line-height: 1.2;
+  letter-spacing: -0.03em;
+}
+
+.planPriceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+.planPriceNum {
+  font-size: 42px;
+  font-weight: 850;
+  color: #1b3d7a;
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.planPricePer {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.planDivider {
+  height: 1px;
+  background: #e8edf5;
+  margin-bottom: 15px;
+}
+
+.planFeatures {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 22px;
+}
+
+.planFeatItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  font-size: 13px;
+  color: #243044;
+  line-height: 1.45;
+}
+
+.featCheck {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #eef2fa;
+  color: #1b3d7a;
+  font-size: 8px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.popularPill,
+.premiumPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.075em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 14px;
+  width: fit-content;
+  transform-origin: left center;
+  line-height: 1.2;
+}
+
+.popularPill {
+  background: #1b3d7a;
+  color: #ffffff;
+}
+
+.premiumPill {
+  background: #eef2fa;
+  color: #1b3d7a;
+  border: 1px solid #dbe4f3;
+}
+
+.btnOutlinePlan,
+.btnEmpresaPlan,
+.btnFilledPlan {
+  width: 100%;
+  min-height: 44px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+  transition:
+    background 0.22s ease,
+    border-color 0.22s ease,
+    color 0.22s ease;
+  margin-top: auto;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btnOutlinePlan,
+.btnEmpresaPlan {
+  border: 1.5px solid #d8e5fb;
+  background: #f1f6ff;
+  color: #1b3d7a;
+}
+
+.btnOutlinePlan:hover,
+.btnEmpresaPlan:hover {
+  background: #e8f1ff;
+  border-color: #bcd1f5;
+  color: #162f5e;
+}
+
+.btnFilledPlan {
+  border: 1.5px solid #1b3d7a;
+  background: #1b3d7a;
+  color: #ffffff;
+}
+
+.btnFilledPlan:hover {
+  background: #162f5e;
+  border-color: #162f5e;
+}
+
+.planesNote {
+  margin: 24px 0 0;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.03em;
+}
+
+@keyframes spinBorder {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 1024px) {
+  .planesSection {
+    min-height: auto;
+    padding: 58px 22px 92px;
+  }
+
+  .planesGrid {
+    gap: 18px;
+  }
+
+  .planCard,
+  .premiumCard,
+  .proInner {
+    padding: 22px 21px 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .planesGrid {
+    grid-template-columns: 1fr;
+    max-width: 390px;
+    margin: 0 auto;
+  }
+
+  .planesHeader {
+    margin-bottom: 34px;
+  }
+}
+
+@media (max-width: 640px) {
+  .planesSection {
+    padding: 52px 18px 82px;
+  }
+
+  .planesTitle {
+    font-size: clamp(26px, 9vw, 34px);
+  }
+
+  .planesSub {
+    font-size: 13px;
+  }
+
+  .planCard,
+  .premiumCard,
+  .proInner {
+    padding: 22px 20px 20px;
+  }
+
+  .planPriceNum {
+    font-size: 38px;
+  }
+
+  .planesNote {
+    margin-top: 22px;
+  }
+}

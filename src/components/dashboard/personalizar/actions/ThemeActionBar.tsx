@@ -80,8 +80,8 @@ export default function ThemeActionBar() {
         <div
           className="flex w-full flex-col gap-2 rounded-3xl border p-2.5 sm:w-auto sm:flex-row sm:items-center"
           style={{
-            backgroundColor: "hsl(var(--card))",
-            borderColor: "hsl(var(--border) / 0.45)",
+            backgroundColor: "var(--card)",
+            borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
             boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
           }}
         >
@@ -91,9 +91,9 @@ export default function ThemeActionBar() {
             disabled={isLoading || isSaving || isSameAsDefaults}
             className="inline-flex items-center justify-center gap-1.5 rounded-2xl border px-3.5 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              backgroundColor: "hsl(var(--background))",
-              borderColor: "hsl(var(--border) / 0.42)",
-              color: "hsl(var(--foreground))",
+              backgroundColor: "var(--background)",
+              borderColor: "color-mix(in srgb, var(--border) 42%, transparent)",
+              color: "var(--foreground)",
               boxShadow: "0 8px 20px rgba(15, 23, 42, 0.035)",
             }}
           >
@@ -123,9 +123,7 @@ export default function ThemeActionBar() {
             disabled={isLoading || isSaving || !hasChanges}
             className="inline-flex items-center justify-center gap-1.5 rounded-2xl px-3.5 py-2 text-sm font-semibold transition-all disabled:cursor-not-allowed disabled:opacity-40"
             style={{
-              backgroundColor: saved
-                ? "hsl(var(--success))"
-                : "hsl(var(--primary))",
+              backgroundColor: saved ? "var(--success)" : "var(--primary)",
               color: "white",
               boxShadow: saved
                 ? "0 10px 24px rgba(34, 197, 94, 0.20)"

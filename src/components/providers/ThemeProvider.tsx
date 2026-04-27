@@ -9,6 +9,8 @@ import {
   useState,
   type ReactNode,
 } from "react"
+import { useSession } from "next-auth/react"
+
 import {
   applyThemeToDocument,
   getSystemThemePreference,
@@ -142,6 +144,8 @@ function addSystemThemeListener(
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
+  const { status } = useSession()
+
   const [settings, setSettings] = useState<ThemeSettings>(() =>
     createDefaultThemeSettings()
   )
@@ -167,17 +171,29 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     let cancelled = false
 
     const loadTheme = async () => {
+      if (status === "loading") {
+        setIsLoading(true)
+        return
+      }
+
+      if (status === "unauthenticated") {
+        const fallback = createDefaultThemeSettings()
+
+        setSettings(fallback)
+        setDraftState(fallback)
+        setIsLoading(false)
+        return
+      }
+
       try {
+        setIsLoading(true)
+
         const result = await readThemeSettings()
 
         if (cancelled) return
 
         setSettings(result.settings)
         setDraftState(result.settings)
-
-        if (result.unauthorized) {
-          return
-        }
       } catch (error) {
         if (cancelled) return
 
@@ -198,7 +214,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [status])
 
   useEffect(() => {
     if (isLoading) return

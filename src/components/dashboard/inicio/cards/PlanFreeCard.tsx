@@ -1,3 +1,5 @@
+"use client"
+
 import type { UserConfig } from "@/types/dashboard"
 import { CheckCircle2, XCircle } from "lucide-react"
 import { useEffect, useRef } from "react"
@@ -14,21 +16,24 @@ type FeatureItem = {
 
 type DashboardPlanType = "free" | "pro" | "premium"
 
-const CARD_BG_START = "hsl(var(--primary-hover, 214 57% 38%))"
-const CARD_BG_END = "hsl(var(--primary, 216 64% 29%))"
+const CARD_BG_START = "var(--primary-hover, #2a5298)"
+const CARD_BG_END = "var(--primary, #1b3d7a)"
 const CARD_BORDER = "rgba(255,255,255,0.10)"
-const CARD_TEXT = "#FFFFFF"
+const CARD_TEXT = "#ffffff"
 const CARD_TEXT_SOFT = "rgba(255,255,255,0.82)"
 const CARD_TEXT_FAINT = "rgba(255,255,255,0.35)"
-const CARD_BADGE_BG = "hsl(var(--warning, 38 92% 50%))"
+
+const CARD_BADGE_BG = "var(--warning, #d97706)"
 const CARD_PROGRESS_BG = "rgba(255,255,255,0.18)"
-const CARD_PROGRESS_FILL = "hsl(var(--primary-light, 214 91% 75%))"
-const CARD_CHECK = "hsl(var(--primary-light, 214 91% 75%))"
-const CARD_CTA_BG = "#FFFFFF"
+const CARD_PROGRESS_FILL = "var(--primary-light, #d1dcf5)"
+const CARD_CHECK = "var(--primary-light, #d1dcf5)"
+
+const CARD_CTA_BG = "#ffffff"
 const CARD_CTA_BG_HOVER = "rgba(255,255,255,0.94)"
-const CARD_CTA_TEXT = "hsl(var(--primary, 216 64% 29%))"
+const CARD_CTA_TEXT = "var(--primary, #1b3d7a)"
 const CARD_CTA_DISABLED_BG = "rgba(255,255,255,0.12)"
 const CARD_CTA_DISABLED_TEXT = "rgba(255,255,255,0.92)"
+
 const CARD_SHADOW = "0 12px 30px rgba(15,23,42,0.22)"
 const CARD_SHADOW_HOVER = "0 22px 48px rgba(15,23,42,0.38)"
 const CARD_RADIUS = "20px"
@@ -129,7 +134,10 @@ export default function PlanFreeCard({
 
   const cotizacionesUsadas = userConfig?.cotizacionesUsadas ?? 0
   const cotizacionesMax = userConfig?.cotizacionesMax ?? 5
-  const cotizacionesRestantes = Math.max(0, cotizacionesMax - cotizacionesUsadas)
+  const cotizacionesRestantes = Math.max(
+    0,
+    cotizacionesMax - cotizacionesUsadas
+  )
 
   const porcentajeUso =
     isFree && cotizacionesMax > 0
@@ -161,7 +169,7 @@ export default function PlanFreeCard({
   return (
     <article
       ref={cardRef}
-      className="w-[270px] min-h-[420px] shrink-0 px-4 pb-4 pt-4 text-white"
+      className="flex h-full w-[270px] min-h-[450px] shrink-0 flex-col px-4 pb-5 pt-5 text-white"
       style={{
         background: `linear-gradient(180deg, ${CARD_BG_START} 0%, ${CARD_BG_END} 100%)`,
         border: `1px solid ${CARD_BORDER}`,
@@ -181,7 +189,7 @@ export default function PlanFreeCard({
       }}
     >
       <div
-        className="inline-flex px-2.5 py-1 text-[10px] font-extrabold text-white"
+        className="inline-flex w-fit px-2.5 py-1 text-[10px] font-extrabold text-white"
         style={{
           background: CARD_BADGE_BG,
           borderRadius: "10px",
@@ -191,7 +199,7 @@ export default function PlanFreeCard({
       </div>
 
       <h3
-        className="mt-3 text-[20px] font-extrabold leading-tight"
+        className="mt-4 text-[21px] font-extrabold leading-tight"
         style={{ color: CARD_TEXT }}
       >
         {getPlanTitle(plan)}
@@ -204,7 +212,7 @@ export default function PlanFreeCard({
         {getPlanDescription(plan, cotizacionesRestantes, cotizacionesMax)}
       </p>
 
-      <div className="mt-4">
+      <div className="mt-5">
         <div className="flex items-center justify-between text-[11px]">
           <span style={{ color: CARD_TEXT_SOFT }}>
             {isFree ? "Cotizaciones usadas" : "Estado del plan"}
@@ -214,8 +222,8 @@ export default function PlanFreeCard({
             {isFree
               ? `${cotizacionesUsadas} / ${cotizacionesMax}`
               : plan === "premium"
-                ? "Empresa"
-                : "Pro"}
+              ? "Empresa"
+              : "Pro"}
           </span>
         </div>
 
@@ -237,9 +245,9 @@ export default function PlanFreeCard({
         </div>
       </div>
 
-      <div className="mt-5 space-y-2.5">
+      <div className="mt-5 flex-1 space-y-3">
         {features.map((feature) => (
-          <div key={feature.label} className="flex items-center gap-2">
+          <div key={feature.label} className="flex items-center gap-2.5">
             {feature.ok ? (
               <CheckCircle2
                 className="h-4 w-4 shrink-0"
@@ -268,7 +276,7 @@ export default function PlanFreeCard({
         type="button"
         onClick={isFree ? onUpgrade : undefined}
         disabled={isPaidPlan}
-        className="mt-5 inline-flex w-full items-center justify-center gap-1 px-2 py-1.5 text-[10px] font-bold transition"
+        className="mt-6 inline-flex w-full items-center justify-center gap-1 px-3 py-2 text-[11px] font-bold transition"
         style={{
           background: isPaidPlan ? CARD_CTA_DISABLED_BG : CARD_CTA_BG,
           color: isPaidPlan ? CARD_CTA_DISABLED_TEXT : CARD_CTA_TEXT,

@@ -18,29 +18,22 @@ export default function AppearanceSection() {
     <section
       className="rounded-3xl border p-5"
       style={{
-        backgroundColor: "hsl(var(--card))",
-
-        // CORRECCIÓN VISUAL:
-        // Antes dependía directo de --border y se veía muy oscuro.
-        // Lo suavizamos para recuperar el diseño limpio anterior.
-        borderColor: "hsl(var(--border) / 0.45)",
-
-        // CORRECCIÓN VISUAL:
-        // Shadow más suave para que no se vea pesado.
+        backgroundColor: "var(--card)",
+        borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
         boxShadow: "0 14px 35px rgba(15, 23, 42, 0.06)",
       }}
     >
       <div className="mb-4 space-y-1">
         <h2
           className="text-sm font-semibold"
-          style={{ color: "hsl(var(--foreground))" }}
+          style={{ color: "var(--foreground)" }}
         >
           Apariencia
         </h2>
 
         <p
           className="text-xs leading-5"
-          style={{ color: "hsl(var(--text-muted))" }}
+          style={{ color: "var(--text-muted)" }}
         >
           Elige cómo se verá el dashboard de forma global.
         </p>
@@ -59,18 +52,12 @@ export default function AppearanceSection() {
               disabled={isLoading || isSaving}
               className="min-h-[116px] rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
-                // CORRECCIÓN VISUAL:
-                // Card activa suave, card inactiva clara.
                 backgroundColor: isActive
-                  ? "hsl(var(--primary-soft))"
-                  : "hsl(var(--background))",
-
-                // CORRECCIÓN VISUAL:
-                // Borde activo azul, inactivo más bajito para que no se vea negro.
+                  ? "var(--primary-soft)"
+                  : "var(--background)",
                 borderColor: isActive
-                  ? "hsl(var(--primary) / 0.75)"
-                  : "hsl(var(--border) / 0.45)",
-
+                  ? "color-mix(in srgb, var(--primary) 75%, transparent)"
+                  : "color-mix(in srgb, var(--border) 45%, transparent)",
                 boxShadow: isActive
                   ? "0 10px 24px rgba(45, 107, 255, 0.12)"
                   : "0 8px 20px rgba(15, 23, 42, 0.035)",
@@ -81,9 +68,9 @@ export default function AppearanceSection() {
                   className="flex h-9 w-9 items-center justify-center rounded-xl"
                   style={{
                     backgroundColor: isActive
-                      ? "hsl(var(--primary))"
-                      : "hsl(var(--primary-soft))",
-                    color: isActive ? "white" : "hsl(var(--primary))",
+                      ? "var(--primary)"
+                      : "var(--primary-soft)",
+                    color: isActive ? "white" : "var(--primary)",
                   }}
                 >
                   <Icon size={16} />
@@ -93,7 +80,7 @@ export default function AppearanceSection() {
                   <span
                     className="rounded-full px-2.5 py-1 text-[10px] font-semibold"
                     style={{
-                      backgroundColor: "hsl(var(--primary))",
+                      backgroundColor: "var(--primary)",
                       color: "white",
                     }}
                   >
@@ -105,7 +92,7 @@ export default function AppearanceSection() {
               <div className="space-y-1">
                 <p
                   className="text-sm font-semibold"
-                  style={{ color: "hsl(var(--foreground))" }}
+                  style={{ color: "var(--foreground)" }}
                 >
                   {option.label}
                 </p>
@@ -113,7 +100,7 @@ export default function AppearanceSection() {
                 {option.description ? (
                   <p
                     className="text-xs leading-5"
-                    style={{ color: "hsl(var(--text-muted))" }}
+                    style={{ color: "var(--text-muted)" }}
                   >
                     {option.description}
                   </p>

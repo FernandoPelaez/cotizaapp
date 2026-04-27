@@ -12,21 +12,27 @@ type DashboardHeroProps = {
 
 const QUOTE_CREATE_HREF = "/cotizaciones/nueva"
 
+
 const HERO_BG =
-  "linear-gradient(135deg, hsl(var(--primary, 216 64% 29%)) 0%, hsl(var(--primary-hover, 214 57% 38%)) 100%)"
-const HERO_BG_SOLID = "hsl(var(--primary, 216 64% 29%))"
-const HERO_BG_HOVER = "hsl(var(--primary-hover, 214 57% 38%))"
+  "linear-gradient(135deg, var(--primary, #1b3d7a) 0%, var(--primary-hover, #2a5298) 100%)"
+
+const HERO_BG_SOLID = "var(--primary, #1b3d7a)"
+const HERO_BG_HOVER = "var(--primary-hover, #2a5298)"
+
 const HERO_TEXT_SOFT = "var(--hero-text-soft, rgba(255,255,255,0.92))"
 const HERO_GLOW_SOFT = "var(--hero-glow-soft, rgba(255,255,255,0.04))"
 const HERO_GLOW_MEDIUM = "var(--hero-glow-medium, rgba(255,255,255,0.05))"
+
 const HERO_CARD_BG = "var(--hero-card-bg, rgba(255,255,255,0.96))"
 const HERO_CARD_BORDER = "var(--hero-card-border, rgba(255,255,255,0.22))"
-const HERO_CARD_TEXT = "hsl(var(--primary, 216 64% 29%))"
-const HERO_CARD_MUTED = "var(--hero-card-muted, #64748B)"
+const HERO_CARD_TEXT = "var(--primary, #1b3d7a)"
+const HERO_CARD_MUTED = "var(--hero-card-muted, #64748b)"
 const HERO_CARD_STRONG = "var(--hero-card-strong, #334155)"
-const HERO_CARD_LINE = "var(--hero-card-line, #E2E8F0)"
-const HERO_BUTTON_BG = "var(--hero-button-bg, #FFFFFF)"
-const HERO_BUTTON_TEXT = "var(--hero-button-text, hsl(var(--primary, 216 64% 29%)))"
+const HERO_CARD_LINE = "var(--hero-card-line, #e2e8f0)"
+
+const HERO_BUTTON_BG = "var(--hero-button-bg, #ffffff)"
+const HERO_BUTTON_TEXT = "var(--hero-button-text, var(--primary, #1b3d7a))"
+
 const HERO_BUTTON_SHADOW = "0 10px 24px rgba(15,37,84,0.22)"
 const HERO_SHELL_SHADOW = "0 12px 40px rgba(15,37,84,0.28)"
 const HERO_DOC_SHADOW = "0 8px 24px rgba(0,0,0,0.28)"
@@ -81,7 +87,10 @@ export default function DashboardHero({
         }}
       />
 
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 overflow-hidden"
+      >
         <div className="absolute left-[26%] top-[8%] rotate-[-14deg] opacity-[0.12]">
           <div
             className="w-[100px] rounded-lg p-2"
@@ -300,7 +309,7 @@ export default function DashboardHero({
 
                 <p
                   className="mt-0.5 text-[4px] font-semibold"
-                  style={{ color: "#94A3B8" }}
+                  style={{ color: "#94a3b8" }}
                 >
                   COT-001
                 </p>
@@ -374,14 +383,18 @@ export default function DashboardHero({
                 <span style={{ color: "#475569", fontWeight: 600 }}>
                   Subtotal
                 </span>
-                <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
+                <span style={{ color: "#0f172a", fontWeight: 700 }}>
+                  $0.00
+                </span>
               </div>
 
               <div className="flex items-center justify-between text-[4px]">
                 <span style={{ color: "#475569", fontWeight: 600 }}>
                   IVA (16%)
                 </span>
-                <span style={{ color: "#0F172A", fontWeight: 700 }}>$0.00</span>
+                <span style={{ color: "#0f172a", fontWeight: 700 }}>
+                  $0.00
+                </span>
               </div>
 
               <div

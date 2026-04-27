@@ -1,7 +1,7 @@
 "use client"
 
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, type ReactNode } from "react"
 import Sidebar from "@/components/layout/Sidebar"
 import Header from "@/components/layout/Header"
 
@@ -11,10 +11,12 @@ const SIDEBAR_COLLAPSIBLE_ROUTES = [
   "/plantillas",
 ]
 
+const SIDEBAR_WIDTH = "256px"
+
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: ReactNode
 }) {
   const pathname = usePathname()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
@@ -24,13 +26,21 @@ export default function DashboardLayout({
   )
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100 text-foreground">
+    <div
+      className="flex h-screen overflow-hidden"
+      style={{
+        
+        backgroundColor: "var(--background, #e5e5e5)",
+        color: "var(--foreground, #0f172a)",
+      }}
+    >
       <div
         style={{
-          width: canCollapseSidebar && sidebarCollapsed ? "0px" : "240px",
+          
+          width: canCollapseSidebar && sidebarCollapsed ? "0px" : SIDEBAR_WIDTH,
           overflow: "hidden",
           flexShrink: 0,
-          transition: "width .2s ease",
+          transition: "width 0.2s ease",
         }}
       >
         <Sidebar />
@@ -40,12 +50,17 @@ export default function DashboardLayout({
         <Header
           onToggleSidebar={() => {
             if (!canCollapseSidebar) return
-            setSidebarCollapsed((v) => !v)
+            setSidebarCollapsed((value) => !value)
           }}
           sidebarCollapsed={sidebarCollapsed}
         />
 
-        <main className="hide-scrollbar flex-1 overflow-y-auto p-4">
+        <main
+          className="hide-scrollbar flex-1 overflow-y-auto p-4"
+          style={{
+            backgroundColor: "var(--background, #e5e5e5)",
+          }}
+        >
           {children}
         </main>
       </div>

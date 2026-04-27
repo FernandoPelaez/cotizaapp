@@ -1,0 +1,299 @@
+.heroSection {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 68px 32px 0;
+  background: linear-gradient(160deg, #1b3d7a 0%, #0f2654 55%, #0a1a3a 100%);
+  position: relative;
+  overflow: clip;
+  box-sizing: border-box;
+}
+
+.heroGridBg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 52px 52px;
+  pointer-events: none;
+}
+
+.heroGlow1 {
+  position: absolute;
+  width: 560px;
+  height: 560px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(42, 82, 152, 0.4) 0%, transparent 70%);
+  top: -120px;
+  right: -80px;
+  pointer-events: none;
+}
+
+.heroGlow2 {
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(55, 48, 163, 0.18) 0%, transparent 70%);
+  bottom: -80px;
+  left: 20%;
+  pointer-events: none;
+}
+
+.heroInner {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 60px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.heroLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.heroRight {
+  justify-self: end;
+  width: 100%;
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 3vw, 2.9rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.18;
+  letter-spacing: -1px;
+}
+
+.heroTitleAccent {
+  color: #93c5fd;
+}
+
+.typewriterPlaceholder {
+  display: inline-block;
+  min-width: 220px;
+  vertical-align: bottom;
+}
+
+.heroSub {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.75;
+  max-width: 380px;
+  font-weight: 400;
+}
+
+.heroActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 6px;
+}
+
+.btnMotionWrap {
+  width: fit-content;
+}
+
+.btnHero {
+  cursor: pointer;
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0 2rem;
+  height: 52px;
+  background: #ffffff;
+  border: 1px solid rgba(147, 197, 253, 0.32);
+  border-radius: 9999px;
+  text-decoration: none;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.btnHeroSheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(147, 197, 253, 0.62) 50%,
+    transparent 72%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.btnHeroContent {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sparkle {
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  color: #1b3d7a;
+}
+
+.sparkle path {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.textButton {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1b3d7a;
+  white-space: nowrap;
+}
+
+.plantillasWrapper {
+  background: linear-gradient(135deg, rgba(12, 20, 48, 0.82) 0%, rgba(8, 12, 32, 0.9) 100%);
+  border: 1px solid rgba(147, 197, 253, 0.18);
+  border-radius: 22px;
+  padding: 18px 18px 16px;
+  backdrop-filter: blur(16px);
+  box-shadow:
+    0 28px 64px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    inset 0 0 0 1px rgba(147, 197, 253, 0.04);
+}
+
+.plantillasHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.plantillasTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.plantillasSub {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 3px;
+}
+
+.plantillasCount {
+  font-size: 0.68rem;
+  color: rgba(147, 197, 253, 0.75);
+  background: rgba(147, 197, 253, 0.1);
+  border: 1px solid rgba(147, 197, 253, 0.22);
+  border-radius: 20px;
+  padding: 3px 12px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.plantillasGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.plantillaCard {
+  background: #fff;
+  border-radius: 13px;
+  overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer;
+  position: relative;
+}
+
+.plantillaCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(147, 197, 253, 0.12) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  pointer-events: none;
+}
+
+.plantillaCard:hover::after {
+  opacity: 1;
+}
+
+.plantillaCardBody {
+  padding: 8px 10px 10px;
+  background: #fff;
+}
+
+.plantillaBadge {
+  display: inline-block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+  background: #eef2fa;
+  color: #1b3d7a;
+  margin-bottom: 4px;
+  letter-spacing: 0.06em;
+}
+
+.plantillaType {
+  font-size: 0.58rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+@media (max-width: 960px) {
+  .plantillasGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 860px) {
+  .heroInner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .heroRight {
+    width: 100%;
+  }
+}
+
+@media (max-width: 560px) {
+  .plantillasGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .btnHero {
+    padding: 0 1.35rem;
+    height: 48px;
+  }
+
+  .textButton {
+    font-size: 0.95rem;
+  }
+
+  .sparkle {
+    width: 1.15rem;
+    height: 1.15rem;
+  }
+}

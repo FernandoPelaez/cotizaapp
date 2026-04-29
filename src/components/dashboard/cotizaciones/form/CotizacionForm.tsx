@@ -35,6 +35,38 @@ type ProfileResponseWithVisualData = ProfileResponse & {
   }
 }
 
+type TrialStatus = {
+  plan: "free" | "pro" | "premium"
+  quotesUsed: number
+  trialQuotesLimit: number
+  trialBlocked: boolean
+}
+
+function resolvePlan(value: unknown): TrialStatus["plan"] {
+  const plan = String(value ?? "free")
+    .trim()
+    .toLowerCase()
+
+  if (
+    plan.includes("premium") ||
+    plan.includes("empresa") ||
+    plan.includes("enterprise")
+  ) {
+    return "premium"
+  }
+
+  if (plan.includes("pro")) {
+    return "pro"
+  }
+
+  return "free"
+}
+
+function toSafeNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
 export default function CotizacionForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -44,6 +76,13 @@ export default function CotizacionForm() {
   const [templateKey, setTemplateKey] = useState<string | null>(null)
   const [profileType, setProfileType] = useState<ProfileType | null>(null)
   const [loadingProfile, setLoadingProfile] = useState(true)
+  const [loadingTrialStatus, setLoadingTrialStatus] = useState(true)
+  const [trialStatus, setTrialStatus] = useState<TrialStatus>({
+    plan: "free",
+    quotesUsed: 0,
+    trialQuotesLimit: 5,
+    trialBlocked: false,
+  })
   const [previewScale, setPreviewScale] = useState(0.38)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [limitModal, setLimitModal] = useState<LimitModalState>({
@@ -69,6 +108,12 @@ export default function CotizacionForm() {
   const [notes, setNotes] = useState("")
   const [loading, setLoading] = useState(false)
 
+  const isQuoteCreationBlocked =
+    trialStatus.plan === "free" &&
+    (trialStatus.trialBlocked ||
+      (trialStatus.trialQuotesLimit > 0 &&
+        trialStatus.quotesUsed >= trialStatus.trialQuotesLimit))
+
   const showToast = (message: string, type: Toast["type"] = "success") => {
     const id = Date.now()
     setToasts((prev) => [...prev, { id, message, type }])
@@ -85,6 +130,43 @@ export default function CotizacionForm() {
   const closeLimitModal = () => {
     setLimitModal({ open: false, title: "", message: "" })
   }
+
+  useEffect(() => {
+    const fetchTrialStatus = async () => {
+      try {
+        const res = await fetch("/api/quotes", {
+          cache: "no-store",
+          credentials: "include",
+        })
+
+        if (!res.ok) return
+
+        const data = await res.json()
+        const user = data?.user
+
+        const plan = resolvePlan(user?.plan?.name)
+        const quotesUsed = toSafeNumber(user?.quotesUsed, 0)
+        const trialQuotesLimit = toSafeNumber(user?.trialQuotesLimit, 5)
+
+        setTrialStatus({
+          plan,
+          quotesUsed,
+          trialQuotesLimit,
+          trialBlocked:
+            Boolean(user?.trialBlocked) ||
+            (plan === "free" &&
+              trialQuotesLimit > 0 &&
+              quotesUsed >= trialQuotesLimit),
+        })
+      } catch (error) {
+        console.error("Error validando límite de prueba", error)
+      } finally {
+        setLoadingTrialStatus(false)
+      }
+    }
+
+    fetchTrialStatus()
+  }, [])
 
   useEffect(() => {
     const queryTemplate = searchParams.get("template")?.trim()
@@ -267,6 +349,14 @@ export default function CotizacionForm() {
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
+    if (isQuoteCreationBlocked) {
+      openLimitModal(
+        "Tu prueba gratuita ha finalizado",
+        "Ya alcanzaste el límite de 5 cotizaciones de prueba. Mejora tu plan para seguir creando cotizaciones."
+      )
+      return
+    }
+
     if (!templateKey) {
       showToast("Selecciona una plantilla antes de crear la cotización", "warning")
       return
@@ -382,6 +472,69 @@ export default function CotizacionForm() {
 
   const showServicesSection = profileType !== "negocio"
   const showProductsSection = profileType !== "independiente"
+
+  if (loadingTrialStatus) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f0f2f5] p-4">
+        <div className="rounded-2xl border border-neutral-200 bg-white px-6 py-5 text-center shadow-sm">
+          <p className="text-sm font-semibold text-neutral-900">
+            Validando disponibilidad...
+          </p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Estamos revisando tus cotizaciones de prueba.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  if (isQuoteCreationBlocked) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f0f2f5] p-4 -mt-16">
+        <QuoteCenteredToast toasts={toasts} />
+
+        <div className="w-full max-w-[520px] rounded-2xl border border-red-200 bg-gradient-to-b from-red-50 to-white px-8 py-9 text-center shadow-sm">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-2xl font-black text-red-600">
+            !
+          </div>
+
+          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-red-500">
+            Prueba gratuita finalizada
+          </p>
+
+          <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-neutral-900">
+            Ya usaste tus 5 cotizaciones gratis
+          </h2>
+
+          <p className="mx-auto mt-3 max-w-[390px] text-sm leading-6 text-neutral-500">
+            Para seguir creando cotizaciones, mejora tu plan. Tus cotizaciones
+            anteriores siguen guardadas en el historial.
+          </p>
+
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/planes"
+              className="inline-flex items-center justify-center rounded-full bg-[#1B3D7A] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-0.5 hover:bg-[#244d96]"
+            >
+              Ver planes
+            </Link>
+
+            <Link
+              href="/cotizaciones"
+              className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-bold text-neutral-700 transition hover:-translate-y-0.5 hover:bg-neutral-50"
+            >
+              Ver historial
+            </Link>
+          </div>
+
+          <p className="mt-5 text-[11px] leading-5 text-neutral-400">
+            Límite usado: {trialStatus.quotesUsed} de{" "}
+            {trialStatus.trialQuotesLimit} cotizaciones de prueba.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="grid min-h-screen grid-cols-1 items-start gap-4 bg-[#f0f2f5] p-4 lg:grid-cols-2">

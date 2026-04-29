@@ -1,6 +1,9 @@
 "use client"
 
+import { useEffect, useState } from "react"
+import { motion, type Variants } from "framer-motion"
 import { useRouter } from "next/navigation"
+
 import type { TemplateComponent } from "@/lib/templates"
 
 type PreviewData = {
@@ -41,6 +44,47 @@ type TemplateCardProps = {
   userPlan?: UserPlan
 }
 
+type TrialStatus = {
+  plan: UserPlan
+  quotesUsed: number
+  trialQuotesLimit: number
+  trialBlocked: boolean
+}
+
+let trialStatusRequest: Promise<TrialStatus> | null = null
+
+const cardEase: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
+const cardHoverVariants: Variants = {
+  rest: {
+    y: 0,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+  },
+  hover: {
+    y: -3,
+    boxShadow: "0 14px 32px rgba(15,23,42,0.12)",
+    transition: {
+      duration: 0.32,
+      ease: cardEase,
+    },
+  },
+}
+
+const buttonHoverVariants: Variants = {
+  rest: {
+    y: 0,
+    backgroundColor: "#1e3a8a",
+  },
+  hover: {
+    y: -1,
+    backgroundColor: "#1e40af",
+    transition: {
+      duration: 0.28,
+      ease: cardEase,
+    },
+  },
+}
+
 const ACCESS_META: Record<
   TemplateAccess,
   {
@@ -70,9 +114,6 @@ const ACCESS_META: Record<
   },
 }
 
-// CAMBIO TEMPORAL:
-// mientras diseñamos y editamos las plantillas, dejamos el bloqueo apagado.
-// al final lo regresamos a true.
 const ENABLE_TEMPLATE_LOCKS = false
 
 function isTemplateLocked(type: TemplateAccess, userPlan: UserPlan) {
@@ -83,6 +124,73 @@ function isTemplateLocked(type: TemplateAccess, userPlan: UserPlan) {
   return userPlan !== "premium"
 }
 
+function resolvePlan(value: unknown): UserPlan {
+  const plan = String(value ?? "free")
+    .trim()
+    .toLowerCase()
+
+  if (
+    plan.includes("premium") ||
+    plan.includes("empresa") ||
+    plan.includes("enterprise")
+  ) {
+    return "premium"
+  }
+
+  if (plan.includes("pro")) {
+    return "pro"
+  }
+
+  return "free"
+}
+
+function toSafeNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value)
+  return Number.isFinite(parsed) ? parsed : fallback
+}
+
+async function getTrialStatus(): Promise<TrialStatus> {
+  if (!trialStatusRequest) {
+    trialStatusRequest = fetch("/api/quotes", {
+      cache: "no-store",
+      credentials: "include",
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error("No se pudo validar el estado de prueba")
+        }
+
+        const data = await response.json()
+        const user = data?.user
+
+        const plan = resolvePlan(user?.plan?.name)
+        const quotesUsed = toSafeNumber(user?.quotesUsed, 0)
+        const trialQuotesLimit = toSafeNumber(user?.trialQuotesLimit, 5)
+
+        const trialBlocked =
+          Boolean(user?.trialBlocked) ||
+          (plan === "free" &&
+            trialQuotesLimit > 0 &&
+            quotesUsed >= trialQuotesLimit)
+
+        return {
+          plan,
+          quotesUsed,
+          trialQuotesLimit,
+          trialBlocked,
+        }
+      })
+      .catch(() => ({
+        plan: "free",
+        quotesUsed: 0,
+        trialQuotesLimit: 5,
+        trialBlocked: false,
+      }))
+  }
+
+  return trialStatusRequest
+}
+
 export default function TemplateCard({
   template,
   userPlan = "free",
@@ -90,8 +198,36 @@ export default function TemplateCard({
   const router = useRouter()
   const PreviewComponent = template.component
 
+  const [trialStatus, setTrialStatus] = useState<TrialStatus | null>(null)
+
+  useEffect(() => {
+    let isMounted = true
+
+    getTrialStatus().then((status) => {
+      if (isMounted) {
+        setTrialStatus(status)
+      }
+    })
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
   const accessMeta = ACCESS_META[template.type]
-  const isLocked = isTemplateLocked(template.type, userPlan)
+  const effectiveUserPlan = trialStatus?.plan ?? userPlan
+  const isLocked = isTemplateLocked(template.type, effectiveUserPlan)
+
+  const isTrialBlocked =
+    effectiveUserPlan === "free" &&
+    Boolean(
+      trialStatus?.trialBlocked ||
+        ((trialStatus?.trialQuotesLimit ?? 5) > 0 &&
+          (trialStatus?.quotesUsed ?? 0) >=
+            (trialStatus?.trialQuotesLimit ?? 5))
+    )
+
+  const isButtonDisabled = isLocked || isTrialBlocked
 
   const previewData: PreviewData = {
     title: "Propuesta de Servicios",
@@ -124,6 +260,13 @@ export default function TemplateCard({
   const SCALE = PREVIEW_HEIGHT / TEMPLATE_HEIGHT
 
   const handleSelect = () => {
+    if (isTrialBlocked) {
+      alert(
+        "Ya alcanzaste el límite de 5 cotizaciones de prueba. Mejora tu plan para seguir usando plantillas."
+      )
+      return
+    }
+
     if (isLocked) {
       alert(
         `Esta plantilla es ${accessMeta.description}. Actualiza tu plan para usarla.`
@@ -139,7 +282,14 @@ export default function TemplateCard({
   }
 
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl">
+    <motion.div
+      className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white"
+      variants={cardHoverVariants}
+      initial="rest"
+      animate="rest"
+      whileHover="hover"
+      whileTap={{ scale: 0.995 }}
+    >
       <div className="absolute right-3 top-3 z-10">
         <span
           className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur-sm ${accessMeta.badgeClass}`}
@@ -176,15 +326,24 @@ export default function TemplateCard({
           Plantilla estándar · {accessMeta.description}
         </p>
 
-        <button
+        <motion.button
           type="button"
           onClick={handleSelect}
-          disabled={false}
-          className="w-full rounded-xl bg-[#1e3a8a] py-2 text-sm font-semibold text-white shadow-sm transition-all duration-150 hover:bg-[#1e40af]"
+          disabled={isButtonDisabled}
+          variants={isButtonDisabled ? undefined : buttonHoverVariants}
+          initial={isButtonDisabled ? undefined : "rest"}
+          animate={isButtonDisabled ? undefined : "rest"}
+          whileHover={isButtonDisabled ? undefined : "hover"}
+          whileTap={isButtonDisabled ? undefined : { scale: 0.99 }}
+          className={`w-full rounded-xl py-2 text-sm font-semibold shadow-sm transition ${
+            isButtonDisabled
+              ? "cursor-not-allowed bg-[#1e3a8a]/70 text-white shadow-none opacity-80"
+              : "bg-[#1e3a8a] text-white"
+          }`}
         >
-          Usar plantilla
-        </button>
+          {isTrialBlocked ? "Pruebas agotadas" : "Usar plantilla"}
+        </motion.button>
       </div>
-    </div>
+    </motion.div>
   )
 }

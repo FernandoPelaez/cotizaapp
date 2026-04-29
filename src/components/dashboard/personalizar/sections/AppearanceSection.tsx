@@ -1,9 +1,16 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Monitor, Moon, Sun } from "lucide-react"
-import { THEME_MODE_OPTIONS } from "@/lib/theme/theme-presets"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
+import { THEME_MODE_OPTIONS } from "@/lib/theme/theme-presets"
 import type { ThemeMode } from "@/types/theme"
+
+import {
+  personalizarCardsContainerVariants,
+  personalizarCardVariants,
+} from "../animations/personalizar.motion"
 
 const modeIcons: Record<ThemeMode, typeof Sun> = {
   light: Sun,
@@ -40,18 +47,24 @@ export default function AppearanceSection() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <motion.div
+        className="grid gap-3 md:grid-cols-3"
+        variants={personalizarCardsContainerVariants}
+      >
         {THEME_MODE_OPTIONS.map((option) => {
           const Icon = modeIcons[option.value]
           const isActive = draft.themeMode === option.value
 
           return (
-            <button
+            <motion.button
               key={option.value}
               type="button"
               onClick={() => setDraft({ themeMode: option.value })}
               disabled={isLoading || isSaving}
-              className="min-h-[116px] rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
+              variants={personalizarCardVariants}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.99 }}
+              className="min-h-[116px] rounded-2xl border p-4 text-left disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 backgroundColor: isActive
                   ? "var(--primary-soft)"
@@ -107,10 +120,10 @@ export default function AppearanceSection() {
                   </p>
                 ) : null}
               </div>
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

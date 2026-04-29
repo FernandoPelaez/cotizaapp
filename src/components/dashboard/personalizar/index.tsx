@@ -1,23 +1,49 @@
-"use client"
+"use client";
 
-import ThemeActionBar from "@/components/dashboard/personalizar/actions/ThemeActionBar"
-import ThemePreview from "@/components/dashboard/personalizar/preview/ThemePreview"
-import AppearanceSection from "@/components/dashboard/personalizar/sections/AppearanceSection"
-import BrandSection from "@/components/dashboard/personalizar/sections/BrandSection"
-import DensitySection from "@/components/dashboard/personalizar/sections/DensitySection"
-import SurfaceSection from "@/components/dashboard/personalizar/sections/SurfaceSection"
-import TypographySection from "@/components/dashboard/personalizar/sections/TypographySection"
-import { useThemeContext } from "@/components/providers/ThemeProvider"
+import { motion } from "framer-motion";
+
+import ThemeActionBar from "@/components/dashboard/personalizar/actions/ThemeActionBar";
+import ThemePreview from "@/components/dashboard/personalizar/preview/ThemePreview";
+import AppearanceSection from "@/components/dashboard/personalizar/sections/AppearanceSection";
+import BrandSection from "@/components/dashboard/personalizar/sections/BrandSection";
+import DensitySection from "@/components/dashboard/personalizar/sections/DensitySection";
+import SurfaceSection from "@/components/dashboard/personalizar/sections/SurfaceSection";
+import TypographySection from "@/components/dashboard/personalizar/sections/TypographySection";
+import { useThemeContext } from "@/components/providers/ThemeProvider";
+
+import {
+  personalizarActionBarVariants,
+  personalizarHeaderVariants,
+  personalizarLayoutVariants,
+  personalizarPageVariants,
+  personalizarPreviewVariants,
+  personalizarSectionVariants,
+} from "./animations/personalizar.motion";
+
+const SECTIONS = [
+  <AppearanceSection key="appearance" />,
+  <BrandSection key="brand" />,
+  <TypographySection key="typography" />,
+  <SurfaceSection key="surface" />,
+  <DensitySection key="density" />,
+];
 
 export default function Personalizar() {
-  const { isLoading, hasChanges } = useThemeContext()
+  const { isLoading, hasChanges } = useThemeContext();
 
   return (
-    <div
+    <motion.div
       className="flex flex-col px-4 py-4 md:px-5 md:py-5 xl:px-6 xl:py-5"
       style={{ gap: "16px" }}
+      variants={personalizarPageVariants}
+      initial="hidden"
+      animate="show"
     >
-      <header className="space-y-2">
+      
+      <motion.header
+        className="space-y-2"
+        variants={personalizarHeaderVariants}
+      >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-1">
             <p
@@ -43,7 +69,6 @@ export default function Personalizar() {
             <span
               className="rounded-full px-3 py-1.5 text-xs font-medium"
               style={{
-                
                 backgroundColor: isLoading
                   ? "var(--background)"
                   : hasChanges
@@ -61,23 +86,35 @@ export default function Personalizar() {
             </span>
           </div>
         </div>
-      </header>
+      </motion.header>
 
-      <div className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_420px]">
+      <motion.div
+        className="grid items-start gap-4 2xl:grid-cols-[minmax(0,1fr)_420px]"
+        variants={personalizarLayoutVariants}
+      >
         <div className="min-w-0 space-y-4">
-          <AppearanceSection />
-          <BrandSection />
-          <TypographySection />
-          <SurfaceSection />
-          <DensitySection />
+          {SECTIONS.map((section, index) => (
+            <motion.div
+              key={index}
+              custom={index}
+              variants={personalizarSectionVariants}
+            >
+              {section}
+            </motion.div>
+          ))}
         </div>
 
-        <div className="min-w-0 2xl:sticky 2xl:top-4">
+        <motion.div
+          className="min-w-0 2xl:sticky 2xl:top-4"
+          variants={personalizarPreviewVariants}
+        >
           <ThemePreview />
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
-      <ThemeActionBar />
-    </div>
-  )
+      <motion.div variants={personalizarActionBarVariants}>
+        <ThemeActionBar />
+      </motion.div>
+    </motion.div>
+  );
 }

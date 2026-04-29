@@ -10,8 +10,13 @@ type DashboardHeroProps = {
   onExplorarPlantillas?: () => void
 }
 
-const QUOTE_CREATE_HREF = "/cotizaciones/nueva"
+type TrialAwareUserConfig = UserConfig & {
+  trialBlocked?: boolean
+  quotesUsed?: number
+  trialQuotesLimit?: number
+}
 
+const QUOTE_CREATE_HREF = "/cotizaciones/nueva"
 
 const HERO_BG =
   "linear-gradient(135deg, var(--primary, #1b3d7a) 0%, var(--primary-hover, #2a5298) 100%)"
@@ -38,10 +43,36 @@ const HERO_SHELL_SHADOW = "0 12px 40px rgba(15,37,84,0.28)"
 const HERO_DOC_SHADOW = "0 8px 24px rgba(0,0,0,0.28)"
 const HERO_DOC_SHADOW_LARGE = "0 16px 40px rgba(1,15,50,0.35)"
 
+function isFreePlan(plan: unknown) {
+  const normalizedPlan = String(plan ?? "free")
+    .trim()
+    .toLowerCase()
+
+  return (
+    normalizedPlan === "free" ||
+    normalizedPlan === "gratis" ||
+    normalizedPlan === "gratuito"
+  )
+}
+
 export default function DashboardHero({
-  userConfig: _userConfig,
+  userConfig,
   onNuevaCotizacion,
 }: DashboardHeroProps) {
+  const trialUserConfig = userConfig as TrialAwareUserConfig | undefined
+
+  const plan = trialUserConfig?.plan ?? "free"
+  const cotizacionesUsadas =
+    trialUserConfig?.cotizacionesUsadas ?? trialUserConfig?.quotesUsed ?? 0
+  const cotizacionesMax =
+    trialUserConfig?.cotizacionesMax ?? trialUserConfig?.trialQuotesLimit ?? 5
+  const trialBlocked = Boolean(trialUserConfig?.trialBlocked)
+
+  const isQuoteCreationBlocked =
+    isFreePlan(plan) &&
+    (trialBlocked ||
+      (cotizacionesMax > 0 && cotizacionesUsadas >= cotizacionesMax))
+
   return (
     <section
       className="relative overflow-hidden rounded-2xl"
@@ -204,24 +235,45 @@ export default function DashboardHero({
           </p>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <Link
-              href={QUOTE_CREATE_HREF}
-              onClick={() => {
-                onNuevaCotizacion?.()
-              }}
-              className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[15px] font-extrabold tracking-[-0.01em] transition hover:-translate-y-0.5 hover:brightness-[0.98]"
-              style={{
-                background: HERO_BUTTON_BG,
-                color: HERO_BUTTON_TEXT,
-                boxShadow: HERO_BUTTON_SHADOW,
-                border: "1px solid rgba(255,255,255,0.82)",
-                textDecoration: "none",
-                whiteSpace: "nowrap",
-              }}
-            >
-              <Plus className="h-4 w-4" strokeWidth={2.7} />
-              Nueva cotización
-            </Link>
+            {isQuoteCreationBlocked ? (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                title="Ya alcanzaste el límite de cotizaciones de prueba"
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded-full px-5 py-3 text-[15px] font-extrabold tracking-[-0.01em] opacity-65 transition"
+                style={{
+                  background: HERO_BUTTON_BG,
+                  color: HERO_BUTTON_TEXT,
+                  boxShadow: HERO_BUTTON_SHADOW,
+                  border: "1px solid rgba(255,255,255,0.82)",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.7} />
+                Nueva cotización
+              </button>
+            ) : (
+              <Link
+                href={QUOTE_CREATE_HREF}
+                onClick={() => {
+                  onNuevaCotizacion?.()
+                }}
+                className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[15px] font-extrabold tracking-[-0.01em] transition hover:-translate-y-0.5 hover:brightness-[0.98]"
+                style={{
+                  background: HERO_BUTTON_BG,
+                  color: HERO_BUTTON_TEXT,
+                  boxShadow: HERO_BUTTON_SHADOW,
+                  border: "1px solid rgba(255,255,255,0.82)",
+                  textDecoration: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                <Plus className="h-4 w-4" strokeWidth={2.7} />
+                Nueva cotización
+              </Link>
+            )}
           </div>
         </div>
 

@@ -1,8 +1,15 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Check, Palette } from "lucide-react"
-import { BRAND_COLOR_PRESET_LIST } from "@/lib/theme/theme-presets"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
+import { BRAND_COLOR_PRESET_LIST } from "@/lib/theme/theme-presets"
+
+import {
+  personalizarCardsContainerVariants,
+  personalizarCardVariants,
+} from "../animations/personalizar.motion"
 
 function mixColor(color: string, amount: number, base = "transparent") {
   return `color-mix(in srgb, ${color} ${amount}%, ${base})`
@@ -41,16 +48,24 @@ export default function BrandSection() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+      <motion.div
+        className="grid gap-3 md:grid-cols-2 xl:grid-cols-3"
+        variants={personalizarCardsContainerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {BRAND_COLOR_PRESET_LIST.map((preset) => {
           const isActive = draft.brandColor === preset.key
 
           return (
-            <button
+            <motion.button
               key={preset.key}
               type="button"
               onClick={() => setDraft({ brandColor: preset.key })}
               disabled={isLoading || isSaving}
+              variants={personalizarCardVariants}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.99 }}
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
@@ -155,10 +170,10 @@ export default function BrandSection() {
                   </span>
                 </div>
               </div>
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

@@ -1,9 +1,16 @@
 "use client"
 
+import { AnimatePresence, motion, type Variants } from "framer-motion"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { DASHBOARD_PLANS, type DashboardPlanId } from "@/lib/dashboard/plans"
+
+import {
+  planesCardVariants,
+  planesCardsGridVariants,
+  planesEase,
+} from "../animations/planes.motion"
 import PlanCard from "./PlanCard"
 
 type PlanesCardsGridProps = {
@@ -16,14 +23,41 @@ type UpdatePlanResponse = {
   error?: string
 }
 
+const messageVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.36,
+      ease: planesEase,
+    },
+  },
+  exit: {
+    opacity: 0,
+    y: -5,
+    transition: {
+      duration: 0.22,
+      ease: planesEase,
+    },
+  },
+}
+
 export default function PlanesCardsGrid({
   currentPlanId = "free",
 }: PlanesCardsGridProps) {
   const router = useRouter()
 
-  const [hoveredPlanId, setHoveredPlanId] = useState<DashboardPlanId | null>(null)
-  const [selectedPlanId, setSelectedPlanId] = useState<DashboardPlanId>(currentPlanId)
-  const [submittingPlanId, setSubmittingPlanId] = useState<DashboardPlanId | null>(null)
+  const [hoveredPlanId, setHoveredPlanId] = useState<DashboardPlanId | null>(
+    null
+  )
+  const [selectedPlanId, setSelectedPlanId] =
+    useState<DashboardPlanId>(currentPlanId)
+  const [submittingPlanId, setSubmittingPlanId] =
+    useState<DashboardPlanId | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -69,46 +103,66 @@ export default function PlanesCardsGrid({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+      <motion.div
+        className="grid grid-cols-1 gap-6 md:grid-cols-3"
+        variants={planesCardsGridVariants}
+        initial="hidden"
+        animate="show"
+      >
         {DASHBOARD_PLANS.map((plan) => (
-          <PlanCard
-            key={plan.id}
-            plan={plan}
-            currentPlanId={selectedPlanId}
-            isHovered={hoveredPlanId === plan.id}
-            isSubmitting={submittingPlanId === plan.id}
-            onSelectPlan={() => handleSelectPlan(plan.id)}
-            onMouseEnter={() => setHoveredPlanId(plan.id)}
-            onMouseLeave={() => setHoveredPlanId(null)}
-          />
+          <motion.div key={plan.id} variants={planesCardVariants}>
+            <PlanCard
+              plan={plan}
+              currentPlanId={selectedPlanId}
+              isHovered={hoveredPlanId === plan.id}
+              isSubmitting={submittingPlanId === plan.id}
+              onSelectPlan={() => handleSelectPlan(plan.id)}
+              onMouseEnter={() => setHoveredPlanId(plan.id)}
+              onMouseLeave={() => setHoveredPlanId(null)}
+            />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      {successMessage && (
-        <div
-          className="rounded-xl border px-4 py-3 text-sm"
-          style={{
-            borderColor: "var(--success, #22c55e)",
-            background: "var(--success-bg, rgba(34,197,94,0.08))",
-            color: "var(--foreground)",
-          }}
-        >
-          {successMessage}
-        </div>
-      )}
+      <AnimatePresence mode="popLayout">
+        {successMessage && (
+          <motion.div
+            key="plan-success-message"
+            className="rounded-xl border px-4 py-3 text-sm"
+            variants={messageVariants}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            style={{
+              borderColor: "var(--success, #22c55e)",
+              background: "var(--success-bg, rgba(34,197,94,0.08))",
+              color: "var(--foreground)",
+            }}
+          >
+            {successMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-      {errorMessage && (
-        <div
-          className="rounded-xl border px-4 py-3 text-sm"
-          style={{
-            borderColor: "rgba(239,68,68,0.35)",
-            background: "rgba(239,68,68,0.08)",
-            color: "var(--foreground)",
-          }}
-        >
-          {errorMessage}
-        </div>
-      )}
+      <AnimatePresence mode="popLayout">
+        {errorMessage && (
+          <motion.div
+            key="plan-error-message"
+            className="rounded-xl border px-4 py-3 text-sm"
+            variants={messageVariants}
+            initial="hidden"
+            animate="show"
+            exit="exit"
+            style={{
+              borderColor: "rgba(239,68,68,0.35)",
+              background: "rgba(239,68,68,0.08)",
+              color: "var(--foreground)",
+            }}
+          >
+            {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

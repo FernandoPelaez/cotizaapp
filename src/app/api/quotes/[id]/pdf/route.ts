@@ -204,8 +204,8 @@ export async function GET(
     })
 
     await page.setViewport({
-      width: 1280,
-      height: 1810,
+      width: 794,
+      height: 1123,
       deviceScaleFactor: 1,
     })
 

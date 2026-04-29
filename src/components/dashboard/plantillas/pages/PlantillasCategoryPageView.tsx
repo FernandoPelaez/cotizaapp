@@ -1,11 +1,18 @@
 "use client"
 
+import { motion } from "framer-motion"
+
 import PlantillasTemplatesGrid, {
   type PlantillasTemplatesGridItem,
 } from "@/components/dashboard/plantillas/sections/PlantillasTemplatesGrid"
-import { getTemplatesByCategory } from "@/lib/templates/template-catalog"
 import { templateMap, type TemplateComponent } from "@/lib/templates"
+import { getTemplatesByCategory } from "@/lib/templates/template-catalog"
 import type { TemplateCategoryId } from "@/types/template"
+
+import {
+  plantillasHeaderVariants,
+  plantillasPageVariants,
+} from "../animations/plantillas.motion"
 
 type SupportedCategoria = Extract<
   TemplateCategoryId,
@@ -26,9 +33,7 @@ const categoryLabels: Record<SupportedCategoria, string> = {
 }
 
 function isValidCategoria(value: string): value is SupportedCategoria {
-  return (
-    value === "clasica" || value === "moderna" || value === "premium"
-  )
+  return value === "clasica" || value === "moderna" || value === "premium"
 }
 
 export default function PlantillasCategoryPageView({
@@ -39,14 +44,22 @@ export default function PlantillasCategoryPageView({
 
   if (!isValidCategoria(normalizedCategory)) {
     return (
-      <div className="space-y-4 p-6">
-        <h1 className="text-2xl font-semibold text-neutral-900">
-          Categoría no válida
-        </h1>
-        <p className="text-neutral-500">
-          La categoría que intentas abrir no existe.
-        </p>
-      </div>
+      <motion.div
+        className="space-y-4 p-6"
+        variants={plantillasPageVariants}
+        initial="hidden"
+        animate="show"
+      >
+        <motion.div variants={plantillasHeaderVariants}>
+          <h1 className="text-2xl font-semibold text-neutral-900">
+            Categoría no válida
+          </h1>
+
+          <p className="text-neutral-500">
+            La categoría que intentas abrir no existe.
+          </p>
+        </motion.div>
+      </motion.div>
     )
   }
 
@@ -70,17 +83,23 @@ export default function PlantillasCategoryPageView({
     )
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="space-y-1">
+    <motion.div
+      className="space-y-6 p-6"
+      variants={plantillasPageVariants}
+      initial="hidden"
+      animate="show"
+    >
+      <motion.div className="space-y-1" variants={plantillasHeaderVariants}>
         <h1 className="text-2xl font-semibold text-neutral-900">
           Plantillas {categoryLabels[normalizedCategory]}
         </h1>
+
         <p className="text-neutral-500">
           Selecciona una plantilla para comenzar tu cotización
         </p>
-      </div>
+      </motion.div>
 
       <PlantillasTemplatesGrid templates={templates} userPlan={userPlan} />
-    </div>
+    </motion.div>
   )
 }

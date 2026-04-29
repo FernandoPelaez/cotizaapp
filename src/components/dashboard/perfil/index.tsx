@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "framer-motion"
 import {
   useCallback,
   useEffect,
@@ -9,6 +10,12 @@ import {
   type FormEvent,
 } from "react"
 
+import {
+  perfilCardVariants,
+  perfilCardsContainerVariants,
+  perfilHeaderVariants,
+  perfilPageVariants,
+} from "./animations/perfil.motion"
 import PerfilFormCard from "./PerfilFormCard"
 import PerfilOverviewCard from "./PerfilOverviewCard"
 
@@ -30,7 +37,6 @@ const EMPTY_FORM_VALUES: ProfileFormValues = {
 
 function createFormValues(user: DashboardProfileUser | null): ProfileFormValues {
   if (!user) return EMPTY_FORM_VALUES
-
   return {
     phone: user.profile.phone ?? "",
     city: user.profile.city ?? "",
@@ -43,43 +49,27 @@ function createFormValues(user: DashboardProfileUser | null): ProfileFormValues 
 
 function getInitials(name: string | null | undefined) {
   if (!name?.trim()) return "US"
-
-  const parts = name
-    .trim()
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-
+  const parts = name.trim().split(" ").filter(Boolean).slice(0, 2)
   if (parts.length === 0) return "US"
-
   return parts.map((part) => part[0]?.toUpperCase() ?? "").join("")
 }
 
 function getErrorMessage(error: unknown, fallback: string) {
-  if (error instanceof Error && error.message.trim()) {
-    return error.message
-  }
-
+  if (error instanceof Error && error.message.trim()) return error.message
   return fallback
 }
 
 function readFileAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
-
     reader.onload = () => {
       if (typeof reader.result === "string" && reader.result.trim()) {
         resolve(reader.result)
         return
       }
-
       reject(new Error("No se pudo procesar el logo"))
     }
-
-    reader.onerror = () => {
-      reject(new Error("No se pudo procesar el logo"))
-    }
-
+    reader.onerror = () => reject(new Error("No se pudo procesar el logo"))
     reader.readAsDataURL(file)
   })
 }
@@ -87,12 +77,9 @@ function readFileAsDataUrl(file: File) {
 export default function Perfil() {
   const [user, setUser] = useState<DashboardProfileUser | null>(null)
   const [values, setValues] = useState<ProfileFormValues>(EMPTY_FORM_VALUES)
-  const [initialValues, setInitialValues] =
-    useState<ProfileFormValues>(EMPTY_FORM_VALUES)
-
+  const [initialValues, setInitialValues] = useState<ProfileFormValues>(EMPTY_FORM_VALUES)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
 
@@ -103,22 +90,10 @@ export default function Perfil() {
       setLoading(true)
       setError(null)
       setSuccessMessage(null)
-
-      const response = await fetch("/api/user/profile", {
-        method: "GET",
-        cache: "no-store",
-      })
-
-      const data = (await response.json()) as ProfileResponse & {
-        error?: string
-      }
-
-      if (!response.ok || !data?.user) {
-        throw new Error(data?.error || "No se pudo cargar el perfil")
-      }
-
+      const response = await fetch("/api/user/profile", { method: "GET", cache: "no-store" })
+      const data = (await response.json()) as ProfileResponse & { error?: string }
+      if (!response.ok || !data?.user) throw new Error(data?.error || "No se pudo cargar el perfil")
       const nextValues = createFormValues(data.user)
-
       setUser(data.user)
       setValues(nextValues)
       setInitialValues(nextValues)
@@ -129,20 +104,11 @@ export default function Perfil() {
     }
   }, [])
 
-  useEffect(() => {
-    void loadProfile()
-  }, [loadProfile])
+  useEffect(() => { void loadProfile() }, [loadProfile])
 
-  const handleChange = (
-    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = event.target
-
-    setValues((current) => ({
-      ...current,
-      [name]: value,
-    }))
-
+    setValues((current) => ({ ...current, [name]: value }))
     if (error) setError(null)
     if (successMessage) setSuccessMessage(null)
   }
@@ -150,22 +116,10 @@ export default function Perfil() {
   const handleLogoChange = async (file: File) => {
     try {
       const allowedTypes = ["image/jpeg", "image/png", "image/webp"]
-
-      if (!allowedTypes.includes(file.type)) {
-        throw new Error("Formato inválido. Usa JPG, PNG o WEBP.")
-      }
-
-      if (file.size > 2 * 1024 * 1024) {
-        throw new Error("El logo debe pesar máximo 2MB.")
-      }
-
+      if (!allowedTypes.includes(file.type)) throw new Error("Formato inválido. Usa JPG, PNG o WEBP.")
+      if (file.size > 2 * 1024 * 1024) throw new Error("El logo debe pesar máximo 2MB.")
       const nextLogoUrl = await readFileAsDataUrl(file)
-
-      setValues((current) => ({
-        ...current,
-        logoUrl: nextLogoUrl,
-      }))
-
+      setValues((current) => ({ ...current, logoUrl: nextLogoUrl }))
       if (error) setError(null)
       if (successMessage) setSuccessMessage(null)
     } catch (error) {
@@ -182,12 +136,10 @@ export default function Perfil() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-
     try {
       setSaving(true)
       setError(null)
       setSuccessMessage(null)
-
       const payload: ProfileFormValues = {
         phone: values.phone.trim(),
         city: values.city.trim(),
@@ -196,25 +148,14 @@ export default function Perfil() {
         description: values.description.trim(),
         logoUrl: values.logoUrl.trim(),
       }
-
       const response = await fetch("/api/user/profile", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
-
-      const data = (await response.json()) as ProfileUpdateResponse & {
-        error?: string
-      }
-
-      if (!response.ok || !data?.user) {
-        throw new Error(data?.error || "No se pudo actualizar el perfil")
-      }
-
+      const data = (await response.json()) as ProfileUpdateResponse & { error?: string }
+      if (!response.ok || !data?.user) throw new Error(data?.error || "No se pudo actualizar el perfil")
       const nextValues = createFormValues(data.user)
-
       setUser(data.user)
       setValues(nextValues)
       setInitialValues(nextValues)
@@ -226,137 +167,102 @@ export default function Perfil() {
     }
   }
 
-  if (loading) {
-    return (
-      <section className="min-h-full">
-        <div className="mx-auto w-full max-w-[1360px] space-y-5">
-          <div className="space-y-2">
-            <div
-              className="h-9 w-64 rounded-2xl"
-              style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--foreground) 10%, var(--card))",
-              }}
-            />
-
-            <div
-              className="h-5 w-80 rounded-xl"
-              style={{
-                backgroundColor:
-                  "color-mix(in srgb, var(--foreground) 8%, var(--card))",
-              }}
-            />
-          </div>
-
-          <div className="grid gap-5 xl:grid-cols-[620px_minmax(0,1fr)] xl:items-start">
-            <div
-              className="h-[430px] rounded-[30px] border"
-              style={{
-                backgroundColor: "var(--card)",
-                borderColor:
-                  "color-mix(in srgb, var(--border) 45%, transparent)",
-                boxShadow:
-                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
-              }}
-            />
-
-            <div
-              className="h-[430px] rounded-[30px] border"
-              style={{
-                backgroundColor: "var(--card)",
-                borderColor:
-                  "color-mix(in srgb, var(--border) 45%, transparent)",
-                boxShadow:
-                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
-              }}
-            />
-          </div>
-        </div>
-      </section>
-    )
-  }
+  if (loading) return null
 
   if (!user) {
     return (
-      <section className="min-h-full">
+      <motion.section
+        className="min-h-full"
+        variants={perfilPageVariants}
+        initial="hidden"
+        animate="show"
+      >
         <div
           className="mx-auto w-full max-w-3xl rounded-[28px] border p-6"
           style={{
             backgroundColor: "var(--card)",
             borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
-            boxShadow:
-              "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
+            boxShadow: "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
           }}
         >
-          <h2
-            className="text-lg font-semibold"
-            style={{ color: "var(--foreground)" }}
-          >
+          <h2 className="text-lg font-semibold" style={{ color: "var(--foreground)" }}>
             No se pudo cargar el perfil
           </h2>
-
-          <p
-            className="mt-2 text-sm leading-6"
-            style={{ color: "var(--text-muted)" }}
-          >
+          <p className="mt-2 text-sm leading-6" style={{ color: "var(--text-muted)" }}>
             {error || "Ocurrió un problema al obtener la información del perfil."}
           </p>
-
           <div className="mt-5">
             <button
               type="button"
               onClick={() => void loadProfile()}
               className="inline-flex items-center justify-center rounded-2xl px-5 py-3 text-sm font-semibold"
-              style={{
-                backgroundColor: "var(--primary)",
-                color: "var(--card)",
-              }}
+              style={{ backgroundColor: "var(--primary)", color: "var(--card)" }}
             >
               Reintentar
             </button>
           </div>
         </div>
-      </section>
+      </motion.section>
     )
   }
 
   return (
-    <section className="min-h-full">
+    <motion.section
+      className="min-h-full"
+      variants={perfilPageVariants}
+      initial="hidden"
+      animate="show"
+    >
       <div className="mx-auto w-full max-w-[1360px] space-y-5">
-        <div className="space-y-1">
+        {/* ANIMADO: título baja desde arriba suavemente */}
+        <motion.div
+          className="space-y-1"
+          variants={perfilHeaderVariants}
+          initial="hidden"
+          animate="show"
+        >
           <h1
             className="text-[2rem] font-semibold tracking-tight"
             style={{ color: "var(--foreground)" }}
           >
             Información principal
           </h1>
-
           <p className="text-sm" style={{ color: "var(--text-muted)" }}>
             Actualiza tus datos base y deja listo tu perfil real.
           </p>
-        </div>
+        </motion.div>
 
-        <div className="grid gap-5 xl:grid-cols-[620px_minmax(0,1fr)] xl:items-start">
-          <PerfilOverviewCard
-            user={user}
-            values={values}
-            initials={initials}
-          />
+        {/* ANIMADO: las dos tarjetas suben escalonadas con 120ms entre ellas */}
+        <motion.div
+          className="grid gap-5 xl:grid-cols-[620px_minmax(0,1fr)] xl:items-start"
+          variants={perfilCardsContainerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          <motion.div className="h-full" variants={perfilCardVariants}>
+            <PerfilOverviewCard
+              user={user}
+              values={values}
+              initials={initials}
+            />
+          </motion.div>
 
-          <PerfilFormCard
-            values={values}
-            saving={saving}
-            error={error}
-            successMessage={successMessage}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            onReset={handleReset}
-            initials={initials}
-            logoUrl={values.logoUrl}
-            onLogoChange={handleLogoChange}
-          />
-        </div>
+          <motion.div variants={perfilCardVariants}>
+            <PerfilFormCard
+              values={values}
+              saving={saving}
+              error={error}
+              successMessage={successMessage}
+              onChange={handleChange}
+              onSubmit={handleSubmit}
+              onReset={handleReset}
+              initials={initials}
+              logoUrl={values.logoUrl}
+              onLogoChange={handleLogoChange}
+            />
+          </motion.div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   )
 }

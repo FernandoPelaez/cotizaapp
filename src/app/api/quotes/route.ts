@@ -9,6 +9,11 @@ type QuoteItemInput = {
   price?: number | string
 }
 
+type UserPlanLike = {
+  name?: string | null
+  maxQuotes?: number | null
+} | null
+
 function toNumber(value: unknown) {
   const num = Number(value)
   return Number.isFinite(num) ? num : 0
@@ -16,6 +21,19 @@ function toNumber(value: unknown) {
 
 function toTrimmedString(value: unknown) {
   return typeof value === "string" ? value.trim() : ""
+}
+
+function isTrialPlan(plan: UserPlanLike) {
+  const planName = plan?.name?.toLowerCase?.().trim() ?? ""
+
+  return (
+    !plan ||
+    planName === "free" ||
+    planName === "gratis" ||
+    planName === "gratuito" ||
+    planName.includes("free") ||
+    planName.includes("gratis")
+  )
 }
 
 async function getUserIdFromSession() {
@@ -174,13 +192,27 @@ export async function POST(req: Request) {
       )
     }
 
-    if (user.trialBlocked) {
+    const userIsTrial = isTrialPlan(user.plan)
+    const trialQuotesLimit = user.trialQuotesLimit ?? 5
+    const quotesUsed = user.quotesUsed ?? 0
+
+    if (userIsTrial && (user.trialBlocked || quotesUsed >= trialQuotesLimit)) {
+      if (!user.trialBlocked) {
+        await prisma.user.update({
+          where: { id: userId },
+          data: {
+            trialBlocked: true,
+          },
+        })
+      }
+
       return NextResponse.json(
         {
           error: "TRIAL_BLOCKED",
           message: "Ya alcanzaste el límite de cotizaciones de prueba",
-          trialQuotesLimit: user.trialQuotesLimit,
-          quotesUsed: user.quotesUsed,
+          trialQuotesLimit,
+          quotesUsed,
+          trialBlocked: true,
         },
         { status: 403 }
       )
@@ -241,49 +273,51 @@ export async function POST(req: Request) {
     const taxAmount = taxableBase * (taxPercent / 100)
     const total = taxableBase + taxAmount
 
-    const maxQuotes = user.plan?.maxQuotes ?? user.trialQuotesLimit ?? 5
+    const maxQuotes = user.plan?.maxQuotes ?? null
 
-    const startOfMonth = new Date()
-    startOfMonth.setDate(1)
-    startOfMonth.setHours(0, 0, 0, 0)
+    if (!userIsTrial && maxQuotes && maxQuotes > 0) {
+      const startOfMonth = new Date()
+      startOfMonth.setDate(1)
+      startOfMonth.setHours(0, 0, 0, 0)
 
-    const totalQuotesThisMonth = await prisma.quote.count({
-      where: {
-        userId,
-        createdAt: { gte: startOfMonth },
-      },
-    })
-
-    if (totalQuotesThisMonth >= maxQuotes) {
-      return NextResponse.json(
-        {
-          error: "LIMIT_REACHED",
-          message: `Has alcanzado el límite de ${maxQuotes} cotizaciones en tu plan`,
-          maxQuotes,
-          totalQuotes: totalQuotesThisMonth,
+      const totalQuotesThisMonth = await prisma.quote.count({
+        where: {
+          userId,
+          createdAt: { gte: startOfMonth },
         },
-        { status: 403 }
-      )
+      })
+
+      if (totalQuotesThisMonth >= maxQuotes) {
+        return NextResponse.json(
+          {
+            error: "LIMIT_REACHED",
+            message: `Has alcanzado el límite de ${maxQuotes} cotizaciones en tu plan`,
+            maxQuotes,
+            totalQuotes: totalQuotesThisMonth,
+          },
+          { status: 403 }
+        )
+      }
     }
 
-        let safeTemplateId: string | null = null
+    let safeTemplateId: string | null = null
 
-        if (templateId || templateKey) {
-          const existingTemplate = await prisma.template.findFirst({
-            where: {
-              OR: [
-                ...(templateId ? [{ id: templateId }] : []),
-                ...(templateKey ? [{ name: templateKey }] : []),
-              ],
-            },
-            select: {
-              id: true,
-              name: true,
-            },
-          })
+    if (templateId || templateKey) {
+      const existingTemplate = await prisma.template.findFirst({
+        where: {
+          OR: [
+            ...(templateId ? [{ id: templateId }] : []),
+            ...(templateKey ? [{ name: templateKey }] : []),
+          ],
+        },
+        select: {
+          id: true,
+          name: true,
+        },
+      })
 
-          safeTemplateId = existingTemplate?.id ?? null
-        }
+      safeTemplateId = existingTemplate?.id ?? null
+    }
 
     const quote = await prisma.quote.create({
       data: {
@@ -314,22 +348,27 @@ export async function POST(req: Request) {
       },
     })
 
-    const newQuotesUsed = (user.quotesUsed ?? 0) + 1
-    const shouldBlockTrial = newQuotesUsed >= (user.trialQuotesLimit ?? 5)
+    let nextQuotesUsed = quotesUsed
+    let nextTrialBlocked = user.trialBlocked ?? false
 
-    await prisma.user.update({
-      where: { id: userId },
-      data: {
-        quotesUsed: newQuotesUsed,
-        trialBlocked: shouldBlockTrial,
-      },
-    })
+    if (userIsTrial) {
+      nextQuotesUsed = quotesUsed + 1
+      nextTrialBlocked = nextQuotesUsed >= trialQuotesLimit
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          quotesUsed: nextQuotesUsed,
+          trialBlocked: nextTrialBlocked,
+        },
+      })
+    }
 
     return NextResponse.json({
       ...quote,
-      quotesUsed: newQuotesUsed,
-      trialBlocked: shouldBlockTrial,
-      trialQuotesLimit: user.trialQuotesLimit,
+      quotesUsed: nextQuotesUsed,
+      trialBlocked: nextTrialBlocked,
+      trialQuotesLimit,
     })
   } catch (error) {
     console.error("ERROR POST QUOTES API:", error)

@@ -256,6 +256,7 @@ export default async function QuotePrintPage({ params }: PageProps) {
           margin: 0;
           padding: 0;
           width: 100%;
+          min-height: 100%;
           overflow-x: hidden;
           background: white;
         }
@@ -272,7 +273,7 @@ export default async function QuotePrintPage({ params }: PageProps) {
 
         @page {
           size: A4;
-          margin: 0;
+          margin: 34px 36px;
         }
 
         .print-page-shell {
@@ -285,11 +286,50 @@ export default async function QuotePrintPage({ params }: PageProps) {
         }
 
         .print-page-inner {
-          width: 595px;
-          max-width: 595px;
-          min-height: 842px;
-          overflow: hidden;
+          width: 100%;
+          max-width: 720px;
           background: white;
+          overflow: visible;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+        }
+
+        .print-page-inner > * {
+          margin: 0 auto;
+        }
+
+        @media print {
+          html,
+          body {
+            width: auto;
+            min-height: auto;
+            overflow: visible;
+            background: white;
+          }
+
+          .print-page-shell {
+            width: 100%;
+            min-height: auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background: white;
+          }
+
+          .print-page-inner {
+            width: 100%;
+            max-width: none;
+            background: white;
+            overflow: visible;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+          }
+
+          .print-page-inner > * {
+            margin: 0 auto;
+          }
         }
       `}</style>
 

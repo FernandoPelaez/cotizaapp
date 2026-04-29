@@ -1,11 +1,18 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Type } from "lucide-react"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
 import {
   FONT_FAMILY_OPTIONS,
   FONT_FAMILY_STACKS,
 } from "@/lib/theme/theme-presets"
+
+import {
+  personalizarCardsContainerVariants,
+  personalizarCardVariants,
+} from "../animations/personalizar.motion"
 
 export default function TypographySection() {
   const { draft, setDraft, isLoading, isSaving } = useThemeContext()
@@ -41,16 +48,24 @@ export default function TypographySection() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <motion.div
+        className="grid gap-3 md:grid-cols-2"
+        variants={personalizarCardsContainerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {FONT_FAMILY_OPTIONS.map((option) => {
           const isActive = draft.fontFamily === option.value
 
           return (
-            <button
+            <motion.button
               key={option.value}
               type="button"
               onClick={() => setDraft({ fontFamily: option.value })}
               disabled={isLoading || isSaving}
+              variants={personalizarCardVariants}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.99 }}
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 backgroundColor: isActive
@@ -121,10 +136,10 @@ export default function TypographySection() {
                   </p>
                 </div>
               </div>
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

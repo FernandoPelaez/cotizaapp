@@ -1,13 +1,20 @@
 "use client"
 
+import { motion } from "framer-motion"
 import type { CSSProperties } from "react"
 import { Layers3, Radius, SquareStack } from "lucide-react"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
 import {
   CARD_STYLE_OPTIONS,
   RADIUS_STYLE_OPTIONS,
   SHADOW_STYLE_OPTIONS,
 } from "@/lib/theme/theme-presets"
+
+import {
+  personalizarCardsContainerVariants,
+  personalizarCardVariants,
+} from "../animations/personalizar.motion"
 
 function getCardPreviewStyles(value: string): CSSProperties {
   const softBorder = "color-mix(in srgb, var(--border) 42%, transparent)"
@@ -119,17 +126,25 @@ export default function SurfaceSection() {
             </p>
           </div>
 
-          <div className="grid gap-3 md:grid-cols-2">
+          <motion.div
+            className="grid gap-3 md:grid-cols-2"
+            variants={personalizarCardsContainerVariants}
+            initial="hidden"
+            animate="show"
+          >
             {CARD_STYLE_OPTIONS.map((option) => {
               const isActive = draft.cardStyle === option.value
               const previewStyles = getCardPreviewStyles(option.value)
 
               return (
-                <button
+                <motion.button
                   key={option.value}
                   type="button"
                   onClick={() => setDraft({ cardStyle: option.value })}
                   disabled={isLoading || isSaving}
+                  variants={personalizarCardVariants}
+                  whileHover={{ y: -2 }}
+                  whileTap={{ scale: 0.99 }}
                   className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                   style={{
                     background: isActive
@@ -232,10 +247,10 @@ export default function SurfaceSection() {
                       </div>
                     </div>
                   </div>
-                </button>
+                </motion.button>
               )
             })}
-          </div>
+          </motion.div>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2">
@@ -251,17 +266,25 @@ export default function SurfaceSection() {
               </p>
             </div>
 
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-3"
+              variants={personalizarCardsContainerVariants}
+              initial="hidden"
+              animate="show"
+            >
               {RADIUS_STYLE_OPTIONS.map((option) => {
                 const isActive = draft.radiusStyle === option.value
                 const previewRadius = getRadiusPreview(option.value)
 
                 return (
-                  <button
+                  <motion.button
                     key={option.value}
                     type="button"
                     onClick={() => setDraft({ radiusStyle: option.value })}
                     disabled={isLoading || isSaving}
+                    variants={personalizarCardVariants}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.99 }}
                     className="w-full rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                     style={{
                       background: isActive
@@ -314,10 +337,10 @@ export default function SurfaceSection() {
                         />
                       </div>
                     </div>
-                  </button>
+                  </motion.button>
                 )
               })}
-            </div>
+            </motion.div>
           </div>
 
           <div className="space-y-3">
@@ -332,17 +355,25 @@ export default function SurfaceSection() {
               </p>
             </div>
 
-            <div className="space-y-3">
+            <motion.div
+              className="space-y-3"
+              variants={personalizarCardsContainerVariants}
+              initial="hidden"
+              animate="show"
+            >
               {SHADOW_STYLE_OPTIONS.map((option) => {
                 const isActive = draft.shadowStyle === option.value
                 const previewShadow = getShadowPreview(option.value)
 
                 return (
-                  <button
+                  <motion.button
                     key={option.value}
                     type="button"
                     onClick={() => setDraft({ shadowStyle: option.value })}
                     disabled={isLoading || isSaving}
+                    variants={personalizarCardVariants}
+                    whileHover={{ y: -2 }}
+                    whileTap={{ scale: 0.99 }}
                     className="w-full rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
                     style={{
                       background: isActive
@@ -395,10 +426,10 @@ export default function SurfaceSection() {
                         />
                       </div>
                     </div>
-                  </button>
+                  </motion.button>
                 )
               })}
-            </div>
+            </motion.div>
           </div>
         </div>
       </div>

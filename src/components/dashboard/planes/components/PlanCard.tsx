@@ -1,3 +1,6 @@
+"use client"
+
+import { motion } from "framer-motion"
 import { Check, Crown, Sparkles, Zap } from "lucide-react"
 import type { MouseEventHandler } from "react"
 
@@ -12,6 +15,8 @@ type PlanCardProps = {
   onMouseEnter?: MouseEventHandler<HTMLElement>
   onMouseLeave?: MouseEventHandler<HTMLElement>
 }
+
+const planCardEase: [number, number, number, number] = [0.19, 1, 0.22, 1]
 
 function getPlanIcon(icon: DashboardPlan["icon"]) {
   switch (icon) {
@@ -36,6 +41,7 @@ export default function PlanCard({
 }: PlanCardProps) {
   const Icon = getPlanIcon(plan.icon)
   const isCurrentPlan = currentPlanId === plan.id
+  const isButtonDisabled = isCurrentPlan || isSubmitting
 
   const buttonLabel = isCurrentPlan
     ? "Plan actual"
@@ -43,26 +49,32 @@ export default function PlanCard({
       ? "Actualizando..."
       : "Elegir plan"
 
+  const defaultShadow = plan.highlighted
+    ? "0 8px 32px rgba(45,107,255,0.25)"
+    : "0 0 0 rgba(45,107,255,0)"
+
+  const hoveredShadow = plan.highlighted
+    ? "0 20px 48px rgba(45,107,255,0.35)"
+    : "0 12px 32px rgba(45,107,255,0.10)"
+
   return (
-    <article
+    <motion.article
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       className="relative flex h-full flex-col gap-6 rounded-[20px] p-8"
+      animate={{
+        y: isHovered ? -4 : 0,
+        boxShadow: isHovered ? hoveredShadow : defaultShadow,
+      }}
+      transition={{
+        duration: 0.32,
+        ease: planCardEase,
+      }}
       style={{
         background: plan.highlighted ? "var(--primary)" : "var(--card)",
         border: plan.highlighted
           ? "2px solid var(--primary)"
           : `1px solid ${isHovered ? "var(--primary-light)" : "var(--border)"}`,
-        transform: isHovered ? "translateY(-4px)" : "translateY(0)",
-        transition:
-          "transform 0.2s cubic-bezier(0.16,1,0.3,1), box-shadow 0.2s ease, border-color 0.2s ease",
-        boxShadow: isHovered
-          ? plan.highlighted
-            ? "0 20px 48px rgba(45,107,255,0.35)"
-            : "0 12px 32px rgba(45,107,255,0.10)"
-          : plan.highlighted
-            ? "0 8px 32px rgba(45,107,255,0.25)"
-            : "none",
       }}
     >
       {plan.badge && (
@@ -177,16 +189,20 @@ export default function PlanCard({
         ))}
       </div>
 
-      <button
+      <motion.button
         type="button"
-        onClick={isCurrentPlan || isSubmitting ? undefined : onSelectPlan}
-        disabled={isCurrentPlan || isSubmitting}
+        onClick={isButtonDisabled ? undefined : onSelectPlan}
+        disabled={isButtonDisabled}
+        whileHover={isButtonDisabled ? undefined : { y: -1 }}
+        whileTap={isButtonDisabled ? undefined : { scale: 0.99 }}
+        transition={{
+          duration: 0.2,
+          ease: planCardEase,
+        }}
         className="w-full rounded-xl px-4 py-3 text-sm font-semibold"
         style={{
           border: "none",
-          cursor: isCurrentPlan || isSubmitting ? "default" : "pointer",
-          transition:
-            "background 0.15s ease, transform 0.1s ease, opacity 0.15s ease",
+          cursor: isButtonDisabled ? "default" : "pointer",
           background: isCurrentPlan
             ? "var(--primary-soft)"
             : plan.highlighted
@@ -201,7 +217,7 @@ export default function PlanCard({
         }}
       >
         {buttonLabel}
-      </button>
-    </article>
+      </motion.button>
+    </motion.article>
   )
 }

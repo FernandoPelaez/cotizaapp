@@ -1,8 +1,15 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { Rows3 } from "lucide-react"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
 import { DENSITY_STYLE_OPTIONS } from "@/lib/theme/theme-presets"
+
+import {
+  personalizarCardsContainerVariants,
+  personalizarCardVariants,
+} from "../animations/personalizar.motion"
 
 const densityPreviewMap = {
   compact: {
@@ -62,7 +69,12 @@ export default function DensitySection() {
         </p>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
+      <motion.div
+        className="grid gap-3 md:grid-cols-3"
+        variants={personalizarCardsContainerVariants}
+        initial="hidden"
+        animate="show"
+      >
         {DENSITY_STYLE_OPTIONS.map((option) => {
           const isActive = draft.densityStyle === option.value
           const preview =
@@ -71,11 +83,14 @@ export default function DensitySection() {
             ]
 
           return (
-            <button
+            <motion.button
               key={option.value}
               type="button"
               onClick={() => setDraft({ densityStyle: option.value })}
               disabled={isLoading || isSaving}
+              variants={personalizarCardVariants}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.99 }}
               className="rounded-2xl border p-4 text-left transition disabled:cursor-not-allowed disabled:opacity-60"
               style={{
                 background: isActive
@@ -194,10 +209,10 @@ export default function DensitySection() {
                   </div>
                 </div>
               </div>
-            </button>
+            </motion.button>
           )
         })}
-      </div>
+      </motion.div>
     </section>
   )
 }

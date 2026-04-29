@@ -1,3 +1,6 @@
+"use client"
+
+import { motion } from "framer-motion"
 import type { LucideIcon } from "lucide-react"
 import {
   CheckCircle2,
@@ -8,6 +11,11 @@ import {
   XCircle,
 } from "lucide-react"
 
+import {
+  cotizacionesEase,
+  cotizacionesStatsCardVariants,
+  cotizacionesStatsGridVariants,
+} from "@/components/dashboard/cotizaciones/animations/cotizaciones.motion"
 import type { QuotesSummary } from "@/types/cotizacion"
 
 type CotizacionesStatsProps = {
@@ -99,7 +107,12 @@ const stats: StatItem[] = [
 
 export default function CotizacionesStats({ summary }: CotizacionesStatsProps) {
   return (
-    <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+    <motion.div
+      className="grid gap-3 sm:grid-cols-2"
+      variants={cotizacionesStatsGridVariants}
+      initial="hidden"
+      animate="show"
+    >
       {stats.map(
         ({
           key,
@@ -112,40 +125,48 @@ export default function CotizacionesStats({ summary }: CotizacionesStatsProps) {
           value,
           dot,
         }) => (
-          <div
+          <motion.div
             key={key}
-            className={`group relative overflow-hidden rounded-lg border p-2.5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md ${card}`}
+            variants={cotizacionesStatsCardVariants}
+            whileHover={{ y: -2 }}
+            transition={{
+              duration: 0.22,
+              ease: cotizacionesEase,
+            }}
+            className={`relative min-h-[136px] overflow-hidden rounded-xl border p-4 shadow-sm ${card}`}
           >
             <span
-              className={`absolute right-2.5 top-2.5 h-1.5 w-1.5 rounded-full ${dot}`}
+              className={`absolute right-3 top-3 h-1.5 w-1.5 rounded-full ${dot}`}
             />
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <div
-                className={`inline-flex h-7 w-7 items-center justify-center rounded-md ${icon_wrap}`}
+                className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${icon_wrap}`}
               >
-                <Icon className="h-3.5 w-3.5" strokeWidth={1.8} />
+                <Icon className="h-4 w-4" strokeWidth={1.8} />
               </div>
 
               <span
-                className={`rounded px-1.5 py-px text-[9px] font-semibold uppercase tracking-widest ${badge}`}
+                className={`rounded-md px-2 py-1 text-[10px] font-semibold uppercase tracking-widest ${badge}`}
               >
                 {label}
               </span>
             </div>
 
-            <div className="mt-2">
-              <p className="text-[10px] text-neutral-400">{description}</p>
+            <div className="mt-3">
+              <p className="text-[11px] leading-5 text-neutral-400">
+                {description}
+              </p>
 
               <p
-                className={`mt-0.5 text-xl font-semibold tabular-nums tracking-tight ${value}`}
+                className={`mt-1 text-2xl font-semibold tabular-nums tracking-tight ${value}`}
               >
                 {summary[key]}
               </p>
             </div>
-          </div>
+          </motion.div>
         )
       )}
-    </div>
+    </motion.div>
   )
 }

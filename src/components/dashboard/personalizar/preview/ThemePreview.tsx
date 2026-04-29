@@ -1,5 +1,6 @@
 "use client"
 
+import { motion, type Variants } from "framer-motion"
 import {
   Bell,
   CircleUserRound,
@@ -13,6 +14,7 @@ import {
   useState,
   type CSSProperties,
 } from "react"
+
 import { useThemeContext } from "@/components/providers/ThemeProvider"
 import {
   createThemeCssVariables,
@@ -23,14 +25,44 @@ type ResolvedThemeMode = "light" | "dark"
 
 function getSystemPreference(): ResolvedThemeMode {
   if (typeof window === "undefined") return "light"
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light"
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
 }
 
 function themeMix(color: string, amount: number, base = "transparent") {
   return `color-mix(in srgb, ${color} ${amount}%, ${base})`
+}
+
+const previewEase: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
+const previewSectionVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 16,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.82,
+      ease: previewEase,
+    },
+  },
+}
+
+const previewFrameVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 12,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.72,
+      delay: 0.14,
+      ease: previewEase,
+    },
+  },
 }
 
 export default function ThemePreview() {
@@ -43,9 +75,7 @@ export default function ThemePreview() {
 
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
 
-    const handleChange = (
-      event: MediaQueryListEvent | MediaQueryList
-    ) => {
+    const handleChange = (event: MediaQueryListEvent | MediaQueryList) => {
       setSystemPreference(event.matches ? "dark" : "light")
     }
 
@@ -53,8 +83,7 @@ export default function ThemePreview() {
 
     if (typeof mediaQuery.addEventListener === "function") {
       mediaQuery.addEventListener("change", handleChange)
-      return () =>
-        mediaQuery.removeEventListener("change", handleChange)
+      return () => mediaQuery.removeEventListener("change", handleChange)
     }
 
     mediaQuery.addListener(handleChange)
@@ -64,11 +93,7 @@ export default function ThemePreview() {
   const preview = useMemo(() => {
     const tokens = deriveThemeTokens(draft, systemPreference)
     const variables = createThemeCssVariables(tokens)
-
-    return {
-      tokens,
-      variables,
-    }
+    return { tokens, variables }
   }, [draft, systemPreference])
 
   const previewStyle = useMemo<CSSProperties>(
@@ -107,39 +132,19 @@ export default function ThemePreview() {
       : "none"
 
   const sidebarBg = isDark
-    ? `linear-gradient(180deg, ${themeMix(
-        "var(--primary)",
-        20,
-        "var(--card)"
-      )} 0%, var(--card) 100%)`
+    ? `linear-gradient(180deg, ${themeMix("var(--primary)", 20, "var(--card)")} 0%, var(--card) 100%)`
     : "linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%)"
 
   const heroBg =
     "linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%)"
 
   const planBg = isDark
-    ? `linear-gradient(135deg, ${themeMix(
-        "var(--primary)",
-        20,
-        "var(--card)"
-      )} 0%, var(--card) 100%)`
-    : `linear-gradient(135deg, ${themeMix(
-        "var(--primary)",
-        12,
-        "var(--card)"
-      )} 0%, ${themeMix("var(--primary)", 4, "var(--card)")} 100%)`
+    ? `linear-gradient(135deg, ${themeMix("var(--primary)", 20, "var(--card)")} 0%, var(--card) 100%)`
+    : `linear-gradient(135deg, ${themeMix("var(--primary)", 12, "var(--card)")} 0%, ${themeMix("var(--primary)", 4, "var(--card)")} 100%)`
 
   const mainAreaBg = isDark
-    ? `linear-gradient(180deg, ${themeMix(
-        "var(--card)",
-        12,
-        "var(--background)"
-      )} 0%, var(--background) 100%)`
-    : `linear-gradient(180deg, ${themeMix(
-        "var(--card)",
-        82,
-        "var(--background)"
-      )} 0%, var(--background) 100%)`
+    ? `linear-gradient(180deg, ${themeMix("var(--card)", 12, "var(--background)")} 0%, var(--background) 100%)`
+    : `linear-gradient(180deg, ${themeMix("var(--card)", 82, "var(--background)")} 0%, var(--background) 100%)`
 
   const sidebarDivider = isDark
     ? "color-mix(in srgb, var(--border) 42%, transparent)"
@@ -169,8 +174,10 @@ export default function ThemePreview() {
   }
 
   return (
-    <section
+
+    <motion.section
       className="rounded-3xl border p-5"
+      variants={previewSectionVariants}
       style={{
         backgroundColor: "var(--card)",
         borderColor: "color-mix(in srgb, var(--border) 45%, transparent)",
@@ -193,8 +200,9 @@ export default function ThemePreview() {
         </p>
       </div>
 
-      <div
+      <motion.div
         className="overflow-hidden rounded-2xl border"
+        variants={previewFrameVariants}
         style={{
           ...previewStyle,
           borderColor: softBorderColor,
@@ -213,20 +221,15 @@ export default function ThemePreview() {
           >
             <div
               className="border-b px-2 py-2.5"
-              style={{
-                borderColor: sidebarDivider,
-              }}
+              style={{ borderColor: sidebarDivider }}
             >
               <div className="flex items-center gap-1.5">
                 <span
                   className="h-2 w-2 rounded-full"
                   style={{
-                    backgroundColor: isDark
-                      ? "var(--primary)"
-                      : "var(--card)",
+                    backgroundColor: isDark ? "var(--primary)" : "var(--card)",
                   }}
                 />
-
                 <span
                   className="truncate text-[10px] font-semibold"
                   style={{ color: sidebarText }}
@@ -243,7 +246,6 @@ export default function ThemePreview() {
                 { label: "Tema", icon: Sparkles, active: false },
               ].map((item) => {
                 const Icon = item.icon
-
                 return (
                   <div
                     key={item.label}
@@ -284,7 +286,6 @@ export default function ThemePreview() {
                 <p className="truncate text-[11px] font-semibold">
                   Panel de inicio
                 </p>
-
                 <p
                   className="truncate text-[9px]"
                   style={{ color: "var(--text-muted)" }}
@@ -327,8 +328,7 @@ export default function ThemePreview() {
                 className="relative overflow-hidden rounded-[var(--radius)] border p-2.5"
                 style={{
                   background: heroBg,
-                  borderColor:
-                    "color-mix(in srgb, var(--primary) 22%, var(--border))",
+                  borderColor: "color-mix(in srgb, var(--primary) 22%, var(--border))",
                   boxShadow: cardShadow,
                 }}
               >
@@ -345,8 +345,7 @@ export default function ThemePreview() {
                   <div
                     className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[9px] font-medium"
                     style={{
-                      backgroundColor:
-                        "color-mix(in srgb, var(--card) 94%, transparent)",
+                      backgroundColor: "color-mix(in srgb, var(--card) 94%, transparent)",
                       color: "var(--primary)",
                     }}
                   >
@@ -358,20 +357,16 @@ export default function ThemePreview() {
                 <div
                   className="absolute right-2.5 top-2 h-12 w-8 rounded-md"
                   style={{
-                    backgroundColor:
-                      "color-mix(in srgb, var(--card) 90%, var(--foreground))",
-                    boxShadow:
-                      "0 8px 18px color-mix(in srgb, var(--background) 14%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--card) 90%, var(--foreground))",
+                    boxShadow: "0 8px 18px color-mix(in srgb, var(--background) 14%, transparent)",
                   }}
                 />
 
                 <div
                   className="absolute right-8 top-3.5 h-10 w-7 rotate-[-8deg] rounded-md"
                   style={{
-                    backgroundColor:
-                      "color-mix(in srgb, var(--card) 72%, var(--foreground))",
-                    boxShadow:
-                      "0 8px 18px color-mix(in srgb, var(--background) 12%, transparent)",
+                    backgroundColor: "color-mix(in srgb, var(--card) 72%, var(--foreground))",
+                    boxShadow: "0 8px 18px color-mix(in srgb, var(--background) 12%, transparent)",
                   }}
                 />
               </div>
@@ -393,7 +388,6 @@ export default function ThemePreview() {
                       >
                         Cot-001
                       </p>
-
                       <p className="text-[11px] font-semibold">PRUEBAS</p>
                     </div>
 
@@ -405,9 +399,7 @@ export default function ThemePreview() {
                     </span>
                   </div>
 
-                  <p className="mb-2 text-[13px] font-semibold">
-                    $66,811.36
-                  </p>
+                  <p className="mb-2 text-[13px] font-semibold">$66,811.36</p>
 
                   <div className="flex items-center justify-between">
                     <div className="flex gap-1">
@@ -415,12 +407,10 @@ export default function ThemePreview() {
                         className="h-1.5 w-4 rounded-full"
                         style={{ backgroundColor: "var(--primary)" }}
                       />
-
                       <span
                         className="h-1.5 w-2 rounded-full"
                         style={{ backgroundColor: subtleBorderColor }}
                       />
-
                       <span
                         className="h-1.5 w-2 rounded-full"
                         style={{ backgroundColor: subtleBorderColor }}
@@ -452,11 +442,7 @@ export default function ThemePreview() {
                   </p>
 
                   <div className="space-y-1.5">
-                    {[
-                      "Nueva cotización",
-                      "Ver historial",
-                      "Explorar plantillas",
-                    ].map((item) => (
+                    {["Nueva cotización", "Ver historial", "Explorar plantillas"].map((item) => (
                       <div
                         key={item}
                         className="flex items-center justify-between rounded-lg border px-2 py-1.5"
@@ -466,12 +452,9 @@ export default function ThemePreview() {
                         }}
                       >
                         <span className="text-[9px]">{item}</span>
-
                         <span
                           className="h-1.5 w-1.5 rounded-full"
-                          style={{
-                            backgroundColor: "var(--primary)",
-                          }}
+                          style={{ backgroundColor: "var(--primary)" }}
                         />
                       </div>
                     ))}
@@ -489,7 +472,6 @@ export default function ThemePreview() {
                   <p className="mb-0.5 text-[11px] font-semibold">
                     Cotizaciones recientes
                   </p>
-
                   <p
                     className="mb-1.5 text-[9px]"
                     style={{ color: "var(--text-muted)" }}
@@ -510,17 +492,10 @@ export default function ThemePreview() {
                           borderColor: subtleBorderColor,
                         }}
                       >
-                        <p className="text-[9px] font-semibold">
-                          {item.title}
-                        </p>
-
+                        <p className="text-[9px] font-semibold">{item.title}</p>
                         <span
                           className="rounded-full px-1.5 py-0.5 text-[8px] font-medium"
-                          style={
-                            item.tone === "expired"
-                              ? expiredBadgeStyle
-                              : approvedBadgeStyle
-                          }
+                          style={item.tone === "expired" ? expiredBadgeStyle : approvedBadgeStyle}
                         >
                           {item.status}
                         </span>
@@ -546,18 +521,11 @@ export default function ThemePreview() {
                     PLAN FREE
                   </span>
 
-                  <div
-                    className="mt-2 space-y-1"
-                    style={{ color: "var(--foreground)" }}
-                  >
+                  <div className="mt-2 space-y-1" style={{ color: "var(--foreground)" }}>
                     <p className="text-[11px] font-semibold">
                       Estás en el plan gratuito
                     </p>
-
-                    <p
-                      className="text-[9px]"
-                      style={{ color: "var(--text-muted)" }}
-                    >
+                    <p className="text-[9px]" style={{ color: "var(--text-muted)" }}>
                       Desbloquea plantillas y más.
                     </p>
 
@@ -576,10 +544,7 @@ export default function ThemePreview() {
                       >
                         <div
                           className="h-1.5 rounded-full"
-                          style={{
-                            width: "60%",
-                            backgroundColor: "var(--primary)",
-                          }}
+                          style={{ width: "60%", backgroundColor: "var(--primary)" }}
                         />
                       </div>
                     </div>
@@ -596,17 +561,12 @@ export default function ThemePreview() {
                 }}
               >
                 <div className="min-w-0">
-                  <p className="text-[10px] font-semibold">
-                    Configuración actual
-                  </p>
-
+                  <p className="text-[10px] font-semibold">Configuración actual</p>
                   <p
                     className="truncate text-[9px]"
                     style={{ color: "var(--text-muted)" }}
                   >
-                    {preview.tokens.mode === "dark"
-                      ? "Modo oscuro"
-                      : "Modo claro"}{" "}
+                    {preview.tokens.mode === "dark" ? "Modo oscuro" : "Modo claro"}{" "}
                     • {draft.fontFamily} • {draft.densityStyle}
                   </p>
                 </div>
@@ -624,7 +584,7 @@ export default function ThemePreview() {
             </main>
           </div>
         </div>
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   )
 }

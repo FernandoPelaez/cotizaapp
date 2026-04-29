@@ -1,0 +1,645 @@
+.formCard {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  padding: 12px 16px;
+}
+
+.formHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formIcon {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.formTitle {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.formDescription {
+  margin: 0;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.formBody {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+}
+
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.inputWrap {
+  position: relative;
+  width: 100%;
+}
+
+.fieldIcon {
+  pointer-events: none;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  display: flex;
+  align-items: center;
+  color: var(--primary);
+}
+
+.input {
+  width: 100%;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  padding: 8px 12px 8px 32px;
+  font-size: 12px;
+  color: var(--foreground);
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease;
+}
+
+.input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.input:disabled {
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--background) 80%, var(--card));
+  color: var(--text-muted);
+}
+
+.logoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.logoLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.logoBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: color-mix(in srgb, var(--background) 65%, var(--card));
+  padding: 8px 12px;
+}
+
+.logoInfo {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+}
+
+.logoAvatar {
+  display: flex;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--primary);
+  color: var(--card);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.logoImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.logoTitle {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.logoHint {
+  margin: 0;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.logoButton,
+.editButton,
+.resetButton,
+.cancelButton,
+.saveButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    box-shadow 180ms ease,
+    opacity 180ms ease;
+}
+
+.logoButton {
+  border-color: color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  padding: 6px 12px;
+  font-size: 11px;
+  color: var(--primary);
+}
+
+.editButton {
+  border-color: color-mix(in srgb, var(--primary) 24%, var(--border));
+  background: var(--primary-soft);
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--primary);
+}
+
+.resetButton {
+  border-color: color-mix(in srgb, var(--warning) 35%, var(--border));
+  background: var(--warning-bg);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--warning);
+}
+
+.cancelButton {
+  border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+  background: var(--error-bg);
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--error);
+}
+
+.saveButton {
+  border-color: var(--primary);
+  background: var(--primary);
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--card);
+}
+
+.logoButton:hover:not(:disabled),
+.editButton:hover:not(:disabled),
+.saveButton:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 9%, transparent);
+}
+
+.resetButton:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--warning) 9%, transparent);
+}
+
+.cancelButton:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--error) 9%, transparent);
+}
+
+.logoButton:disabled,
+.editButton:disabled,
+.resetButton:disabled,
+.cancelButton:disabled,
+.saveButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.feedback {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 8px 12px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.feedbackError {
+  border-color: color-mix(in srgb, var(--error) 35%, var(--border));
+  background: var(--error-bg);
+  color: var(--error);
+}
+
+.feedbackSuccess {
+  border-color: color-mix(in srgb, var(--success) 35%, var(--border));
+  background: var(--success-bg);
+  color: var(--success);
+}
+
+.formActions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  padding-top: 12px;
+}
+
+.editActions {
+  display: flex;
+  width: 100%;
+  justify-content: flex-end;
+}
+
+.actionGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.overviewAside {
+  width: 100%;
+  height: 100%;
+}
+
+.overviewCard {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.overviewInner {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  flex-direction: column;
+  padding: 24px;
+}
+
+.previewBadgeWrap {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.previewBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent);
+}
+
+.previewBadgeIcon {
+  width: 10px;
+  height: 10px;
+}
+
+.overviewContent {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.overviewMain {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.profileSummary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarLarge,
+.avatarSmall {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 999px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.avatarLarge {
+  width: 72px;
+  height: 72px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 26px;
+}
+
+.avatarSmall {
+  width: 44px;
+  height: 44px;
+  background: color-mix(in srgb, var(--card) 20%, transparent);
+  color: var(--card);
+  font-size: 14px;
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profileText {
+  min-width: 0;
+}
+
+.businessName {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+.profileTypeBadge {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contactRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.contactIcon {
+  display: flex;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.contactText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quotePreviewWrap {
+  width: 270px;
+  flex-shrink: 0;
+}
+
+.quotePreviewCard {
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  background: var(--card);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 13%, transparent);
+}
+
+.quotePreviewHeader {
+  background: var(--primary);
+  padding: 20px;
+}
+
+.quotePreviewHeaderContent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.previewBusinessName {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--card);
+}
+
+.previewProfileType {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: color-mix(in srgb, var(--card) 72%, transparent);
+}
+
+.quotePreviewBody {
+  padding: 20px 20px 32px;
+}
+
+.quotePreviewTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 45%, transparent);
+  padding-bottom: 12px;
+}
+
+.quoteTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.quoteNumber {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.quoteItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 0;
+}
+
+.quoteItem,
+.quoteTotalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.quoteItemName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.quoteItemPrice {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.quoteTotalRow {
+  border-top: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  padding-top: 12px;
+}
+
+.quoteTotalLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.quoteTotalAmount {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+@media (max-width: 1120px) {
+  .overviewContent {
+    flex-direction: column;
+  }
+
+  .quotePreviewWrap {
+    width: 100%;
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 720px) {
+  .fieldGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .logoBox {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .logoButton {
+    width: 100%;
+  }
+
+  .formActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .actionGroup {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .resetButton,
+  .cancelButton,
+  .saveButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .overviewInner {
+    padding: 18px;
+  }
+
+  .previewBadgeWrap {
+    justify-content: flex-start;
+  }
+
+  .profileSummary {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .avatarLarge {
+    width: 64px;
+    height: 64px;
+    font-size: 22px;
+  }
+
+  .quotePreviewWrap {
+    max-width: 100%;
+  }
+}

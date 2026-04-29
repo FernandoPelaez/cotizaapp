@@ -222,8 +222,8 @@ export default function PlanFreeCard({
             {isFree
               ? `${cotizacionesUsadas} / ${cotizacionesMax}`
               : plan === "premium"
-              ? "Empresa"
-              : "Pro"}
+                ? "Empresa"
+                : "Pro"}
           </span>
         </div>
 
@@ -276,11 +276,11 @@ export default function PlanFreeCard({
         type="button"
         onClick={isFree ? onUpgrade : undefined}
         disabled={isPaidPlan}
-        className="mt-6 inline-flex w-full items-center justify-center gap-1 px-3 py-2 text-[11px] font-bold transition"
+        className="mt-4 inline-flex w-full items-center justify-center gap-1 px-3 py-1.5 text-[10px] font-bold transition"
         style={{
           background: isPaidPlan ? CARD_CTA_DISABLED_BG : CARD_CTA_BG,
           color: isPaidPlan ? CARD_CTA_DISABLED_TEXT : CARD_CTA_TEXT,
-          borderRadius: "14px",
+          borderRadius: "11px",
           cursor: isPaidPlan ? "default" : "pointer",
           opacity: isPaidPlan ? 0.95 : 1,
         }}

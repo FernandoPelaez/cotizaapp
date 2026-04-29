@@ -1,7 +1,15 @@
 "use client"
 
+import { motion } from "framer-motion"
 import { useEffect, useState, type ReactNode } from "react"
 import { Mail, MapPin, Phone } from "lucide-react"
+
+import {
+  perfilOverviewContainerVariants,
+  perfilOverviewChildVariants,
+} from "./animations/perfil.motion"
+import styles from "./Perfil.module.css"
+
 import type { DashboardProfileUser, ProfileFormValues } from "@/types/profile"
 
 type PerfilOverviewCardProps = {
@@ -33,35 +41,11 @@ type AvatarProps = {
   size?: "lg" | "sm"
 }
 
-function Avatar({
-  showImage,
-  src,
-  initials,
-  onError,
-  size = "lg",
-}: AvatarProps) {
+function Avatar({ showImage, src, initials, onError, size = "lg" }: AvatarProps) {
   return (
-    <div
-      className={
-        size === "lg"
-          ? "flex h-[72px] w-[72px] shrink-0 items-center justify-center overflow-hidden rounded-full text-[26px] font-bold tracking-tight"
-          : "flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full text-[14px] font-bold tracking-tight"
-      }
-      style={{
-        backgroundColor:
-          size === "lg"
-            ? "var(--primary-soft)"
-            : "color-mix(in srgb, var(--card) 20%, transparent)",
-        color: size === "lg" ? "var(--primary)" : "var(--card)",
-      }}
-    >
+    <div className={size === "lg" ? styles.avatarLarge : styles.avatarSmall}>
       {showImage ? (
-        <img
-          src={src}
-          alt="Logo"
-          className="h-full w-full object-cover"
-          onError={onError}
-        />
+        <img src={src} alt="Logo" className={styles.avatarImage} onError={onError} />
       ) : (
         <span>{initials}</span>
       )}
@@ -71,27 +55,14 @@ function Avatar({
 
 function ContactRow({ icon, text }: { icon: ReactNode; text: string }) {
   return (
-    <div
-      className="flex items-center gap-2.5 text-[13px]"
-      style={{ color: "var(--text-muted)" }}
-    >
-      <div
-        className="flex h-4 w-4 shrink-0 items-center justify-center"
-        style={{ color: "var(--primary)" }}
-      >
-        {icon}
-      </div>
-
-      <span className="truncate">{text}</span>
+    <div className={styles.contactRow}>
+      <div className={styles.contactIcon}>{icon}</div>
+      <span className={styles.contactText}>{text}</span>
     </div>
   )
 }
 
-export default function PerfilOverviewCard({
-  user,
-  values,
-  initials,
-}: PerfilOverviewCardProps) {
+export default function PerfilOverviewCard({ user, values, initials }: PerfilOverviewCardProps) {
   const [imageError, setImageError] = useState(false)
 
   const profileTypeLabel = getProfileTypeLabel(user.profileType)
@@ -102,54 +73,44 @@ export default function PerfilOverviewCard({
   const phone = values.phone.trim() || "Sin teléfono"
   const location = getLocation(values.city, values.state)
 
-  useEffect(() => {
-    setImageError(false)
-  }, [previewLogo])
+  useEffect(() => { setImageError(false) }, [previewLogo])
 
   return (
-    <aside className="h-full w-full">
-      <section
-        className="h-full w-full overflow-hidden rounded-[16px] border"
-        style={{
-          backgroundColor: "var(--card)",
-          borderColor: "color-mix(in srgb, var(--border) 75%, transparent)",
-          boxShadow:
-            "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
-        }}
-      >
-        <div className="flex h-full w-full flex-col px-6 py-6">
-          <div className="mb-5 flex justify-end">
-            <span
-              className="inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[11px] font-medium"
-              style={{
-                backgroundColor: "var(--card)",
-                borderColor:
-                  "color-mix(in srgb, var(--border) 75%, transparent)",
-                color: "var(--text-muted)",
-                boxShadow:
-                  "0 8px 20px color-mix(in srgb, var(--foreground) 4%, transparent)",
-              }}
-            >
+    <aside className={styles.overviewAside}>
+      <section className={styles.overviewCard}>
+        {/* ANIMADO: contenedor orquesta el stagger de todos los hijos */}
+        <motion.div
+          className={styles.overviewInner}
+          variants={perfilOverviewContainerVariants}
+          initial="hidden"
+          animate="show"
+        >
+          {/* badge "Vista previa" — entra primero */}
+          <motion.div
+            className={styles.previewBadgeWrap}
+            variants={perfilOverviewChildVariants}
+          >
+            <span className={styles.previewBadge}>
               <svg
-                className="h-2.5 w-2.5"
+                className={styles.previewBadgeIcon}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 strokeWidth={2.5}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M9 5l7 7-7 7"
-                />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
               </svg>
               Vista previa en cotización
             </span>
-          </div>
+          </motion.div>
 
-          <div className="flex flex-1 items-start gap-6">
-            <div className="flex min-w-0 flex-1 flex-col gap-5">
-              <div className="flex items-center gap-3">
+          <div className={styles.overviewContent}>
+            <div className={styles.overviewMain}>
+              {/* nombre + avatar — entra segundo */}
+              <motion.div
+                className={styles.profileSummary}
+                variants={perfilOverviewChildVariants}
+              >
                 <Avatar
                   showImage={showLogoImage}
                   src={previewLogo}
@@ -157,53 +118,31 @@ export default function PerfilOverviewCard({
                   onError={() => setImageError(true)}
                   size="lg"
                 />
-
-                <div className="min-w-0">
-                  <p
-                    className="truncate text-[18px] font-bold leading-snug"
-                    style={{ color: "var(--foreground)" }}
-                  >
-                    {businessName}
-                  </p>
-
-                  <span
-                    className="mt-1 inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
-                    style={{
-                      backgroundColor: "var(--primary-soft)",
-                      color: "var(--primary)",
-                    }}
-                  >
-                    {profileTypeLabel}
-                  </span>
+                <div className={styles.profileText}>
+                  <p className={styles.businessName}>{businessName}</p>
+                  <span className={styles.profileTypeBadge}>{profileTypeLabel}</span>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="flex flex-col gap-3">
-                <ContactRow icon={<Mail className="h-4 w-4" />} text={email} />
-                <ContactRow icon={<Phone className="h-4 w-4" />} text={phone} />
-                <ContactRow
-                  icon={<MapPin className="h-4 w-4" />}
-                  text={location}
-                />
-              </div>
+              {/* contactos — entran tercero */}
+              <motion.div
+                className={styles.contactList}
+                variants={perfilOverviewChildVariants}
+              >
+                <ContactRow icon={<Mail size={16} />} text={email} />
+                <ContactRow icon={<Phone size={16} />} text={phone} />
+                <ContactRow icon={<MapPin size={16} />} text={location} />
+              </motion.div>
             </div>
 
-            <div className="w-[270px] shrink-0">
-              <div
-                className="overflow-hidden rounded-[12px] border"
-                style={{
-                  backgroundColor: "var(--card)",
-                  borderColor:
-                    "color-mix(in srgb, var(--border) 75%, transparent)",
-                  boxShadow:
-                    "0 8px 24px color-mix(in srgb, var(--primary) 13%, transparent)",
-                }}
-              >
-                <div
-                  className="px-5 py-5"
-                  style={{ backgroundColor: "var(--primary)" }}
-                >
-                  <div className="flex items-center gap-3">
+            {/* tarjeta cotización — entra última */}
+            <motion.div
+              className={styles.quotePreviewWrap}
+              variants={perfilOverviewChildVariants}
+            >
+              <div className={styles.quotePreviewCard}>
+                <div className={styles.quotePreviewHeader}>
+                  <div className={styles.quotePreviewHeaderContent}>
                     <Avatar
                       showImage={showLogoImage}
                       src={previewLogo}
@@ -211,111 +150,37 @@ export default function PerfilOverviewCard({
                       onError={() => setImageError(true)}
                       size="sm"
                     />
-
-                    <div className="min-w-0">
-                      <p
-                        className="truncate text-[13px] font-bold uppercase tracking-wide"
-                        style={{ color: "var(--card)" }}
-                      >
-                        {businessName}
-                      </p>
-
-                      <p
-                        className="mt-0.5 text-[11px]"
-                        style={{
-                          color:
-                            "color-mix(in srgb, var(--card) 72%, transparent)",
-                        }}
-                      >
-                        {profileTypeLabel}
-                      </p>
+                    <div className={styles.profileText}>
+                      <p className={styles.previewBusinessName}>{businessName}</p>
+                      <p className={styles.previewProfileType}>{profileTypeLabel}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-3.5 px-5 pb-8 pt-5">
-                  <div
-                    className="flex items-center justify-between border-b pb-3"
-                    style={{
-                      borderColor:
-                        "color-mix(in srgb, var(--border) 45%, transparent)",
-                    }}
-                  >
-                    <span
-                      className="text-[13px] font-semibold"
-                      style={{ color: "var(--foreground)" }}
-                    >
-                      Cotización
-                    </span>
-
-                    <span
-                      className="text-[12px]"
-                      style={{ color: "var(--text-muted)" }}
-                    >
-                      #CTZ-0001
-                    </span>
+                <div className={styles.quotePreviewBody}>
+                  <div className={styles.quotePreviewTop}>
+                    <span className={styles.quoteTitle}>Cotización</span>
+                    <span className={styles.quoteNumber}>#CTZ-0001</span>
                   </div>
-
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className="min-w-0 truncate text-[12px]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Diseño y Desarrollo
-                      </span>
-
-                      <span
-                        className="shrink-0 text-[12px]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        $12,500.00
-                      </span>
+                  <div className={styles.quoteItems}>
+                    <div className={styles.quoteItem}>
+                      <span className={styles.quoteItemName}>Diseño y Desarrollo</span>
+                      <span className={styles.quoteItemPrice}>$12,500.00</span>
                     </div>
-
-                    <div className="flex items-center justify-between gap-2">
-                      <span
-                        className="min-w-0 truncate text-[12px]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        Mantenimiento
-                      </span>
-
-                      <span
-                        className="shrink-0 text-[12px]"
-                        style={{ color: "var(--text-muted)" }}
-                      >
-                        $2,800.00
-                      </span>
+                    <div className={styles.quoteItem}>
+                      <span className={styles.quoteItemName}>Mantenimiento</span>
+                      <span className={styles.quoteItemPrice}>$2,800.00</span>
                     </div>
                   </div>
-
-                  <div
-                    className="flex items-center justify-between gap-2 border-t pt-3"
-                    style={{
-                      borderColor:
-                        "color-mix(in srgb, var(--border) 75%, transparent)",
-                    }}
-                  >
-                    <span
-                      className="text-[13px] font-bold"
-                      style={{ color: "var(--foreground)" }}
-                    >
-                      Total
-                    </span>
-
-                    <span
-                      className="text-[13px] font-bold"
-                      style={{ color: "var(--primary)" }}
-                    >
-                      $15,300.00
-                    </span>
+                  <div className={styles.quoteTotalRow}>
+                    <span className={styles.quoteTotalLabel}>Total</span>
+                    <span className={styles.quoteTotalAmount}>$15,300.00</span>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
     </aside>
   )

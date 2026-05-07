@@ -13,7 +13,45 @@ type DashboardInicioProps = {
   plantillasDisponibles?: Plantilla[]
 }
 
+type PlanApiResponse = {
+  plan?: "free" | "pro" | "premium" | string
+  quotesUsed?: number | null
+  maxQuotes?: number | null
+  trialQuotesLimit?: number | null
+  trialBlocked?: boolean | null
+  billingCycle?: "monthly" | null
+  planStartedAt?: string | null
+  planExpiresAt?: string | null
+  renewsAt?: string | null
+}
+
+type DashboardUserConfigWithPlan = UserConfig & {
+  quotesUsed?: number
+  trialQuotesLimit?: number
+  trialBlocked?: boolean
+  billingCycle?: "monthly" | null
+  planStartedAt?: string | null
+  planExpiresAt?: string | null
+  renewsAt?: string | null
+}
+
 const UPSELL_STORAGE_KEY = "dashboard-pro-upsell-free-3-of-5"
+
+function normalizePlan(plan: unknown): UserConfig["plan"] {
+  const normalizedPlan = String(plan ?? "free").trim().toLowerCase()
+
+  if (normalizedPlan === "pro") return "pro"
+
+  if (
+    normalizedPlan === "premium" ||
+    normalizedPlan === "empresa" ||
+    normalizedPlan === "business"
+  ) {
+    return "premium"
+  }
+
+  return "free"
+}
 
 export default function DashboardInicio({
   userConfig,
@@ -23,10 +61,68 @@ export default function DashboardInicio({
   void plantillasDisponibles
 
   const [showProUpsell, setShowProUpsell] = useState(false)
+  const [planData, setPlanData] = useState<PlanApiResponse | null>(null)
 
-  const plan = userConfig?.plan ?? "free"
-  const cotizacionesUsadas = userConfig?.cotizacionesUsadas ?? 0
-  const cotizacionesMax = userConfig?.cotizacionesMax ?? 5
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadCurrentPlan() {
+      try {
+        const response = await fetch("/api/user/plan", {
+          method: "GET",
+          cache: "no-store",
+        })
+
+        if (!response.ok) return
+
+        const data = (await response.json()) as PlanApiResponse
+
+        if (isMounted) {
+          setPlanData(data)
+        }
+      } catch {
+        if (isMounted) {
+          setPlanData(null)
+        }
+      }
+    }
+
+    loadCurrentPlan()
+
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  const resolvedUserConfig = useMemo<DashboardUserConfigWithPlan | undefined>(() => {
+    if (!userConfig && !planData) return undefined
+
+    const plan = normalizePlan(planData?.plan ?? userConfig?.plan)
+    const quotesUsed =
+      planData?.quotesUsed ?? userConfig?.cotizacionesUsadas ?? 0
+    const trialQuotesLimit =
+      planData?.trialQuotesLimit ?? userConfig?.cotizacionesMax ?? 5
+    const maxQuotes =
+      planData?.maxQuotes ?? trialQuotesLimit ?? userConfig?.cotizacionesMax ?? 5
+
+    return {
+      ...userConfig,
+      plan,
+      cotizacionesUsadas: quotesUsed,
+      cotizacionesMax: maxQuotes,
+      quotesUsed,
+      trialQuotesLimit,
+      trialBlocked: Boolean(planData?.trialBlocked),
+      billingCycle: planData?.billingCycle ?? null,
+      planStartedAt: planData?.planStartedAt ?? null,
+      planExpiresAt: planData?.planExpiresAt ?? null,
+      renewsAt: planData?.renewsAt ?? null,
+    }
+  }, [userConfig, planData])
+
+  const plan = resolvedUserConfig?.plan ?? "free"
+  const cotizacionesUsadas = resolvedUserConfig?.cotizacionesUsadas ?? 0
+  const cotizacionesMax = resolvedUserConfig?.cotizacionesMax ?? 5
   const cotizacionesRestantes = Math.max(0, cotizacionesMax - cotizacionesUsadas)
 
   const shouldShowProUpsell = useMemo(
@@ -90,7 +186,6 @@ export default function DashboardInicio({
         onSeen={markUpsellAsSeen}
       />
 
-      {/* Animación del dashboard */}
       <motion.section
         className="min-h-full"
         initial={{ opacity: 0, y: 18 }}
@@ -103,7 +198,7 @@ export default function DashboardInicio({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.7 }}
           >
-            <DashboardHero userConfig={userConfig} />
+            <DashboardHero userConfig={resolvedUserConfig} />
           </motion.div>
 
           <motion.div
@@ -112,7 +207,7 @@ export default function DashboardInicio({
             transition={{ duration: 0.4, ease: "easeOut", delay: 0.8 }}
           >
             <DashboardTopGrid
-              userConfig={userConfig}
+              userConfig={resolvedUserConfig}
               cotizaciones={cotizaciones}
             />
           </motion.div>
@@ -121,3 +216,6 @@ export default function DashboardInicio({
     </>
   )
 }
+
+
+

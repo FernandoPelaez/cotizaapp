@@ -24,9 +24,7 @@ const CENTER_CARD_GAP = 16
 const CENTER_CARD_HEIGHT = (DASHBOARD_ROW_HEIGHT - CENTER_CARD_GAP) / 2
 
 function isFreePlan(plan: unknown) {
-  const normalizedPlan = String(plan ?? "free")
-    .trim()
-    .toLowerCase()
+  const normalizedPlan = String(plan ?? "free").trim().toLowerCase()
 
   return (
     normalizedPlan === "free" ||
@@ -58,6 +56,7 @@ export default function DashboardTopGrid({
 
   const handleNuevaCotizacion = () => {
     if (isQuoteCreationBlocked) return
+
     router.push("/cotizaciones/nueva")
   }
 

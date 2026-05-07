@@ -24,4 +24,8 @@ export interface UserConfig {
   cotizacionesMax?: number
   plantillaActivaNombre?: string
   historialTotal?: number
+  billingCycle?: "monthly" | null
+  planStartedAt?: string | null
+  planExpiresAt?: string | null
+  renewsAt?: string | null
 }

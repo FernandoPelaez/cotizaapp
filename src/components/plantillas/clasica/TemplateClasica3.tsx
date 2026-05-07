@@ -49,8 +49,16 @@ const defaultData: {
   clientName: "Cliente ejemplo",
   companyName: "Tu Empresa",
   services: [
-    { name: "Servicio 1", description: "Descripción breve del servicio", price: 500 },
-    { name: "Servicio 2", description: "Descripción breve del servicio", price: 800 },
+    {
+      name: "Servicio 1",
+      description: "Descripción breve del servicio",
+      price: 500,
+    },
+    {
+      name: "Servicio 2",
+      description: "Descripción breve del servicio",
+      price: 800,
+    },
   ],
   products: [{ name: "Producto 1", quantity: 2, price: 150 }],
   total: 1600,
@@ -109,8 +117,9 @@ export default function TemplateClasica3({ data }: Props) {
   const subtotal = Number(safeData.subtotal ?? calculatedSubtotal)
   const tax = Number(safeData.tax ?? 0)
   const discount = Number(safeData.discount ?? 0)
-  const taxAmount = subtotal * (tax / 100)
-  const finalTotal = Number(safeData.total ?? subtotal + taxAmount - discount)
+  const taxableBase = Math.max(0, subtotal - discount)
+  const taxAmount = taxableBase * (tax / 100)
+  const finalTotal = Number(safeData.total ?? taxableBase + taxAmount)
 
   const initials = String(safeData.companyName || "TE")
     .trim()
@@ -132,12 +141,11 @@ export default function TemplateClasica3({ data }: Props) {
         overflow: "hidden",
       }}
     >
-      {/* ── HEADER ── */}
       <div
         style={{
           background: "#f0fdf4",
           borderBottom: "2px solid #bbf7d0",
-          padding: "24px 32px 20px",
+          padding: "30px 38px 25px",
           position: "relative",
           overflow: "hidden",
         }}
@@ -145,24 +153,25 @@ export default function TemplateClasica3({ data }: Props) {
         <div
           style={{
             position: "absolute",
-            top: -40,
+            top: -42,
             right: -20,
-            width: 130,
-            height: 130,
+            width: 142,
+            height: 142,
             borderRadius: "50%",
-            background: "rgba(34,197,94,0.08)",
+            background: "rgba(34,197,94,0.09)",
             pointerEvents: "none",
           }}
         />
+
         <div
           style={{
             position: "absolute",
-            bottom: -30,
-            left: 160,
-            width: 80,
-            height: 80,
+            bottom: -34,
+            left: 165,
+            width: 92,
+            height: 92,
             borderRadius: "50%",
-            background: "rgba(34,197,94,0.06)",
+            background: "rgba(34,197,94,0.07)",
             pointerEvents: "none",
           }}
         />
@@ -172,39 +181,39 @@ export default function TemplateClasica3({ data }: Props) {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "flex-start",
-            gap: 16,
+            gap: 20,
             position: "relative",
           }}
         >
-          {/* Izquierda */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div
               style={{
                 display: "inline-flex",
                 alignItems: "center",
                 gap: 7,
-                marginBottom: 10,
+                marginBottom: 12,
                 background: "#dcfce7",
                 border: "1px solid #bbf7d0",
                 borderRadius: 999,
-                padding: "3px 10px",
+                padding: "4px 12px",
               }}
             >
               <div
                 style={{
-                  width: 6,
-                  height: 6,
+                  width: 7,
+                  height: 7,
                   borderRadius: "50%",
                   background: "#16a34a",
                   flexShrink: 0,
                 }}
               />
+
               <span
                 style={{
-                  fontSize: 8.5,
-                  fontWeight: 700,
+                  fontSize: 9.5,
+                  fontWeight: 800,
                   textTransform: "uppercase",
-                  letterSpacing: "0.16em",
+                  letterSpacing: "0.15em",
                   color: "#15803d",
                 }}
               >
@@ -215,10 +224,10 @@ export default function TemplateClasica3({ data }: Props) {
             <h1
               style={{
                 margin: 0,
-                fontSize: 26,
-                fontWeight: 800,
-                letterSpacing: "-0.025em",
-                lineHeight: 1.15,
+                fontSize: 31,
+                fontWeight: 850,
+                letterSpacing: "-0.035em",
+                lineHeight: 1.08,
                 color: "#14532d",
               }}
             >
@@ -228,11 +237,11 @@ export default function TemplateClasica3({ data }: Props) {
             {safeData.description ? (
               <p
                 style={{
-                  margin: "7px 0 0",
-                  fontSize: 10.5,
-                  lineHeight: 1.6,
+                  margin: "9px 0 0",
+                  fontSize: 12,
+                  lineHeight: 1.55,
                   color: "#4b7a52",
-                  maxWidth: 290,
+                  maxWidth: 325,
                 }}
               >
                 {safeData.description}
@@ -241,11 +250,11 @@ export default function TemplateClasica3({ data }: Props) {
 
             <div
               style={{
-                marginTop: 10,
+                marginTop: 13,
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
-                fontSize: 9.5,
+                fontSize: 10.5,
                 color: "#4b7a52",
               }}
             >
@@ -253,16 +262,18 @@ export default function TemplateClasica3({ data }: Props) {
                 style={{
                   background: "#ffffff",
                   border: "1px solid #bbf7d0",
-                  borderRadius: 6,
-                  padding: "2px 8px",
-                  fontWeight: 600,
+                  borderRadius: 7,
+                  padding: "3px 9px",
+                  fontWeight: 700,
                   color: "#15803d",
                 }}
               >
                 {safeData.docNumber || "COT-001"}
               </span>
+
               <span style={{ opacity: 0.5 }}>·</span>
               <span>{today}</span>
+
               {safeData.validUntil && (
                 <>
                   <span style={{ opacity: 0.5 }}>·</span>
@@ -272,30 +283,29 @@ export default function TemplateClasica3({ data }: Props) {
             </div>
           </div>
 
-          {/* Derecha: logo + empresa */}
           <div
             style={{
               display: "flex",
               flexDirection: "column",
               alignItems: "flex-end",
-              gap: 8,
+              gap: 9,
               flexShrink: 0,
             }}
           >
             {safeData.companyLogo ? (
               <div
                 style={{
-                  width: 58,
-                  height: 58,
-                  borderRadius: 14,
+                  width: 66,
+                  height: 66,
+                  borderRadius: 16,
                   background: "#ffffff",
                   border: "1.5px solid #bbf7d0",
-                  padding: 7,
+                  padding: 8,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   overflow: "hidden",
-                  boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                  boxShadow: "0 6px 16px rgba(0,0,0,0.08)",
                 }}
               >
                 <img
@@ -312,17 +322,17 @@ export default function TemplateClasica3({ data }: Props) {
             ) : (
               <div
                 style={{
-                  width: 58,
-                  height: 58,
-                  borderRadius: 14,
+                  width: 66,
+                  height: 66,
+                  borderRadius: 16,
                   background: "linear-gradient(135deg, #16a34a, #15803d)",
                   color: "#ffffff",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: 18,
-                  fontWeight: 800,
-                  boxShadow: "0 4px 12px rgba(22,163,74,0.25)",
+                  fontSize: 20,
+                  fontWeight: 850,
+                  boxShadow: "0 6px 16px rgba(22,163,74,0.27)",
                 }}
               >
                 {initials}
@@ -332,10 +342,11 @@ export default function TemplateClasica3({ data }: Props) {
             <div style={{ textAlign: "right" }}>
               <div
                 style={{
-                  fontSize: 14,
-                  fontWeight: 700,
+                  fontSize: 15,
+                  fontWeight: 800,
                   color: "#14532d",
                   lineHeight: 1.2,
+                  maxWidth: 145,
                 }}
               >
                 {safeData.companyName || "Tu Empresa"}
@@ -345,46 +356,48 @@ export default function TemplateClasica3({ data }: Props) {
         </div>
       </div>
 
-      {/* ── CLIENTE + RESUMEN ── */}
       <div
         style={{
-          padding: "16px 32px 12px",
+          padding: "20px 38px 16px",
           display: "grid",
-          gridTemplateColumns: "1.2fr 0.8fr",
-          gap: 12,
+          gridTemplateColumns: "1.15fr 0.85fr",
+          gap: 16,
           background: "#ffffff",
           borderBottom: "1px solid #f0fdf4",
         }}
       >
-        {/* Cliente */}
         <div>
           <p
             style={{
-              fontSize: 8.5,
-              fontWeight: 700,
+              fontSize: 9.5,
+              fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
               color: "#6b7280",
-              marginBottom: 8,
+              margin: "0 0 10px",
             }}
           >
             Preparado para
           </p>
+
           <p
             style={{
-              fontSize: 16,
-              fontWeight: 700,
+              fontSize: 18,
+              fontWeight: 800,
               color: "#14532d",
-              marginBottom: 6,
+              margin: "0 0 7px",
+              lineHeight: 1.2,
             }}
           >
             {safeData.clientName || "Cliente ejemplo"}
           </p>
-          <div style={{ fontSize: 10, lineHeight: 1.75, color: "#4b5563" }}>
+
+          <div style={{ fontSize: 11, lineHeight: 1.75, color: "#4b5563" }}>
             {safeData.clientEmail && <div>{safeData.clientEmail}</div>}
             {safeData.clientPhone && <div>{safeData.clientPhone}</div>}
             {safeData.clientAddress && <div>{safeData.clientAddress}</div>}
             {safeData.clientRFC && <div>RFC: {safeData.clientRFC}</div>}
+
             {!safeData.clientEmail &&
               !safeData.clientPhone &&
               !safeData.clientAddress && (
@@ -395,54 +408,65 @@ export default function TemplateClasica3({ data }: Props) {
           </div>
         </div>
 
-        {/* Resumen */}
         <div
           style={{
             background: "#f0fdf4",
             border: "1px solid #bbf7d0",
-            borderRadius: 12,
-            padding: "13px 15px",
+            borderRadius: 14,
+            padding: "16px 17px",
           }}
         >
           <p
             style={{
-              fontSize: 8.5,
-              fontWeight: 700,
+              fontSize: 9.5,
+              fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
               color: "#6b7280",
-              marginBottom: 9,
+              margin: "0 0 11px",
             }}
           >
             Resumen
           </p>
-          <div style={{ display: "grid", gap: 6, fontSize: 10.5, color: "#374151" }}>
+
+          <div
+            style={{
+              display: "grid",
+              gap: 7,
+              fontSize: 11.5,
+              color: "#374151",
+            }}
+          >
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Servicios</span>
               <strong style={{ color: "#14532d" }}>{services.length}</strong>
             </div>
+
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Productos</span>
               <strong style={{ color: "#14532d" }}>{products.length}</strong>
             </div>
+
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Impuesto</span>
               <strong style={{ color: "#14532d" }}>{tax}%</strong>
             </div>
+
             <div style={{ display: "flex", justifyContent: "space-between" }}>
               <span>Descuento</span>
-              <strong style={{ color: "#14532d" }}>{formatCurrency(discount)}</strong>
+              <strong style={{ color: "#14532d" }}>
+                {formatCurrency(discount)}
+              </strong>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── TABLA ── */}
-      <div style={{ padding: "14px 32px 12px" }}>
+      <div style={{ padding: "18px 38px 14px" }}>
         <div
           style={{
             border: "1px solid #e5e7eb",
-            borderRadius: 12,
+            borderRadius: 14,
             overflow: "hidden",
           }}
         >
@@ -451,13 +475,13 @@ export default function TemplateClasica3({ data }: Props) {
               display: "grid",
               gridTemplateColumns: "2fr 1fr 0.5fr 1fr 1fr",
               gap: 8,
-              padding: "9px 14px",
+              padding: "11px 15px",
               background: "#f9fafb",
               borderBottom: "1px solid #e5e7eb",
-              fontSize: 8.5,
-              fontWeight: 700,
+              fontSize: 9,
+              fontWeight: 800,
               textTransform: "uppercase",
-              letterSpacing: "0.13em",
+              letterSpacing: "0.12em",
               color: "#6b7280",
             }}
           >
@@ -476,37 +500,41 @@ export default function TemplateClasica3({ data }: Props) {
                   display: "grid",
                   gridTemplateColumns: "2fr 1fr 0.5fr 1fr 1fr",
                   gap: 8,
-                  padding: "11px 14px",
+                  padding: "13px 15px",
                   borderTop: i === 0 ? "none" : "1px solid #f3f4f6",
                   background: i % 2 === 0 ? "#ffffff" : "#fafafa",
-                  fontSize: 11,
+                  fontSize: 12,
                   alignItems: "center",
                 }}
               >
                 <div
                   style={{
-                    fontWeight: 600,
+                    fontWeight: 700,
                     color: "#1a2e1a",
                     lineHeight: 1.35,
                   }}
                 >
                   {item.name}
                 </div>
-                <div style={{ fontSize: 10, color: "#6b7280" }}>
+
+                <div style={{ fontSize: 11, color: "#6b7280" }}>
                   {item.description || (
                     <span style={{ color: "#d1d5db" }}>Sin desc.</span>
                   )}
                 </div>
+
                 <div style={{ textAlign: "center", color: "#6b7280" }}>
                   {item.quantity}
                 </div>
+
                 <div style={{ textAlign: "right", color: "#6b7280" }}>
                   {formatCurrency(item.price)}
                 </div>
+
                 <div
                   style={{
                     textAlign: "right",
-                    fontWeight: 700,
+                    fontWeight: 800,
                     color: "#15803d",
                   }}
                 >
@@ -517,9 +545,9 @@ export default function TemplateClasica3({ data }: Props) {
           ) : (
             <div
               style={{
-                padding: "22px 14px",
+                padding: "26px 14px",
                 textAlign: "center",
-                fontSize: 11,
+                fontSize: 12,
                 color: "#9ca3af",
               }}
             >
@@ -529,36 +557,35 @@ export default function TemplateClasica3({ data }: Props) {
         </div>
       </div>
 
-      {/* ── TOTALES ── */}
       <div
         style={{
-          padding: "0 32px 12px",
+          padding: "0 38px 16px",
           display: "flex",
           justifyContent: "flex-end",
         }}
       >
         <div
           style={{
-            width: 240,
+            width: 262,
             border: "1px solid #e5e7eb",
-            borderRadius: 12,
+            borderRadius: 14,
             overflow: "hidden",
           }}
         >
-          <div style={{ padding: "12px 14px", background: "#ffffff" }}>
+          <div style={{ padding: "14px 16px", background: "#ffffff" }}>
             <div
               style={{
                 display: "flex",
                 justifyContent: "space-between",
-                marginBottom: 6,
-                paddingBottom: 6,
+                marginBottom: 7,
+                paddingBottom: 7,
                 borderBottom: "1px solid #f3f4f6",
-                fontSize: 10.5,
+                fontSize: 11.5,
                 color: "#6b7280",
               }}
             >
               <span>Subtotal</span>
-              <span style={{ fontWeight: 600, color: "#374151" }}>
+              <span style={{ fontWeight: 700, color: "#374151" }}>
                 {formatCurrency(subtotal)}
               </span>
             </div>
@@ -568,15 +595,15 @@ export default function TemplateClasica3({ data }: Props) {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  marginBottom: 6,
-                  paddingBottom: 6,
+                  marginBottom: 7,
+                  paddingBottom: 7,
                   borderBottom: "1px solid #f3f4f6",
-                  fontSize: 10.5,
+                  fontSize: 11.5,
                   color: "#6b7280",
                 }}
               >
                 <span>IVA ({tax}%)</span>
-                <span style={{ fontWeight: 600, color: "#374151" }}>
+                <span style={{ fontWeight: 700, color: "#374151" }}>
                   {formatCurrency(taxAmount)}
                 </span>
               </div>
@@ -587,12 +614,12 @@ export default function TemplateClasica3({ data }: Props) {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  fontSize: 10.5,
+                  fontSize: 11.5,
                   color: "#6b7280",
                 }}
               >
                 <span>Descuento</span>
-                <span style={{ fontWeight: 600, color: "#16a34a" }}>
+                <span style={{ fontWeight: 700, color: "#16a34a" }}>
                   − {formatCurrency(discount)}
                 </span>
               </div>
@@ -601,7 +628,7 @@ export default function TemplateClasica3({ data }: Props) {
 
           <div
             style={{
-              padding: "12px 14px",
+              padding: "14px 16px",
               background: "#16a34a",
               display: "flex",
               justifyContent: "space-between",
@@ -613,18 +640,19 @@ export default function TemplateClasica3({ data }: Props) {
             <div
               style={{
                 position: "absolute",
-                right: -14,
-                top: -14,
-                width: 55,
-                height: 55,
+                right: -15,
+                top: -15,
+                width: 60,
+                height: 60,
                 borderRadius: "50%",
-                background: "rgba(255,255,255,0.07)",
+                background: "rgba(255,255,255,0.08)",
               }}
             />
+
             <span
               style={{
-                fontSize: 9.5,
-                fontWeight: 800,
+                fontSize: 10.5,
+                fontWeight: 850,
                 textTransform: "uppercase",
                 letterSpacing: "0.18em",
                 color: "#dcfce7",
@@ -632,69 +660,78 @@ export default function TemplateClasica3({ data }: Props) {
             >
               Total
             </span>
-            <span style={{ fontSize: 17, fontWeight: 800, color: "#ffffff" }}>
+
+            <span style={{ fontSize: 19, fontWeight: 850, color: "#ffffff" }}>
               {formatCurrency(finalTotal)}
             </span>
           </div>
         </div>
       </div>
 
-      {/* ── NOTAS ── */}
-      <div style={{ padding: "0 32px 16px" }}>
+      <div style={{ padding: "0 38px 18px" }}>
         <p
           style={{
-            fontSize: 8.5,
-            fontWeight: 700,
+            fontSize: 9.5,
+            fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.2em",
             color: "#6b7280",
-            marginBottom: 7,
+            margin: "0 0 8px",
           }}
         >
           Notas / Condiciones
         </p>
+
         <div
           style={{
             border: "1px dashed #bbf7d0",
-            borderRadius: 10,
-            padding: "12px 14px",
-            minHeight: 52,
+            borderRadius: 12,
+            padding: "14px 16px",
+            minHeight: 58,
             background: "#f0fdf4",
           }}
         >
           {safeData.notes ? (
             <p
               style={{
-                fontSize: 10,
+                fontSize: 11,
                 lineHeight: 1.7,
                 color: "#374151",
                 whiteSpace: "pre-line",
+                margin: 0,
               }}
             >
               {safeData.notes}
             </p>
           ) : (
-            <p style={{ fontSize: 10, color: "#9ca3af", fontStyle: "italic" }}>
+            <p
+              style={{
+                fontSize: 11,
+                color: "#9ca3af",
+                fontStyle: "italic",
+                margin: 0,
+              }}
+            >
               Sin observaciones
             </p>
           )}
         </div>
       </div>
 
-      {/* ── FOOTER ── */}
       <div
         style={{
           marginTop: "auto",
           background: "#16a34a",
-          padding: "10px 32px",
+          padding: "12px 38px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
         }}
       >
-        <span style={{ fontSize: 9, color: "#dcfce7", fontWeight: 600 }}>
+        <span style={{ fontSize: 10, color: "#dcfce7", fontWeight: 700 }}>
           {safeData.companyName || "Tu Empresa"}
         </span>
+
         <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
           {[6, 12, 6].map((w, i) => (
             <div
@@ -708,7 +745,8 @@ export default function TemplateClasica3({ data }: Props) {
             />
           ))}
         </div>
-        <span style={{ fontSize: 9, color: "#dcfce7" }}>
+
+        <span style={{ fontSize: 10, color: "#dcfce7" }}>
           Documento generado digitalmente
         </span>
       </div>

@@ -65,6 +65,12 @@ export default function QuoteFormStepTwo({
   onNotesChange,
   onBack,
 }: QuoteFormStepTwoProps) {
+  const IVA_RATE = 16
+  const hasIva = tax > 0
+  const handleIvaToggle = () => {
+    onTaxChange(hasIva ? "0" : String(IVA_RATE))
+  }
+
   return (
     <div className="space-y-3.5 p-4">
       {showServicesSection && (
@@ -239,13 +245,31 @@ export default function QuoteFormStepTwo({
           </div>
 
           <div>
-            <label className={labelCls}>Impuesto (%)</label>
-            <input
-              className={inputCls}
-              placeholder="16"
-              value={tax || ""}
-              onChange={(e) => onTaxChange(e.target.value)}
-            />
+            <label className={labelCls}>IVA</label>
+
+            <button
+              type="button"
+              onClick={handleIvaToggle}
+              className={`flex h-[34px] w-full items-center justify-between rounded-lg border px-3 text-[12px] font-medium transition-all ${
+                hasIva
+                  ? "border-blue-200 bg-blue-50 text-blue-700"
+                  : "border-neutral-200 bg-white text-neutral-500 hover:bg-neutral-50"
+              }`}
+            >
+              <span>{hasIva ? `IVA ${IVA_RATE}% aplicado` : "Sin IVA"}</span>
+
+              <span
+                className={`flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
+                  hasIva ? "bg-[#1B3D7A]" : "bg-neutral-300"
+                }`}
+              >
+                <span
+                  className={`h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                    hasIva ? "translate-x-4" : "translate-x-0"
+                  }`}
+                />
+              </span>
+            </button>
           </div>
         </div>
 
@@ -258,7 +282,7 @@ export default function QuoteFormStepTwo({
           </div>
 
           <div className="flex items-center justify-between">
-            <span>Impuesto</span>
+            <span>{hasIva ? `IVA ${tax}%` : "IVA"}</span>
             <span className="font-medium text-neutral-900">
               {formatMoney(taxAmount)}
             </span>

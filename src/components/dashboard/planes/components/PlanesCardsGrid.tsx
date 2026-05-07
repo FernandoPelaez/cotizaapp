@@ -1,7 +1,7 @@
 "use client"
 
 import { AnimatePresence, motion, type Variants } from "framer-motion"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 
 import { DASHBOARD_PLANS, type DashboardPlanId } from "@/lib/dashboard/plans"
@@ -19,7 +19,13 @@ type PlanesCardsGridProps = {
 
 type UpdatePlanResponse = {
   success?: boolean
+  message?: string
   plan?: DashboardPlanId
+  planName?: string
+  billingCycle?: "monthly" | null
+  planStartedAt?: string | null
+  planExpiresAt?: string | null
+  renewsAt?: string | null
   error?: string
 }
 
@@ -46,13 +52,39 @@ const messageVariants: Variants = {
   },
 }
 
+function formatPlanDate(value?: string | null) {
+  if (!value) return null
+
+  const date = new Date(value)
+
+  if (Number.isNaN(date.getTime())) return null
+
+  return new Intl.DateTimeFormat("es-MX", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date)
+}
+
+async function readPlanResponse(response: Response) {
+  const data = (await response.json().catch(() => null)) as
+    | UpdatePlanResponse
+    | null
+
+  if (!data) {
+    throw new Error("Respuesta inválida del servidor")
+  }
+
+  return data
+}
+
 export default function PlanesCardsGrid({
   currentPlanId = "free",
 }: PlanesCardsGridProps) {
   const router = useRouter()
 
   const [hoveredPlanId, setHoveredPlanId] = useState<DashboardPlanId | null>(
-    null
+    null,
   )
   const [selectedPlanId, setSelectedPlanId] =
     useState<DashboardPlanId>(currentPlanId)
@@ -60,6 +92,10 @@ export default function PlanesCardsGrid({
     useState<DashboardPlanId | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    setSelectedPlanId(currentPlanId)
+  }, [currentPlanId])
 
   async function handleSelectPlan(planId: DashboardPlanId) {
     if (planId === selectedPlanId || submittingPlanId) return
@@ -74,27 +110,39 @@ export default function PlanesCardsGrid({
         headers: {
           "Content-Type": "application/json",
         },
+
         body: JSON.stringify({
           plan: planId,
+          planId,
         }),
       })
 
-      const data = (await response.json()) as UpdatePlanResponse
+      const data = await readPlanResponse(response)
 
       if (!response.ok) {
         throw new Error(data.error || "No se pudo actualizar el plan")
       }
 
       const nextPlanId = data.plan ?? planId
+      const renewalDate = formatPlanDate(data.renewsAt ?? data.planExpiresAt)
 
       setSelectedPlanId(nextPlanId)
-      setSuccessMessage("Plan actualizado correctamente.")
+      if (nextPlanId === "free") {
+        setSuccessMessage("Plan gratuito activado correctamente.")
+      } else if (renewalDate) {
+        setSuccessMessage(
+          `Plan ${data.planName ?? nextPlanId} activado correctamente. Se renueva el ${renewalDate}.`,
+        )
+      } else {
+        setSuccessMessage("Plan actualizado correctamente.")
+      }
+
       router.refresh()
     } catch (error) {
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Ocurrió un error al actualizar el plan"
+          : "Ocurrió un error al actualizar el plan",
       )
     } finally {
       setSubmittingPlanId(null)

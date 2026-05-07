@@ -12,6 +12,45 @@ type SessionUser = {
 
 type PlanId = "free" | "pro" | "premium"
 
+type BillingCycle = "monthly" | null
+
+type UserPlanPayload = {
+  id: string
+  quotesUsed: number | null
+  trialQuotesLimit: number | null
+  trialBlocked: boolean | null
+  planId: string | null
+  updatedAt: Date
+  plan: {
+    id: string
+    name: string
+    price: number
+    maxQuotes: number | null
+    whatsappSend: boolean
+  } | null
+}
+
+const planSelect = {
+  id: true,
+  name: true,
+  price: true,
+  maxQuotes: true,
+  whatsappSend: true,
+} as const
+
+const userPlanSelect = {
+  id: true,
+  quotesUsed: true,
+  trialQuotesLimit: true,
+  trialBlocked: true,
+  planId: true,
+  updatedAt: true,
+
+  plan: {
+    select: planSelect,
+  },
+} as const
+
 function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status })
 }
@@ -34,22 +73,26 @@ function normalizePlanInput(value: unknown): PlanId | null {
     return "pro"
   }
 
-  if (normalized === "premium" || normalized === "empresa") {
+  if (
+    normalized === "premium" ||
+    normalized === "empresa" ||
+    normalized === "business"
+  ) {
     return "premium"
   }
 
   return null
 }
 
-function mapPlanIdToDbName(planId: PlanId) {
+function getPlanDbNames(planId: PlanId) {
   switch (planId) {
     case "pro":
-      return "Pro"
+      return ["Pro", "pro", "PRO"]
     case "premium":
-      return "Premium"
+      return ["Empresa", "Premium", "empresa", "premium", "EMPRESA", "PREMIUM"]
     case "free":
     default:
-      return "Free"
+      return ["Free", "Gratis", "free", "gratis", "FREE", "GRATIS"]
   }
 }
 
@@ -67,6 +110,72 @@ function mapDbPlanNameToPlanId(planName?: string | null): PlanId {
   return "free"
 }
 
+function addMonths(date: Date, months: number) {
+  const result = new Date(date)
+  const originalDay = result.getDate()
+
+  result.setMonth(result.getMonth() + months)
+
+  if (result.getDate() < originalDay) {
+    result.setDate(0)
+  }
+
+  return result
+}
+
+function getBillingInfo(planId: PlanId, referenceDate: Date) {
+  if (planId === "free") {
+    return {
+      billingCycle: null as BillingCycle,
+      planStartedAt: null,
+      planExpiresAt: null,
+      renewsAt: null,
+    }
+  }
+
+  const startedAt = new Date(referenceDate)
+  const expiresAt = addMonths(startedAt, 1)
+
+  return {
+
+    billingCycle: "monthly" as BillingCycle,
+    planStartedAt: startedAt.toISOString(),
+    planExpiresAt: expiresAt.toISOString(),
+    renewsAt: expiresAt.toISOString(),
+  }
+}
+
+function buildPlanResponse(user: UserPlanPayload, extra?: Record<string, unknown>) {
+  const currentPlanId = mapDbPlanNameToPlanId(user.plan?.name)
+  const billing = getBillingInfo(currentPlanId, user.updatedAt)
+
+  return {
+    ...extra,
+    plan: currentPlanId,
+    planId: user.planId,
+    planName: user.plan?.name ?? "Free",
+    price: user.plan?.price ?? 0,
+    maxQuotes: user.plan?.maxQuotes ?? user.trialQuotesLimit ?? 5,
+    whatsappSend: user.plan?.whatsappSend ?? false,
+    quotesUsed: user.quotesUsed ?? 0,
+    trialQuotesLimit: user.trialQuotesLimit ?? 5,
+    trialBlocked: user.trialBlocked ?? false,
+
+    ...billing,
+  }
+}
+
+async function findPlanByPlanId(planId: PlanId) {
+  const names = getPlanDbNames(planId)
+
+  return prisma.plan.findFirst({
+    where: {
+      OR: names.map((name) => ({ name })),
+    },
+    select: planSelect,
+  })
+}
+
 export async function GET() {
   try {
     const userId = await getUserId()
@@ -77,41 +186,14 @@ export async function GET() {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: {
-        id: true,
-        quotesUsed: true,
-        trialQuotesLimit: true,
-        trialBlocked: true,
-        planId: true,
-        plan: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            maxQuotes: true,
-            whatsappSend: true,
-          },
-        },
-      },
+      select: userPlanSelect,
     })
 
     if (!user) {
       return json({ error: "Usuario no encontrado" }, 404)
     }
 
-    const currentPlanId = mapDbPlanNameToPlanId(user.plan?.name)
-
-    return json({
-      plan: currentPlanId,
-      planId: user.planId,
-      planName: user.plan?.name ?? "Free",
-      price: user.plan?.price ?? 0,
-      maxQuotes: user.plan?.maxQuotes ?? user.trialQuotesLimit ?? 5,
-      whatsappSend: user.plan?.whatsappSend ?? false,
-      quotesUsed: user.quotesUsed ?? 0,
-      trialQuotesLimit: user.trialQuotesLimit ?? 5,
-      trialBlocked: user.trialBlocked ?? false,
-    })
+    return json(buildPlanResponse(user))
   } catch (error) {
     console.error("GET /api/user/plan error:", error)
     return json({ error: "Error interno del servidor" }, 500)
@@ -132,27 +214,17 @@ export async function PATCH(req: Request) {
       return json({ error: "Payload inválido" }, 400)
     }
 
-    const nextPlan = normalizePlanInput((body as Record<string, unknown>).plan)
+    const payload = body as Record<string, unknown>
+    const nextPlan = normalizePlanInput(
+      payload.plan ?? payload.planId ?? payload.id ?? payload.name,
+    )
 
     if (!nextPlan) {
       return json({ error: "Plan inválido" }, 400)
     }
 
-    const dbPlanName = mapPlanIdToDbName(nextPlan)
-
     const [targetPlan, user] = await Promise.all([
-      prisma.plan.findFirst({
-        where: {
-          name: dbPlanName,
-        },
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          maxQuotes: true,
-          whatsappSend: true,
-        },
-      }),
+      findPlanByPlanId(nextPlan),
       prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -168,7 +240,14 @@ export async function PATCH(req: Request) {
     }
 
     if (!targetPlan) {
-      return json({ error: "El plan solicitado no existe en la base de datos" }, 404)
+      return json(
+        {
+          error: "El plan solicitado no existe en la base de datos",
+          requestedPlan: nextPlan,
+          searchedNames: getPlanDbNames(nextPlan),
+        },
+        404,
+      )
     }
 
     const trialQuotesLimit = user.trialQuotesLimit ?? 5
@@ -183,37 +262,15 @@ export async function PATCH(req: Request) {
         planId: targetPlan.id,
         trialBlocked: nextTrialBlocked,
       },
-      select: {
-        id: true,
-        planId: true,
-        quotesUsed: true,
-        trialQuotesLimit: true,
-        trialBlocked: true,
-        plan: {
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            maxQuotes: true,
-            whatsappSend: true,
-          },
-        },
-      },
+      select: userPlanSelect,
     })
 
-    return json({
-      success: true,
-      message: "Plan actualizado correctamente",
-      plan: mapDbPlanNameToPlanId(updatedUser.plan?.name),
-      planId: updatedUser.planId,
-      planName: updatedUser.plan?.name ?? "Free",
-      price: updatedUser.plan?.price ?? 0,
-      maxQuotes: updatedUser.plan?.maxQuotes ?? updatedUser.trialQuotesLimit ?? 5,
-      whatsappSend: updatedUser.plan?.whatsappSend ?? false,
-      quotesUsed: updatedUser.quotesUsed ?? 0,
-      trialQuotesLimit: updatedUser.trialQuotesLimit ?? 5,
-      trialBlocked: updatedUser.trialBlocked ?? false,
-    })
+    return json(
+      buildPlanResponse(updatedUser, {
+        success: true,
+        message: "Plan actualizado correctamente",
+      }),
+    )
   } catch (error) {
     console.error("PATCH /api/user/plan error:", error)
     return json({ error: "Error interno del servidor" }, 500)

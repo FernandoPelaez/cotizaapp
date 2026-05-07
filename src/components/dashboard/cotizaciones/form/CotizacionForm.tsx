@@ -83,7 +83,7 @@ export default function CotizacionForm() {
     trialQuotesLimit: 5,
     trialBlocked: false,
   })
-  const [previewScale, setPreviewScale] = useState(0.38)
+  const [previewScale, setPreviewScale] = useState(0.78)
   const [toasts, setToasts] = useState<Toast[]>([])
   const [limitModal, setLimitModal] = useState<LimitModalState>({
     open: false,
@@ -227,7 +227,7 @@ export default function CotizacionForm() {
     const update = () => {
       if (containerRef.current) {
         const w = containerRef.current.offsetWidth - 32
-        setPreviewScale((w / 595) * 0.78)
+        setPreviewScale((w / 595) * 1)
       }
     }
 
@@ -537,7 +537,7 @@ export default function CotizacionForm() {
   }
 
   return (
-    <div className="grid min-h-screen grid-cols-1 items-start gap-4 bg-[#f0f2f5] p-4 lg:grid-cols-2">
+    <div className="grid min-h-[calc(100vh-124px)] grid-cols-1 items-start justify-center gap-4 bg-[#f0f2f5] p-4 lg:grid-cols-[minmax(0,520px)_minmax(0,520px)]">
       <QuoteLimitModal
         open={limitModal.open}
         title={limitModal.title}
@@ -547,7 +547,7 @@ export default function CotizacionForm() {
 
       <QuoteCenteredToast toasts={toasts} />
 
-      <div className="w-full max-w-[520px] justify-self-end overflow-hidden rounded-2xl border border-neutral-200 bg-white">
+      <div className="sticky top-5 w-full max-w-[520px] self-start justify-self-end overflow-hidden rounded-2xl border border-neutral-200 bg-white">
         <div className="border-b border-neutral-100 px-4 pb-0 pt-3">
           <div className="mb-2.5 flex items-center justify-between">
             <h2 className="text-[13px] font-semibold tracking-tight text-neutral-900">
@@ -656,7 +656,7 @@ export default function CotizacionForm() {
       ) : (
         <div
           ref={containerRef}
-          className="flex min-h-[520px] w-full items-center justify-center rounded-2xl border border-neutral-200 bg-white p-6"
+          className="sticky top-5 flex min-h-[560px] w-full max-w-[520px] items-center justify-center self-start justify-self-start rounded-2xl border border-neutral-200 bg-white p-6"
         >
           <div className="max-w-[360px] text-center">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-700">

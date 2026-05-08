@@ -1,8 +1,8 @@
 "use client"
 
+import { motion, type Variants } from "framer-motion"
 import type { UserConfig } from "@/types/dashboard"
 import { CheckCircle2, XCircle } from "lucide-react"
-import { useEffect, useRef } from "react"
 
 type PlanFreeCardProps = {
   userConfig?: UserConfig
@@ -45,6 +45,42 @@ const CARD_SHADOW = "0 12px 30px rgba(15,23,42,0.22)"
 const CARD_SHADOW_HOVER = "0 18px 40px rgba(15,23,42,0.32)"
 const CARD_RADIUS = "20px"
 const INNER_RADIUS = "9999px"
+
+const PLAN_CARD_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
+const planCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 10,
+    scale: 0.995,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.58,
+      ease: PLAN_CARD_EASE,
+      when: "beforeChildren",
+      staggerChildren: 0.06,
+    },
+  },
+}
+
+const planItemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 8,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.42,
+      ease: PLAN_CARD_EASE,
+    },
+  },
+}
 
 function getFeatures(plan: DashboardPlanType): FeatureItem[] {
   if (plan === "premium") {
@@ -106,7 +142,7 @@ function getPlanTitle(plan: DashboardPlanType) {
 function getPlanDescription(
   plan: DashboardPlanType,
   cotizacionesRestantes: number,
-  cotizacionesMax: number,
+  cotizacionesMax: number
 ) {
   switch (plan) {
     case "premium":
@@ -173,7 +209,7 @@ export default function PlanFreeCard({
   const cotizacionesMax = planConfig?.cotizacionesMax ?? 5
   const cotizacionesRestantes = Math.max(
     0,
-    cotizacionesMax - cotizacionesUsadas,
+    cotizacionesMax - cotizacionesUsadas
   )
 
   const planEndDate = planConfig?.renewsAt ?? planConfig?.planExpiresAt ?? null
@@ -187,73 +223,58 @@ export default function PlanFreeCard({
 
   const features = getFeatures(plan)
 
-  const cardRef = useRef<HTMLElement | null>(null)
-
-  useEffect(() => {
-    const card = cardRef.current
-    if (!card) return
-
-    card.style.opacity = "0"
-    card.style.transform = "translateY(12px)"
-    card.style.transition = "opacity 0.45s ease, transform 0.45s ease"
-
-    const raf = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        card.style.opacity = "1"
-        card.style.transform = "translateY(0)"
-      })
-    })
-
-    return () => cancelAnimationFrame(raf)
-  }, [])
-
   return (
-    <article
-      ref={cardRef}
+    <motion.article
       className="flex h-full w-[270px] min-h-0 shrink-0 flex-col overflow-hidden px-4 pb-3.5 pt-4 text-white"
+      variants={planCardVariants}
+      initial="hidden"
+      animate="show"
+      whileHover={{
+        y: -3,
+        scale: 1.01,
+        boxShadow: CARD_SHADOW_HOVER,
+      }}
+      transition={{
+        duration: 0.34,
+        ease: PLAN_CARD_EASE,
+      }}
       style={{
         background: `linear-gradient(180deg, ${CARD_BG_START} 0%, ${CARD_BG_END} 100%)`,
         border: `1px solid ${CARD_BORDER}`,
         boxShadow: CARD_SHADOW,
         borderRadius: CARD_RADIUS,
-        transition:
-          "opacity 0.45s ease, transform 0.45s ease, box-shadow 0.25s ease",
         cursor: "default",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-4px) scale(1.015)"
-        e.currentTarget.style.boxShadow = CARD_SHADOW_HOVER
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0) scale(1)"
-        e.currentTarget.style.boxShadow = CARD_SHADOW
+        willChange: "opacity, transform",
       }}
     >
-      <div
+      <motion.div
         className="inline-flex w-fit px-2.5 py-1 text-[9px] font-extrabold text-white"
+        variants={planItemVariants}
         style={{
           background: CARD_BADGE_BG,
           borderRadius: "10px",
         }}
       >
         {getPlanBadge(plan)}
-      </div>
+      </motion.div>
 
-      <h3
+      <motion.h3
         className="mt-3 text-[20px] font-extrabold leading-tight"
+        variants={planItemVariants}
         style={{ color: CARD_TEXT }}
       >
         {getPlanTitle(plan)}
-      </h3>
+      </motion.h3>
 
-      <p
+      <motion.p
         className="mt-1.5 text-[11px] leading-relaxed"
+        variants={planItemVariants}
         style={{ color: CARD_TEXT_SOFT }}
       >
         {getPlanDescription(plan, cotizacionesRestantes, cotizacionesMax)}
-      </p>
+      </motion.p>
 
-      <div className="mt-4">
+      <motion.div className="mt-4" variants={planItemVariants}>
         <div className="flex items-center justify-between text-[10px]">
           <span style={{ color: CARD_TEXT_SOFT }}>
             {isFree ? "Cotizaciones usadas" : "Estado del plan"}
@@ -275,10 +296,16 @@ export default function PlanFreeCard({
             borderRadius: INNER_RADIUS,
           }}
         >
-          <div
+          <motion.div
             className="h-full"
+            initial={{ width: 0 }}
+            animate={{ width: `${porcentajeUso}%` }}
+            transition={{
+              duration: 0.75,
+              ease: PLAN_CARD_EASE,
+              delay: 0.25,
+            }}
             style={{
-              width: `${porcentajeUso}%`,
               background: CARD_PROGRESS_FILL,
               borderRadius: INNER_RADIUS,
             }}
@@ -286,8 +313,9 @@ export default function PlanFreeCard({
         </div>
 
         {isPaidPlan && formattedPlanEndDate && (
-          <div
+          <motion.div
             className="mt-2.5 rounded-xl px-2.5 py-2"
+            variants={planItemVariants}
             style={{
               background: "rgba(255,255,255,0.10)",
               border: "1px solid rgba(255,255,255,0.12)",
@@ -308,19 +336,41 @@ export default function PlanFreeCard({
             </p>
 
             {daysRemaining !== null && (
-              <p className="mt-0.5 text-[9.5px]" style={{ color: CARD_TEXT_SOFT }}>
+              <p
+                className="mt-0.5 text-[9.5px]"
+                style={{ color: CARD_TEXT_SOFT }}
+              >
                 {daysRemaining === 0
                   ? "Tu plan vence hoy."
                   : `Quedan ${daysRemaining} días de este periodo.`}
               </p>
             )}
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
 
-      <div className="mt-4 flex-1 space-y-2 overflow-hidden">
-        {features.map((feature) => (
-          <div key={feature.label} className="flex items-center gap-2">
+      <motion.div
+        className="mt-4 flex-1 space-y-2 overflow-hidden"
+        variants={planItemVariants}
+      >
+        {features.map((feature, index) => (
+          <motion.div
+            key={feature.label}
+            className="flex items-center gap-2"
+            initial={{
+              opacity: 0,
+              x: -6,
+            }}
+            animate={{
+              opacity: 1,
+              x: 0,
+            }}
+            transition={{
+              duration: 0.32,
+              ease: PLAN_CARD_EASE,
+              delay: 0.22 + index * 0.035,
+            }}
+          >
             {feature.ok ? (
               <CheckCircle2
                 className="h-3.5 w-3.5 shrink-0"
@@ -341,15 +391,29 @@ export default function PlanFreeCard({
             >
               {feature.label}
             </span>
-          </div>
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
 
-      <button
+      <motion.button
         type="button"
         onClick={isFree ? onUpgrade : undefined}
         disabled={isPaidPlan}
-        className="mt-3 inline-flex w-full items-center justify-center gap-1 px-3 py-2 text-[13px] font-bold transition"
+        className="mt-3 inline-flex w-full items-center justify-center gap-1 px-3 py-2 text-[13px] font-bold"
+        variants={planItemVariants}
+        whileHover={
+          isFree
+            ? {
+                y: -1,
+                backgroundColor: CARD_CTA_BG_HOVER,
+              }
+            : undefined
+        }
+        whileTap={isFree ? { scale: 0.985 } : undefined}
+        transition={{
+          duration: 0.22,
+          ease: PLAN_CARD_EASE,
+        }}
         style={{
           background: isPaidPlan ? CARD_CTA_DISABLED_BG : CARD_CTA_BG,
           color: isPaidPlan ? CARD_CTA_DISABLED_TEXT : CARD_CTA_TEXT,
@@ -357,19 +421,9 @@ export default function PlanFreeCard({
           cursor: isPaidPlan ? "default" : "pointer",
           opacity: isPaidPlan ? 0.95 : 1,
         }}
-        onMouseEnter={(e) => {
-          if (isFree) {
-            e.currentTarget.style.background = CARD_CTA_BG_HOVER
-          }
-        }}
-        onMouseLeave={(e) => {
-          if (isFree) {
-            e.currentTarget.style.background = CARD_CTA_BG
-          }
-        }}
       >
         {getButtonLabel(plan)}
-      </button>
-    </article>
+      </motion.button>
+    </motion.article>
   )
 }

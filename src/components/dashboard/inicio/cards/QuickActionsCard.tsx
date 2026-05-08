@@ -1,6 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
+import { motion, type Variants } from "framer-motion"
 import { BookOpen, ChevronRight, FileClock, PlusCircle } from "lucide-react"
 
 type QuickActionsCardProps = {
@@ -50,6 +51,42 @@ const CARD_RADIUS = "20px"
 const ACTION_RADIUS = "14px"
 const ICON_RADIUS = "10px"
 
+const QUICK_ACTIONS_EASE: [number, number, number, number] = [
+  0.22, 1, 0.36, 1,
+]
+
+const cardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 6,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.65,
+      ease: QUICK_ACTIONS_EASE,
+      when: "beforeChildren",
+      staggerChildren: 0.06,
+    },
+  },
+}
+
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 5,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.48,
+      ease: QUICK_ACTIONS_EASE,
+    },
+  },
+}
+
 function ActionItem({
   icon,
   title,
@@ -61,17 +98,25 @@ function ActionItem({
   disabled = false,
 }: ActionItemProps) {
   return (
-    <button
+    <motion.button
       type="button"
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
       aria-disabled={disabled}
+      variants={itemVariants}
+      whileHover={disabled ? undefined : { y: -1 }}
+      whileTap={disabled ? undefined : { scale: 0.995 }}
+      transition={{
+        duration: 0.28,
+        ease: QUICK_ACTIONS_EASE,
+      }}
       className="flex w-full items-center justify-between gap-2 px-3 py-2.5 text-left transition-all duration-200 disabled:cursor-not-allowed"
       style={{
         borderTop: showDivider ? `1px solid ${CARD_BORDER}` : "none",
         borderRadius: ACTION_RADIUS,
         background: disabled ? ACTION_DISABLED_BG : ACTION_DEFAULT_BG,
         opacity: disabled ? 0.58 : 1,
+        willChange: "opacity, transform",
       }}
       onMouseEnter={(e) => {
         if (disabled) return
@@ -115,7 +160,7 @@ function ActionItem({
         className="h-3.5 w-3.5 shrink-0"
         style={{ color: ACTION_CHEVRON }}
       />
-    </button>
+    </motion.button>
   )
 }
 
@@ -128,23 +173,28 @@ export default function QuickActionsCard({
   onExplorarPlantillas,
 }: QuickActionsCardProps) {
   return (
-    <article
+    <motion.article
       className="flex h-[184px] w-full flex-col p-4"
+      variants={cardVariants}
+      initial="hidden"
+      animate="show"
       style={{
         background: CARD_BACKGROUND,
         border: `1px solid ${CARD_BORDER}`,
         boxShadow: CARD_SHADOW,
         borderRadius: CARD_RADIUS,
+        willChange: "opacity, transform",
       }}
     >
-      <h3
+      <motion.h3
         className="text-[12px] font-bold"
+        variants={itemVariants}
         style={{ color: CARD_FOREGROUND }}
       >
         Acciones rápidas
-      </h3>
+      </motion.h3>
 
-      <div className="mt-2 flex-1">
+      <motion.div className="mt-2 flex-1" variants={itemVariants}>
         <ActionItem
           icon={<PlusCircle className="h-4 w-4" />}
           title="Nueva cotización"
@@ -178,8 +228,7 @@ export default function QuickActionsCard({
           iconBackground={ACTION_ICON_BG_ALT}
           iconColor={ACTION_BRAND}
         />
-      </div>
-    </article>
+      </motion.div>
+    </motion.article>
   )
 }
-

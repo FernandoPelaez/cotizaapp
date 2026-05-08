@@ -42,6 +42,9 @@ export default function PlantillasTemplatesGrid({
         variants={plantillasCardVariants}
         initial="hidden"
         animate="show"
+        style={{
+          willChange: "opacity, transform, filter",
+        }}
       >
         <p className="text-sm text-neutral-500">
           No hay plantillas disponibles en esta categoría.
@@ -56,9 +59,20 @@ export default function PlantillasTemplatesGrid({
       variants={plantillasGridVariants}
       initial="hidden"
       animate="show"
+      layout
+      style={{
+        willChange: "opacity, transform",
+      }}
     >
       {templates.map((template) => (
-        <motion.div key={template.id} variants={plantillasCardVariants}>
+        <motion.div
+          key={template.id}
+          variants={plantillasCardVariants}
+          layout
+          style={{
+            willChange: "opacity, transform, filter",
+          }}
+        >
           <TemplateCard template={template} userPlan={userPlan} />
         </motion.div>
       ))}

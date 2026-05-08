@@ -49,19 +49,23 @@ const SIDEBAR_COLLAPSIBLE_ROUTES = [
 ]
 
 const HEADER_BG = "var(--card, #ffffff)"
-const HEADER_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_BORDER =
+  "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
 const HEADER_TEXT = "var(--foreground, #0f172a)"
 const HEADER_TEXT_MUTED = "var(--text-muted, #64748b)"
-const HEADER_TEXT_SOFT = "color-mix(in srgb, var(--text-muted, #64748b) 78%, transparent)"
+const HEADER_TEXT_SOFT =
+  "color-mix(in srgb, var(--text-muted, #64748b) 78%, transparent)"
 
 const HEADER_BUTTON_BG = "var(--card, #ffffff)"
-const HEADER_BUTTON_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_BUTTON_BORDER =
+  "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
 const HEADER_BUTTON_ICON = "var(--primary, #1b3d7a)"
 const HEADER_BUTTON_HOVER_BG = "var(--primary-soft, #eef2fa)"
 const HEADER_BUTTON_HOVER_BORDER = "var(--primary-light, #d1dcf5)"
 
 const HEADER_DROPDOWN_BG = "var(--card, #ffffff)"
-const HEADER_DROPDOWN_BORDER = "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
+const HEADER_DROPDOWN_BORDER =
+  "color-mix(in srgb, var(--border, #d1d5db) 55%, transparent)"
 const HEADER_DROPDOWN_SURFACE = "var(--background, #e5e5e5)"
 const HEADER_TAG_BG = "var(--primary-soft, #eef2fa)"
 const HEADER_TAG_TEXT = "var(--primary, #1b3d7a)"
@@ -140,7 +144,7 @@ function getEventStyles(type: QuoteEventType): EventVisualStyle {
 }
 
 function isQuoteEventsResponse(
-  value: QuoteEventsResponse | { error?: string }
+  value: QuoteEventsResponse | { error?: string },
 ): value is QuoteEventsResponse {
   return (
     typeof value === "object" &&
@@ -174,7 +178,7 @@ export default function Header({
   const { data: session, status } = useSession()
 
   const canCollapseSidebar = SIDEBAR_COLLAPSIBLE_ROUTES.some((route) =>
-    pathname.startsWith(route)
+    pathname.startsWith(route),
   )
 
   const [displayText, setDisplayText] = useState("")
@@ -209,23 +213,29 @@ export default function Header({
   const saludo = getSaludo()
   const fecha = getFecha()
   const fullText = `${saludo} — ${fecha}`
+  const showDashboardGreeting = pathname === "/dashboard"
   const showProfileLogo = Boolean(profileLogoUrl) && !logoError
 
   useEffect(() => {
+    if (!showDashboardGreeting) {
+      setDisplayText("")
+      return
+    }
+
     let i = 0
     setDisplayText("")
 
-    const interval = setInterval(() => {
-      i++
+    const interval = window.setInterval(() => {
+      i += 1
       setDisplayText(fullText.slice(0, i))
 
       if (i >= fullText.length) {
-        clearInterval(interval)
+        window.clearInterval(interval)
       }
     }, i < saludo.length ? 35 : 65)
 
-    return () => clearInterval(interval)
-  }, [pathname, fullText, saludo])
+    return () => window.clearInterval(interval)
+  }, [showDashboardGreeting, fullText, saludo])
 
   useEffect(() => {
     setLogoError(false)
@@ -245,13 +255,13 @@ export default function Header({
         throw new Error(
           "error" in data && data.error
             ? data.error
-            : "No se pudieron cargar las notificaciones"
+            : "No se pudieron cargar las notificaciones",
         )
       }
 
       if (!isQuoteEventsResponse(data)) {
         throw new Error(
-          "La respuesta de notificaciones no tiene el formato esperado"
+          "La respuesta de notificaciones no tiene el formato esperado",
         )
       }
 
@@ -312,8 +322,7 @@ export default function Header({
 
     document.addEventListener("mousedown", handleClickOutside)
 
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   const markNotificationsAsRead = async () => {
@@ -330,20 +339,18 @@ export default function Header({
 
       if (!res.ok) {
         throw new Error(
-          data.error || "No se pudieron actualizar las notificaciones"
+          data.error || "No se pudieron actualizar las notificaciones",
         )
       }
 
-      setUnreadCount(
-        typeof data.unreadCount === "number" ? data.unreadCount : 0
-      )
+      setUnreadCount(typeof data.unreadCount === "number" ? data.unreadCount : 0)
 
       setEvents((prev) =>
         prev.map((event) => ({
           ...event,
           isRead: true,
           readAt: event.readAt ?? new Date().toISOString(),
-        }))
+        })),
       )
     } catch (error) {
       console.error("Error marcando notificaciones del header", error)
@@ -415,18 +422,20 @@ export default function Header({
             {title}
           </h1>
 
-          <span
-            className="text-xs"
-            style={{
-              color: HEADER_TEXT_MUTED,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              borderRight: `2px solid ${HEADER_BUTTON_ICON}`,
-              paddingRight: "4px",
-            }}
-          >
-            {displayText}
-          </span>
+          {showDashboardGreeting ? (
+            <span
+              className="text-xs"
+              style={{
+                color: HEADER_TEXT_MUTED,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                borderRight: `2px solid ${HEADER_BUTTON_ICON}`,
+                paddingRight: "4px",
+              }}
+            >
+              {displayText}
+            </span>
+          ) : null}
         </div>
       </div>
 

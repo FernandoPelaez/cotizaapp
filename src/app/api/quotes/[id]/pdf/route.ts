@@ -105,7 +105,7 @@ async function waitForPrintablePage(page: Page) {
 
 async function openPrintPage(page: Page, printUrl: string) {
   const response = await page.goto(printUrl, {
-    waitUntil: "domcontentloaded",
+    waitUntil: "networkidle0",
     timeout: 60000,
   })
 
@@ -126,6 +126,53 @@ async function openPrintPage(page: Page, printUrl: string) {
   }
 
   await waitForPrintablePage(page)
+}
+
+async function injectPdfPrintStyles(page: Page) {
+  await page.addStyleTag({
+    content: `
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      html,
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #ffffff !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      body {
+        overflow: visible !important;
+      }
+
+      [data-pdf-root],
+      [data-print-root],
+      .pdf-root,
+      .print-root,
+      .pdf-page,
+      .print-page {
+        box-shadow: none !important;
+      }
+    `,
+  })
+
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => resolve())
+        })
+      })
+  )
 }
 
 export async function GET(
@@ -151,6 +198,7 @@ export async function GET(
       select: {
         id: true,
         title: true,
+        templateId: true,
         user: {
           select: {
             settings: {
@@ -180,11 +228,25 @@ export async function GET(
     )}.pdf`
 
     const baseUrl = getBaseUrl(req)
-    const printUrl = `${baseUrl}/quotes/${id}/print`
+
+    const printUrl = new URL(`/quotes/${id}/print`, baseUrl)
+    printUrl.searchParams.set("pdf", "1")
+
+    if (quote.templateId) {
+      printUrl.searchParams.set("templateId", quote.templateId)
+    }
 
     browser = await launchBrowser()
 
     const page = await browser.newPage()
+
+    const cookieHeader = req.headers.get("cookie")
+
+    if (cookieHeader) {
+      await page.setExtraHTTPHeaders({
+        cookie: cookieHeader,
+      })
+    }
 
     page.on("pageerror", (error) => {
       console.error("PDF PAGE ERROR:", error)
@@ -209,16 +271,18 @@ export async function GET(
       deviceScaleFactor: 1,
     })
 
-    await page.emulateMediaType("screen")
+    await page.emulateMediaType("print")
     await page.setCacheEnabled(false)
 
-    await openPrintPage(page, printUrl)
+    await openPrintPage(page, printUrl.toString())
+    await injectPdfPrintStyles(page)
 
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
       displayHeaderFooter: false,
+      scale: 1,
       margin: {
         top: "0px",
         right: "0px",

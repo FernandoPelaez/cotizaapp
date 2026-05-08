@@ -14,6 +14,11 @@ type UserPlanLike = {
   maxQuotes?: number | null
 } | null
 
+type TemplateCandidate = {
+  id: string
+  name: string
+}
+
 function toNumber(value: unknown) {
   const num = Number(value)
   return Number.isFinite(num) ? num : 0
@@ -34,6 +39,127 @@ function isTrialPlan(plan: UserPlanLike) {
     planName.includes("free") ||
     planName.includes("gratis")
   )
+}
+
+function normalizeTemplateValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, "-")
+    .replace(/-+/g, "-")
+}
+
+function getTrailingTemplateNumber(value: string) {
+  const match = value.match(/(?:^|-)(\d+)$/)
+  return match?.[1] ?? ""
+}
+
+function resolveTemplateFromList(
+  templates: TemplateCandidate[],
+  candidates: string[]
+) {
+  const cleanCandidates = Array.from(
+    new Set(candidates.map((candidate) => candidate.trim()).filter(Boolean))
+  )
+
+  if (cleanCandidates.length === 0) return null
+
+  for (const candidate of cleanCandidates) {
+    const exactMatch = templates.find((template) => {
+      return template.id === candidate || template.name === candidate
+    })
+
+    if (exactMatch) return exactMatch
+  }
+
+  for (const candidate of cleanCandidates) {
+    const normalizedCandidate = normalizeTemplateValue(candidate)
+
+    const normalizedMatch = templates.find((template) => {
+      return (
+        normalizeTemplateValue(template.id) === normalizedCandidate ||
+        normalizeTemplateValue(template.name) === normalizedCandidate
+      )
+    })
+
+    if (normalizedMatch) return normalizedMatch
+  }
+
+  for (const candidate of cleanCandidates) {
+    const normalizedCandidate = normalizeTemplateValue(candidate)
+
+    const embeddedMatch = templates.find((template) => {
+      const normalizedId = normalizeTemplateValue(template.id)
+      const normalizedName = normalizeTemplateValue(template.name)
+
+      return (
+        normalizedCandidate.includes(normalizedId) ||
+        normalizedId.includes(normalizedCandidate) ||
+        normalizedCandidate.includes(normalizedName) ||
+        normalizedName.includes(normalizedCandidate)
+      )
+    })
+
+    if (embeddedMatch) return embeddedMatch
+  }
+
+  for (const candidate of cleanCandidates) {
+    const normalizedCandidate = normalizeTemplateValue(candidate)
+    const candidateNumber = getTrailingTemplateNumber(normalizedCandidate)
+
+    if (!candidateNumber) continue
+
+    const candidateBase = normalizedCandidate.replace(
+      new RegExp(`-${candidateNumber}$`),
+      ""
+    )
+
+    const numberedMatch = templates.find((template) => {
+      const values = [template.id, template.name]
+
+      return values.some((value) => {
+        const normalizedValue = normalizeTemplateValue(value)
+        const valueNumber = getTrailingTemplateNumber(normalizedValue)
+
+        if (valueNumber !== candidateNumber) return false
+
+        const valueBase = normalizedValue.replace(
+          new RegExp(`-${valueNumber}$`),
+          ""
+        )
+
+        return (
+          candidateBase.includes(valueBase) ||
+          valueBase.includes(candidateBase)
+        )
+      })
+    })
+
+    if (numberedMatch) return numberedMatch
+  }
+
+  return null
+}
+
+async function resolveTemplateId(templateId: string, templateKey: string) {
+  const candidates = [templateId, templateKey].filter(Boolean)
+
+  if (candidates.length === 0) {
+    return null
+  }
+
+  const templates = await prisma.template.findMany({
+    select: {
+      id: true,
+      name: true,
+    },
+  })
+
+  const selectedTemplate = resolveTemplateFromList(templates, candidates)
+
+  return selectedTemplate?.id ?? null
 }
 
 async function getUserIdFromSession() {
@@ -244,6 +370,16 @@ export async function POST(req: Request) {
       )
     }
 
+    if (!templateId && !templateKey) {
+      return NextResponse.json(
+        {
+          error: "TEMPLATE_REQUIRED",
+          message: "Debes seleccionar una plantilla antes de crear la cotización",
+        },
+        { status: 400 }
+      )
+    }
+
     const normalizedItems = (items as QuoteItemInput[])
       .map((item) => {
         const name = toTrimmedString(item.name)
@@ -300,23 +436,19 @@ export async function POST(req: Request) {
       }
     }
 
-    let safeTemplateId: string | null = null
+    const safeTemplateId = await resolveTemplateId(templateId, templateKey)
 
-    if (templateId || templateKey) {
-      const existingTemplate = await prisma.template.findFirst({
-        where: {
-          OR: [
-            ...(templateId ? [{ id: templateId }] : []),
-            ...(templateKey ? [{ name: templateKey }] : []),
-          ],
+    if (!safeTemplateId) {
+      return NextResponse.json(
+        {
+          error: "TEMPLATE_NOT_FOUND",
+          message:
+            "La plantilla seleccionada no existe en la base de datos o no coincide con las plantillas disponibles.",
+          receivedTemplateId: templateId || null,
+          receivedTemplateKey: templateKey || null,
         },
-        select: {
-          id: true,
-          name: true,
-        },
-      })
-
-      safeTemplateId = existingTemplate?.id ?? null
+        { status: 400 }
+      )
     }
 
     const quote = await prisma.quote.create({

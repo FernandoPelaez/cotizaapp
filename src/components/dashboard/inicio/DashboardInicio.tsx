@@ -1,11 +1,9 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useState } from "react"
-import { motion } from "framer-motion"
+import { useEffect, useMemo, useState } from "react"
 import type { UserConfig, Cotizacion, Plantilla } from "@/types/dashboard"
 import DashboardHero from "./sections/DashboardHero"
 import DashboardTopGrid from "./sections/DashboardTopGrid"
-import ProUpsellModal from "./modals/ProUpsellModal"
 
 type DashboardInicioProps = {
   userConfig?: UserConfig
@@ -35,7 +33,16 @@ type DashboardUserConfigWithPlan = UserConfig & {
   renewsAt?: string | null
 }
 
-const UPSELL_STORAGE_KEY = "dashboard-pro-upsell-free-3-of-5"
+type CotizacionRecord = Cotizacion & Record<string, unknown>
+
+const COTIZACION_DATE_FIELDS = [
+  "createdAt",
+  "created_at",
+  "fecha",
+  "date",
+  "updatedAt",
+  "updated_at",
+] as const
 
 function normalizePlan(plan: unknown): UserConfig["plan"] {
   const normalizedPlan = String(plan ?? "free").trim().toLowerCase()
@@ -53,6 +60,131 @@ function normalizePlan(plan: unknown): UserConfig["plan"] {
   return "free"
 }
 
+function padDatePart(value: number) {
+  return String(value).padStart(2, "0")
+}
+
+function formatSafeLocalDate(date: Date) {
+  const year = date.getFullYear()
+  const month = padDatePart(date.getMonth() + 1)
+  const day = padDatePart(date.getDate())
+
+  return `${year}/${month}/${day}`
+}
+
+function formatSafeLocalDateTime(date: Date) {
+  const year = date.getFullYear()
+  const month = padDatePart(date.getMonth() + 1)
+  const day = padDatePart(date.getDate())
+
+  return `${year}-${month}-${day}T12:00:00`
+}
+
+function formatDisplayDate(date: Date) {
+  const day = padDatePart(date.getDate())
+  const month = padDatePart(date.getMonth() + 1)
+  const year = date.getFullYear()
+
+  return `${day}/${month}/${year}`
+}
+
+function isValidDate(date: Date) {
+  return !Number.isNaN(date.getTime())
+}
+
+function parseDateValue(value: unknown): Date | null {
+  if (!value) return null
+
+  if (value instanceof Date) {
+    return isValidDate(value) ? value : null
+  }
+
+  if (typeof value === "number") {
+    const date = new Date(value)
+    return isValidDate(date) ? date : null
+  }
+
+  if (typeof value !== "string") return null
+
+  const rawValue = value.trim()
+  if (!rawValue) return null
+
+  const isoDateOnlyMatch = rawValue.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/)
+
+  if (isoDateOnlyMatch) {
+    const [, year, month, day] = isoDateOnlyMatch
+    const date = new Date(Number(year), Number(month) - 1, Number(day), 12, 0, 0)
+
+    return isValidDate(date) ? date : null
+  }
+
+  const latinDateMatch = rawValue.match(
+    /^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})(?:\s+.*)?$/
+  )
+
+  if (latinDateMatch) {
+    const [, day, month, yearValue] = latinDateMatch
+    const fullYear =
+      yearValue.length === 2 ? Number(`20${yearValue}`) : Number(yearValue)
+
+    const date = new Date(
+      fullYear,
+      Number(month) - 1,
+      Number(day),
+      12,
+      0,
+      0
+    )
+
+    return isValidDate(date) ? date : null
+  }
+
+  const fallbackDate = new Date(rawValue)
+  return isValidDate(fallbackDate) ? fallbackDate : null
+}
+
+function getCotizacionDate(cotizacion: CotizacionRecord): Date | null {
+  for (const field of COTIZACION_DATE_FIELDS) {
+    const date = parseDateValue(cotizacion[field])
+
+    if (date) return date
+  }
+
+  return null
+}
+
+function normalizeCotizacionesForDashboard(cotizaciones: Cotizacion[]) {
+  return cotizaciones
+    .map((cotizacion) => {
+      const cotizacionRecord = cotizacion as CotizacionRecord
+      const parsedDate = getCotizacionDate(cotizacionRecord)
+
+      if (!parsedDate) return cotizacion
+
+      const safeLocalDate = formatSafeLocalDate(parsedDate)
+      const safeLocalDateTime = formatSafeLocalDateTime(parsedDate)
+      const displayDate = formatDisplayDate(parsedDate)
+
+      return {
+        ...cotizacionRecord,
+        fecha: safeLocalDate,
+        date: safeLocalDate,
+        createdAt: safeLocalDateTime,
+        updatedAt: cotizacionRecord.updatedAt ?? safeLocalDateTime,
+        fechaDisplay: cotizacionRecord.fechaDisplay ?? displayDate,
+      } as Cotizacion
+    })
+    .sort((firstCotizacion, secondCotizacion) => {
+      const firstDate = getCotizacionDate(firstCotizacion as CotizacionRecord)
+      const secondDate = getCotizacionDate(secondCotizacion as CotizacionRecord)
+
+      const firstTime = firstDate?.getTime() ?? 0
+      const secondTime = secondDate?.getTime() ?? 0
+
+      return secondTime - firstTime
+    })
+}
+
 export default function DashboardInicio({
   userConfig,
   cotizaciones = [],
@@ -60,7 +192,6 @@ export default function DashboardInicio({
 }: DashboardInicioProps) {
   void plantillasDisponibles
 
-  const [showProUpsell, setShowProUpsell] = useState(false)
   const [planData, setPlanData] = useState<PlanApiResponse | null>(null)
 
   useEffect(() => {
@@ -94,7 +225,14 @@ export default function DashboardInicio({
     }
   }, [])
 
-  const resolvedUserConfig = useMemo<DashboardUserConfigWithPlan | undefined>(() => {
+  const dashboardCotizaciones = useMemo(
+    () => normalizeCotizacionesForDashboard(cotizaciones),
+    [cotizaciones]
+  )
+
+  const resolvedUserConfig = useMemo<
+    DashboardUserConfigWithPlan | undefined
+  >(() => {
     if (!userConfig && !planData) return undefined
 
     const plan = normalizePlan(planData?.plan ?? userConfig?.plan)
@@ -120,102 +258,16 @@ export default function DashboardInicio({
     }
   }, [userConfig, planData])
 
-  const plan = resolvedUserConfig?.plan ?? "free"
-  const cotizacionesUsadas = resolvedUserConfig?.cotizacionesUsadas ?? 0
-  const cotizacionesMax = resolvedUserConfig?.cotizacionesMax ?? 5
-  const cotizacionesRestantes = Math.max(0, cotizacionesMax - cotizacionesUsadas)
-
-  const shouldShowProUpsell = useMemo(
-    () =>
-      plan === "free" &&
-      cotizacionesMax === 5 &&
-      cotizacionesUsadas === 3 &&
-      cotizacionesRestantes === 2,
-    [plan, cotizacionesMax, cotizacionesUsadas, cotizacionesRestantes],
-  )
-
-  const markUpsellAsSeen = useCallback(() => {
-    if (typeof window === "undefined") return
-
-    window.localStorage.setItem(UPSELL_STORAGE_KEY, "true")
-  }, [])
-
-  const handleCloseUpsell = useCallback(() => {
-    markUpsellAsSeen()
-    setShowProUpsell(false)
-  }, [markUpsellAsSeen])
-
-  useEffect(() => {
-    if (!shouldShowProUpsell || typeof window === "undefined") return
-
-    const alreadySeen = window.localStorage.getItem(UPSELL_STORAGE_KEY) === "true"
-    if (alreadySeen) return
-
-    const timer = window.setTimeout(() => {
-      setShowProUpsell(true)
-    }, 450)
-
-    return () => window.clearTimeout(timer)
-  }, [shouldShowProUpsell])
-
-  useEffect(() => {
-    if (!showProUpsell) return
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        handleCloseUpsell()
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown)
-
-    return () => {
-      document.body.style.overflow = previousOverflow
-      window.removeEventListener("keydown", handleKeyDown)
-    }
-  }, [showProUpsell, handleCloseUpsell])
-
   return (
-    <>
-      <ProUpsellModal
-        open={showProUpsell}
-        onClose={handleCloseUpsell}
-        onSeen={markUpsellAsSeen}
-      />
+    <section className="min-h-full">
+      <div className="space-y-6">
+        <DashboardHero userConfig={resolvedUserConfig} />
 
-      <motion.section
-        className="min-h-full"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut", delay: 0.6 }}
-      >
-        <div className="space-y-6">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.7 }}
-          >
-            <DashboardHero userConfig={resolvedUserConfig} />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.8 }}
-          >
-            <DashboardTopGrid
-              userConfig={resolvedUserConfig}
-              cotizaciones={cotizaciones}
-            />
-          </motion.div>
-        </div>
-      </motion.section>
-    </>
+        <DashboardTopGrid
+          userConfig={resolvedUserConfig}
+          cotizaciones={dashboardCotizaciones}
+        />
+      </div>
+    </section>
   )
 }
-
-
-

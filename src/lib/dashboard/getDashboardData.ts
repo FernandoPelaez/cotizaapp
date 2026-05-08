@@ -27,17 +27,19 @@ async function expirePendingQuotes(userId: string) {
 }
 
 function mapDbPlanToDashboardPlan(
-  planName?: string | null
+  planName?: string | null,
 ): "free" | "pro" | "premium" {
   const normalizedPlanName = planName?.trim().toLowerCase() ?? ""
 
   if (!normalizedPlanName) return "free"
+
   if (
     normalizedPlanName.includes("premium") ||
     normalizedPlanName.includes("empresa")
   ) {
     return "premium"
   }
+
   if (normalizedPlanName.includes("pro")) {
     return "pro"
   }
@@ -59,7 +61,7 @@ export async function getDashboardData() {
 
   await expirePendingQuotes(userId)
 
-  const [user, quotes, templates] = await Promise.all([
+  const [user, quotes, quotesTotal, templates] = await Promise.all([
     prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -97,7 +99,12 @@ export async function getDashboardData() {
         total: true,
         status: true,
         createdAt: true,
+        updatedAt: true,
       },
+    }),
+
+    prisma.quote.count({
+      where: { userId },
     }),
 
     prisma.template.findMany({
@@ -124,15 +131,33 @@ export async function getDashboardData() {
     cotizacionesMax,
     plantillaActivaNombre:
       user?.profile?.defaultTemplate?.name ?? "Sin plantilla activa",
-    historialTotal: quotes.length,
+    historialTotal: quotesTotal,
   }
+
+  const mappedQuotes = mapQuotesToDashboardQuotes(quotes)
+
+  const cotizaciones = mappedQuotes.map((cotizacion, index) => {
+    const originalQuote = quotes[index]
+    const createdAtIso = originalQuote?.createdAt.toISOString()
+    const updatedAtIso = originalQuote?.updatedAt.toISOString()
+
+    return {
+      ...cotizacion,
+      createdAt: createdAtIso,
+      created_at: createdAtIso,
+      fechaCreacion: createdAtIso,
+      fecha_creacion: createdAtIso,
+      updatedAt: updatedAtIso,
+      updated_at: updatedAtIso,
+    }
+  })
 
   return {
     userConfig,
-    cotizaciones: mapQuotesToDashboardQuotes(quotes),
+    cotizaciones,
     plantillasDisponibles: mapTemplatesToDashboardTemplates(
       templates,
-      user?.profile?.defaultTemplateId
+      user?.profile?.defaultTemplateId,
     ),
   }
 }

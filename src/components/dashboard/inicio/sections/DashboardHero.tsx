@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { motion, type Variants } from "framer-motion"
 import type { UserConfig } from "@/types/dashboard"
 import { Plus } from "lucide-react"
 
@@ -43,6 +44,90 @@ const HERO_SHELL_SHADOW = "0 12px 40px rgba(15,37,84,0.28)"
 const HERO_DOC_SHADOW = "0 8px 24px rgba(0,0,0,0.28)"
 const HERO_DOC_SHADOW_LARGE = "0 16px 40px rgba(1,15,50,0.35)"
 
+const HERO_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
+const heroVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 14,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.62,
+      ease: HERO_EASE,
+      when: "beforeChildren",
+      staggerChildren: 0.1,
+    },
+  },
+}
+
+const heroContentVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 12,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.55,
+      ease: HERO_EASE,
+    },
+  },
+}
+
+const heroButtonVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 10,
+    scale: 0.98,
+  },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.5,
+      ease: HERO_EASE,
+      delay: 0.04,
+    },
+  },
+}
+
+const heroVisualVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    x: 18,
+    scale: 0.985,
+  },
+  show: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: {
+      duration: 0.68,
+      ease: HERO_EASE,
+      delay: 0.12,
+    },
+  },
+}
+
+const heroDecorationVariants: Variants = {
+  hidden: {
+    opacity: 0,
+  },
+  show: {
+    opacity: 1,
+    transition: {
+      duration: 0.9,
+      ease: HERO_EASE,
+      delay: 0.08,
+    },
+  },
+}
+
 function isFreePlan(plan: unknown) {
   const normalizedPlan = String(plan ?? "free")
     .trim()
@@ -74,43 +159,52 @@ export default function DashboardHero({
       (cotizacionesMax > 0 && cotizacionesUsadas >= cotizacionesMax))
 
   return (
-    <section
+    <motion.section
       className="relative overflow-hidden rounded-2xl"
+      variants={heroVariants}
+      initial="hidden"
+      animate="show"
       style={{
         background: HERO_BG,
         boxShadow: HERO_SHELL_SHADOW,
+        willChange: "opacity, transform",
       }}
     >
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0"
+        variants={heroDecorationVariants}
         style={{
           background:
             "linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0.02) 100%)",
         }}
       />
 
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute -left-16 top-1/2 h-[260px] w-[260px] -translate-y-1/2 rounded-full blur-3xl"
+        variants={heroDecorationVariants}
         style={{ background: HERO_GLOW_SOFT }}
       />
 
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute right-[20%] top-[-60%] h-[200px] w-[200px] rounded-full blur-3xl"
+        variants={heroDecorationVariants}
         style={{ background: HERO_GLOW_MEDIUM }}
       />
 
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute right-[10%] bottom-[-40%] h-[180px] w-[180px] rounded-full blur-3xl"
+        variants={heroDecorationVariants}
         style={{ background: HERO_GLOW_SOFT }}
       />
 
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0"
+        variants={heroDecorationVariants}
         style={{
           backgroundImage:
             "radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)",
@@ -118,9 +212,10 @@ export default function DashboardHero({
         }}
       />
 
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 overflow-hidden"
+        variants={heroDecorationVariants}
       >
         <div className="absolute left-[26%] top-[8%] rotate-[-14deg] opacity-[0.12]">
           <div
@@ -221,10 +316,16 @@ export default function DashboardHero({
         <div className="absolute left-[25%] top-0 h-full w-px origin-top rotate-[20deg] bg-gradient-to-b from-transparent via-white/10 to-transparent" />
         <div className="absolute left-[48%] top-0 h-full w-px origin-top rotate-[15deg] bg-gradient-to-b from-transparent via-white/8 to-transparent" />
         <div className="absolute left-[65%] top-0 h-full w-px origin-top rotate-[10deg] bg-gradient-to-b from-transparent via-white/6 to-transparent" />
-      </div>
+      </motion.div>
 
       <div className="relative flex items-center justify-between gap-4 px-6 py-5 md:px-8 md:py-6">
-        <div className="max-w-[480px] flex-1">
+        <motion.div
+          className="max-w-[480px] flex-1"
+          variants={heroContentVariants}
+          style={{
+            willChange: "opacity, transform",
+          }}
+        >
           <p
             className="text-[13px] font-medium leading-snug"
             style={{ color: HERO_TEXT_SOFT }}
@@ -234,9 +335,15 @@ export default function DashboardHero({
             un PDF profesional listo para enviar.
           </p>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <motion.div
+            className="mt-4 flex flex-wrap items-center gap-2"
+            variants={heroButtonVariants}
+            style={{
+              willChange: "opacity, transform",
+            }}
+          >
             {isQuoteCreationBlocked ? (
-              <button
+              <motion.button
                 type="button"
                 disabled
                 aria-disabled="true"
@@ -253,31 +360,43 @@ export default function DashboardHero({
               >
                 <Plus className="h-4 w-4" strokeWidth={2.7} />
                 Nueva cotización
-              </button>
+              </motion.button>
             ) : (
-              <Link
-                href={QUOTE_CREATE_HREF}
-                onClick={() => {
-                  onNuevaCotizacion?.()
-                }}
-                className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[15px] font-extrabold tracking-[-0.01em] transition hover:-translate-y-0.5 hover:brightness-[0.98]"
-                style={{
-                  background: HERO_BUTTON_BG,
-                  color: HERO_BUTTON_TEXT,
-                  boxShadow: HERO_BUTTON_SHADOW,
-                  border: "1px solid rgba(255,255,255,0.82)",
-                  textDecoration: "none",
-                  whiteSpace: "nowrap",
-                }}
+              <motion.div
+                whileHover={{ y: -1 }}
+                whileTap={{ scale: 0.985 }}
+                transition={{ duration: 0.22, ease: HERO_EASE }}
               >
-                <Plus className="h-4 w-4" strokeWidth={2.7} />
-                Nueva cotización
-              </Link>
+                <Link
+                  href={QUOTE_CREATE_HREF}
+                  onClick={() => {
+                    onNuevaCotizacion?.()
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full px-5 py-3 text-[15px] font-extrabold tracking-[-0.01em] transition hover:brightness-[0.98]"
+                  style={{
+                    background: HERO_BUTTON_BG,
+                    color: HERO_BUTTON_TEXT,
+                    boxShadow: HERO_BUTTON_SHADOW,
+                    border: "1px solid rgba(255,255,255,0.82)",
+                    textDecoration: "none",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Plus className="h-4 w-4" strokeWidth={2.7} />
+                  Nueva cotización
+                </Link>
+              </motion.div>
             )}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className="relative ml-auto hidden h-[148px] w-[135px] shrink-0 lg:block">
+        <motion.div
+          className="relative ml-auto hidden h-[148px] w-[135px] shrink-0 lg:block"
+          variants={heroVisualVariants}
+          style={{
+            willChange: "opacity, transform",
+          }}
+        >
           <div
             className="absolute left-[-20px] top-1/2 h-[118px] w-[80px] -translate-y-1/2 rotate-[-8deg] overflow-hidden rounded-xl p-1.5"
             style={{
@@ -458,8 +577,8 @@ export default function DashboardHero({
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </section>
+    </motion.section>
   )
 }

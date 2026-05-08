@@ -1,85 +1,77 @@
 "use client"
 
-import { Sparkles } from "lucide-react"
+import { motion } from "framer-motion"
+import { FileText, Sparkles } from "lucide-react"
+
+const SMOOTH_EASE: [number, number, number, number] = [0.25, 0.46, 0.45, 0.94]
 
 export default function ProUpsellQuotePreview() {
   return (
-    <div
+    <motion.div
       className="hidden md:block"
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{
+        duration: 1.1,
+        ease: SMOOTH_EASE,
+        delay: 0.15,
+      }}
       style={{
         width: 360,
         flexShrink: 0,
         position: "relative",
         minHeight: 460,
+        overflow: "hidden",
+        background:
+          "linear-gradient(180deg, rgba(238,242,250,0.95) 0%, rgba(255,255,255,0.82) 100%)",
+        borderLeft:
+          "1px solid color-mix(in srgb, var(--border, #d1d5db) 65%, transparent)",
       }}
     >
-      <div
+      <motion.div
         className="pointer-events-none"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 0.28, scale: 1 }}
+        transition={{
+          duration: 1.6,
+          ease: SMOOTH_EASE,
+          delay: 0.2,
+        }}
         style={{
           position: "absolute",
           top: "50%",
           left: "50%",
           transform: "translate(-55%, -50%)",
-          width: 300,
-          height: 320,
+          width: 310,
+          height: 330,
           borderRadius: "50%",
           background:
-            "radial-gradient(ellipse, rgba(124,58,237,0.7) 0%, rgba(99,102,241,0.35) 40%, transparent 70%)",
-          filter: "blur(22px)",
+            "radial-gradient(ellipse, rgba(27,61,122,0.28) 0%, rgba(42,82,152,0.14) 42%, transparent 72%)",
+          filter: "blur(24px)",
         }}
       />
 
-      <div
-        style={{
-          position: "absolute",
-          top: 18,
-          right: 18,
-          zIndex: 40,
-          padding: "9px 14px",
-          borderRadius: 12,
-          border: "1px solid rgba(251,191,36,0.6)",
-          background:
-            "linear-gradient(135deg, rgba(160,105,0,0.65) 0%, rgba(110,70,0,0.6) 100%)",
-          color: "#fcd34d",
-          fontSize: 10,
-          fontWeight: 900,
-          lineHeight: 1.5,
-          textAlign: "center",
-          backdropFilter: "blur(10px)",
-          boxShadow:
-            "0 0 28px rgba(251,191,36,0.35), 0 4px 16px rgba(0,0,0,0.5)",
-          letterSpacing: "0.05em",
+      {/* Tarjeta de fondo (izquierda, inclinada) */}
+      <motion.div
+        initial={{ opacity: 0, y: 18, rotate: -12 }}
+        animate={{ opacity: 1, y: 0, rotate: -7 }}
+        transition={{
+          duration: 1.2,
+          ease: SMOOTH_EASE,
+          delay: 0.3,
         }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 5,
-            justifyContent: "center",
-          }}
-        >
-          <Sparkles size={11} />
-          <span>SE VE MÁS PRO.</span>
-        </div>
-        <div>VENDE MEJOR.</div>
-      </div>
-
-      <div
         style={{
           position: "absolute",
-          top: 52,
-          left: 10,
+          top: 78,
+          left: 18,
           zIndex: 5,
-          width: 215,
-          borderRadius: 16,
+          width: 210,
+          borderRadius: 18,
           overflow: "hidden",
-          transform: "rotate(-7deg)",
           background:
-            "linear-gradient(150deg, #2e1065 0%, #4c1d95 45%, #6d28d9 80%, #7c3aed 100%)",
+            "linear-gradient(150deg, #1B3D7A 0%, #244A8F 45%, #2A5298 78%, #3B82F6 100%)",
           boxShadow:
-            "0 24px 60px rgba(0,0,0,0.7), 0 0 40px rgba(109,40,217,0.4)",
-          opacity: 1,
+            "0 26px 60px rgba(15,23,42,0.22), 0 20px 48px rgba(27,61,122,0.24)",
         }}
       >
         <div
@@ -88,8 +80,8 @@ export default function ProUpsellQuotePreview() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "rgba(0,0,0,0.3)",
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
+            background: "rgba(15,23,42,0.2)",
+            borderBottom: "1px solid rgba(255,255,255,0.14)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -97,30 +89,22 @@ export default function ProUpsellQuotePreview() {
               style={{
                 width: 24,
                 height: 24,
-                borderRadius: 7,
-                background: "rgba(255,255,255,0.2)",
+                borderRadius: 8,
+                background: "rgba(255,255,255,0.18)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <div
-                style={{
-                  width: 12,
-                  height: 12,
-                  borderRadius: 3,
-                  background: "rgba(255,255,255,0.7)",
-                }}
-              />
+              <FileText size={13} color="#ffffff" />
             </div>
-
             <div>
               <div
                 style={{
                   width: 42,
                   height: 6,
                   borderRadius: 3,
-                  background: "rgba(255,255,255,0.85)",
+                  background: "rgba(255,255,255,0.9)",
                   marginBottom: 3,
                 }}
               />
@@ -129,19 +113,18 @@ export default function ProUpsellQuotePreview() {
                   width: 30,
                   height: 4,
                   borderRadius: 2,
-                  background: "rgba(255,255,255,0.35)",
+                  background: "rgba(255,255,255,0.42)",
                 }}
               />
             </div>
           </div>
-
           <div style={{ textAlign: "right" }}>
             <div
               style={{
                 width: 62,
                 height: 7,
                 borderRadius: 3,
-                background: "rgba(255,255,255,0.8)",
+                background: "rgba(255,255,255,0.82)",
                 marginBottom: 3,
                 marginLeft: "auto",
               }}
@@ -151,66 +134,25 @@ export default function ProUpsellQuotePreview() {
                 width: 38,
                 height: 5,
                 borderRadius: 2,
-                background: "rgba(196,181,253,0.7)",
+                background: "rgba(209,220,245,0.72)",
                 marginLeft: "auto",
               }}
             />
           </div>
         </div>
 
-        <div
-          style={{
-            padding: "10px 13px 0",
-            display: "flex",
-            gap: 10,
-          }}
-        >
+        <div style={{ padding: "10px 13px 0", display: "flex", gap: 10 }}>
           {[58, 42, 38].map((width, index) => (
-            <div
-              key={index}
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 3,
-              }}
-            >
-              <div
-                style={{
-                  width,
-                  height: 4,
-                  borderRadius: 2,
-                  background: "rgba(255,255,255,0.25)",
-                }}
-              />
-              <div
-                style={{
-                  width: width - 8,
-                  height: 5,
-                  borderRadius: 2,
-                  background: "rgba(255,255,255,0.55)",
-                }}
-              />
+            <div key={index} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+              <div style={{ width, height: 4, borderRadius: 2, background: "rgba(255,255,255,0.28)" }} />
+              <div style={{ width: width - 8, height: 5, borderRadius: 2, background: "rgba(255,255,255,0.56)" }} />
             </div>
           ))}
         </div>
 
-        <div
-          style={{
-            margin: "10px 13px 0",
-            height: 18,
-            borderRadius: 6,
-            background: "rgba(255,255,255,0.18)",
-          }}
-        />
+        <div style={{ margin: "10px 13px 0", height: 18, borderRadius: 7, background: "rgba(255,255,255,0.18)" }} />
 
-        <div
-          style={{
-            padding: "8px 13px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 7,
-          }}
-        >
+        <div style={{ padding: "8px 13px", display: "flex", flexDirection: "column", gap: 7 }}>
           {[1, 2, 3].map((item) => (
             <div
               key={item}
@@ -219,25 +161,11 @@ export default function ProUpsellQuotePreview() {
                 justifyContent: "space-between",
                 alignItems: "center",
                 paddingBottom: 6,
-                borderBottom: "1px solid rgba(255,255,255,0.09)",
+                borderBottom: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <div
-                style={{
-                  width: 75 + item * 6,
-                  height: 5,
-                  borderRadius: 2,
-                  background: "rgba(255,255,255,0.4)",
-                }}
-              />
-              <div
-                style={{
-                  width: 34,
-                  height: 5,
-                  borderRadius: 2,
-                  background: "rgba(255,255,255,0.6)",
-                }}
-              />
+              <div style={{ width: 75 + item * 6, height: 5, borderRadius: 2, background: "rgba(255,255,255,0.42)" }} />
+              <div style={{ width: 34, height: 5, borderRadius: 2, background: "rgba(255,255,255,0.64)" }} />
             </div>
           ))}
         </div>
@@ -246,55 +174,41 @@ export default function ProUpsellQuotePreview() {
           style={{
             margin: "4px 13px",
             height: 24,
-            borderRadius: 8,
-            background: "rgba(255,255,255,0.14)",
+            borderRadius: 9,
+            background: "rgba(255,255,255,0.15)",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             padding: "0 10px",
           }}
         >
-          <div
-            style={{
-              width: 34,
-              height: 6,
-              borderRadius: 3,
-              background: "rgba(255,255,255,0.7)",
-            }}
-          />
-          <div
-            style={{
-              width: 52,
-              height: 9,
-              borderRadius: 3,
-              background: "rgba(255,255,255,0.9)",
-            }}
-          />
+          <div style={{ width: 34, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.72)" }} />
+          <div style={{ width: 52, height: 9, borderRadius: 4, background: "rgba(255,255,255,0.92)" }} />
         </div>
 
-        <div
-          style={{
-            margin: "8px 13px 12px",
-            height: 18,
-            borderRadius: 7,
-            background: "rgba(255,255,255,0.1)",
-          }}
-        />
-      </div>
+        <div style={{ margin: "8px 13px 12px", height: 18, borderRadius: 7, background: "rgba(255,255,255,0.1)" }} />
+      </motion.div>
 
-      <div
+      {/* Tarjeta principal (derecha, frontal) */}
+      <motion.div
+        initial={{ opacity: 0, y: 22, rotate: 8 }}
+        animate={{ opacity: 1, y: 0, rotate: 3 }}
+        transition={{
+          duration: 1.3,
+          ease: SMOOTH_EASE,
+          delay: 0.45,
+        }}
         style={{
           position: "absolute",
-          top: 30,
-          right: 14,
+          top: 58,
+          right: 34,
           zIndex: 15,
           width: 238,
-          borderRadius: 18,
+          borderRadius: 20,
           overflow: "hidden",
           background: "#ffffff",
-          transform: "rotate(3deg)",
           boxShadow:
-            "0 28px 70px rgba(0,0,0,0.65), 0 0 0 1px rgba(255,255,255,0.08), 0 0 52px rgba(124,58,237,0.4)",
+            "0 30px 70px rgba(15,23,42,0.22), 0 16px 44px rgba(27,61,122,0.18), 0 0 0 1px rgba(209,220,245,0.9)",
         }}
       >
         <div
@@ -303,7 +217,7 @@ export default function ProUpsellQuotePreview() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            background: "linear-gradient(135deg, #1e1b4b 0%, #4c1d95 100%)",
+            background: "linear-gradient(135deg, #1B3D7A 0%, #2A5298 100%)",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -311,137 +225,59 @@ export default function ProUpsellQuotePreview() {
               style={{
                 width: 28,
                 height: 28,
-                borderRadius: 8,
-                background: "rgba(196,181,253,0.25)",
+                borderRadius: 9,
+                background: "rgba(255,255,255,0.18)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <div
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 3,
-                  background: "#c4b5fd",
-                }}
-              />
+              <FileText size={14} color="#ffffff" />
             </div>
-
             <div>
-              <p
-                style={{
-                  fontSize: 9,
-                  fontWeight: 900,
-                  color: "#fff",
-                  margin: 0,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.08em",
-                }}
-              >
+              <p style={{ fontSize: 9, fontWeight: 900, color: "#fff", margin: 0, textTransform: "uppercase", letterSpacing: "0.08em" }}>
                 Tu Logo
               </p>
-              <p
-                style={{
-                  fontSize: 7,
-                  color: "rgba(255,255,255,0.45)",
-                  margin: 0,
-                  marginTop: 1,
-                }}
-              >
-                Desarrollo web
+              <p style={{ fontSize: 7, color: "rgba(255,255,255,0.62)", margin: 0, marginTop: 1 }}>
+                CotizaApp
               </p>
             </div>
           </div>
-
           <div style={{ textAlign: "right" }}>
-            <p
-              style={{
-                fontSize: 13,
-                fontWeight: 900,
-                color: "#fff",
-                margin: 0,
-                letterSpacing: "0.1em",
-              }}
-            >
+            <p style={{ fontSize: 13, fontWeight: 900, color: "#fff", margin: 0, letterSpacing: "0.08em" }}>
               COTIZACIÓN
             </p>
-            <p
-              style={{
-                fontSize: 9,
-                color: "#a78bfa",
-                margin: 0,
-                marginTop: 1,
-              }}
-            >
+            <p style={{ fontSize: 9, color: "#D1DCF5", margin: 0, marginTop: 1 }}>
               COT-015
             </p>
           </div>
         </div>
 
-        <div
-          style={{
-            padding: "10px 12px",
-            display: "flex",
-            flexDirection: "column",
-            gap: 8,
-          }}
-        >
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr 1fr",
-              gap: 4,
-            }}
-          >
+        <div style={{ padding: "10px 12px", display: "flex", flexDirection: "column", gap: 8 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 4 }}>
             {[
               ["Cliente", "Empresa Cliente"],
               ["Fecha", "18 Abr 2026"],
               ["Vigencia", "15 días"],
             ].map(([label, value]) => (
               <div key={label}>
-                <p
-                  style={{
-                    fontSize: 7,
-                    color: "#94a3b8",
-                    margin: 0,
-                  }}
-                >
-                  {label}
-                </p>
-                <p
-                  style={{
-                    fontSize: 8,
-                    fontWeight: 700,
-                    color: "#334155",
-                    margin: 0,
-                    marginTop: 2,
-                    lineHeight: 1.2,
-                  }}
-                >
+                <p style={{ fontSize: 7, color: "#94a3b8", margin: 0 }}>{label}</p>
+                <p style={{ fontSize: 8, fontWeight: 700, color: "#334155", margin: 0, marginTop: 2, lineHeight: 1.2 }}>
                   {value}
                 </p>
               </div>
             ))}
           </div>
 
-          <p
-            style={{
-              fontSize: 7,
-              color: "#94a3b8",
-              margin: "-4px 0 0",
-            }}
-          >
-            cliente@correo.com
-          </p>
+          <p style={{ fontSize: 7, color: "#94a3b8", margin: "-4px 0 0" }}>cliente@correo.com</p>
 
           <div
             style={{
               display: "grid",
               gridTemplateColumns: "2fr 0.6fr 1fr 1fr",
               padding: "6px 8px",
-              borderRadius: 8,
-              background: "linear-gradient(90deg, #7c3aed, #6366f1)",
+              borderRadius: 9,
+              background: "linear-gradient(90deg, #1B3D7A, #2A5298)",
               fontSize: 7,
               fontWeight: 800,
               color: "#fff",
@@ -475,26 +311,12 @@ export default function ProUpsellQuotePreview() {
             </div>
           ))}
 
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 2,
-            }}
-          >
+          <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
             {[
               ["Subtotal", "$22,500"],
               ["IVA (16%)", "$3,600"],
             ].map(([label, value]) => (
-              <div
-                key={label}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 7,
-                  color: "#64748b",
-                }}
-              >
+              <div key={label} style={{ display: "flex", justifyContent: "space-between", fontSize: 7, color: "#64748b" }}>
                 <span>{label}</span>
                 <span style={{ fontWeight: 600 }}>{value}</span>
               </div>
@@ -507,39 +329,16 @@ export default function ProUpsellQuotePreview() {
               alignItems: "center",
               justifyContent: "space-between",
               padding: "7px 10px",
-              borderRadius: 10,
-              background: "linear-gradient(90deg, #ede9fe, #ddd6fe)",
+              borderRadius: 11,
+              background: "linear-gradient(90deg, rgba(238,242,250,1), rgba(209,220,245,0.72))",
+              border: "1px solid rgba(209,220,245,0.9)",
             }}
           >
-            <span
-              style={{
-                fontSize: 9,
-                fontWeight: 900,
-                color: "#5b21b6",
-              }}
-            >
-              TOTAL
-            </span>
-            <span
-              style={{
-                fontSize: 14,
-                fontWeight: 900,
-                color: "#5b21b6",
-              }}
-            >
-              $26,100
-            </span>
+            <span style={{ fontSize: 9, fontWeight: 900, color: "#1B3D7A" }}>TOTAL</span>
+            <span style={{ fontSize: 14, fontWeight: 900, color: "#1B3D7A" }}>$26,100</span>
           </div>
 
-          <p
-            style={{
-              fontSize: 8,
-              color: "#94a3b8",
-              margin: "2px 0 0",
-              fontStyle: "italic",
-              fontFamily: "Georgia, serif",
-            }}
-          >
+          <p style={{ fontSize: 8, color: "#94a3b8", margin: "2px 0 0", fontStyle: "italic", fontFamily: "Georgia, serif" }}>
             Gracias por tu confianza.
           </p>
         </div>
@@ -552,18 +351,18 @@ export default function ProUpsellQuotePreview() {
             justifyContent: "center",
             gap: 6,
             padding: "8px 0",
-            borderRadius: 10,
-            background: "linear-gradient(135deg, #4c1d95, #6366f1)",
+            borderRadius: 11,
+            background: "linear-gradient(135deg, var(--primary, #1B3D7A), var(--primary-hover, #2A5298))",
             fontSize: 9,
             fontWeight: 800,
             color: "#fff",
-            boxShadow: "0 0 18px rgba(99,102,241,0.45)",
+            boxShadow: "0 12px 20px rgba(27,61,122,0.22)",
           }}
         >
           <Sparkles size={10} />
           Vista previa · Plantilla Pro
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

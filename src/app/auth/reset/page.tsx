@@ -1,4 +1,4 @@
-import ResetPasswordForm from "@/components/resetPasswordForm/ResetPasswordForm"
+import ResetPasswordView from "@/components/auth/reset-password/ResetPasswordView"
 
 export default async function ResetPasswordPage({
   searchParams,
@@ -8,5 +8,5 @@ export default async function ResetPasswordPage({
   const params = await searchParams
   const token = params.token ?? ""
 
-  return <ResetPasswordForm token={token} />
+  return <ResetPasswordView token={token} />
 }

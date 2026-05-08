@@ -9,6 +9,10 @@ import { isPaidPlanSlug, type PaidPlanSlug } from "@/lib/plans/plan-utils"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+type CheckoutRequestBody = {
+  plan?: unknown
+}
+
 function getAppUrl() {
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
@@ -19,7 +23,7 @@ function getAppUrl() {
   return appUrl.replace(/\/$/, "")
 }
 
-function getStripePriceId(plan: PaidPlanSlug) {
+function getEnvStripePriceId(plan: PaidPlanSlug) {
   if (plan === "pro") {
     return process.env.STRIPE_PRICE_PRO?.trim()
   }
@@ -51,13 +55,13 @@ function jsonError(error: string, status: number, extra?: Record<string, unknown
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    const sessionEmail = session?.user?.email
+    const sessionEmail = session?.user?.email?.trim()
 
     if (!sessionEmail) {
       return jsonError("UNAUTHORIZED", 401)
     }
 
-    const body = await req.json().catch(() => null)
+    const body = (await req.json().catch(() => null)) as CheckoutRequestBody | null
     const plan = body?.plan
 
     if (!isPaidPlanSlug(plan)) {
@@ -66,24 +70,7 @@ export async function POST(req: Request) {
       })
     }
 
-    const stripePriceId = getStripePriceId(plan)
-
-    if (!stripePriceId) {
-      return jsonError("STRIPE_PRICE_NOT_CONFIGURED", 500, {
-        plan,
-        hasStripePricePro: Boolean(process.env.STRIPE_PRICE_PRO),
-        hasStripePriceEmpresa: Boolean(process.env.STRIPE_PRICE_EMPRESA),
-      })
-    }
-
-    if (!stripePriceId.startsWith("price_")) {
-      return jsonError("INVALID_STRIPE_PRICE_ID", 500, {
-        plan,
-        stripePriceId,
-      })
-    }
-
-    const emailNormalized = sessionEmail.toLowerCase().trim()
+    const emailNormalized = sessionEmail.toLowerCase()
 
     const user = await prisma.user.findUnique({
       where: {
@@ -105,14 +92,7 @@ export async function POST(req: Request) {
 
     const dbPlan = await prisma.plan.findFirst({
       where: {
-        OR: [
-          {
-            slug: plan,
-          },
-          {
-            stripePriceId,
-          },
-        ],
+        slug: plan,
       },
       select: {
         id: true,
@@ -125,6 +105,24 @@ export async function POST(req: Request) {
     if (!dbPlan) {
       return jsonError("PLAN_NOT_FOUND", 404, {
         plan,
+      })
+    }
+
+    const stripePriceId =
+      getEnvStripePriceId(plan) || dbPlan.stripePriceId?.trim() || undefined
+
+    if (!stripePriceId) {
+      return jsonError("STRIPE_PRICE_NOT_CONFIGURED", 500, {
+        plan,
+        hasStripePricePro: Boolean(process.env.STRIPE_PRICE_PRO),
+        hasStripePriceEmpresa: Boolean(process.env.STRIPE_PRICE_EMPRESA),
+        hasDbStripePriceId: Boolean(dbPlan.stripePriceId),
+      })
+    }
+
+    if (!stripePriceId.startsWith("price_")) {
+      return jsonError("INVALID_STRIPE_PRICE_ID", 500, {
+        plan,
         stripePriceId,
       })
     }
@@ -133,10 +131,10 @@ export async function POST(req: Request) {
 
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
-        email: user.email,
+        email: user.email ?? emailNormalized,
         name: user.name ?? undefined,
         metadata: {
-          userId: user.id,
+          userId: String(user.id),
         },
       })
 
@@ -157,7 +155,7 @@ export async function POST(req: Request) {
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: "subscription",
       customer: stripeCustomerId,
-      client_reference_id: user.id,
+      client_reference_id: String(user.id),
       line_items: [
         {
           price: stripePriceId,
@@ -165,18 +163,18 @@ export async function POST(req: Request) {
         },
       ],
       allow_promotion_codes: true,
-      success_url: `${appUrl}/onboarding/profile?checkout=success&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${appUrl}/dashboard?checkout=success&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/planes?checkout=cancelled&plan=${plan}`,
       metadata: {
-        userId: user.id,
-        planId: dbPlan.id,
-        planSlug: plan,
+        userId: String(user.id),
+        planId: String(dbPlan.id),
+        planSlug: String(plan),
       },
       subscription_data: {
         metadata: {
-          userId: user.id,
-          planId: dbPlan.id,
-          planSlug: plan,
+          userId: String(user.id),
+          planId: String(dbPlan.id),
+          planSlug: String(plan),
         },
       },
     })

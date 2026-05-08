@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { motion, type Variants } from "framer-motion"
 import { useRouter } from "next/navigation"
+import { LockKeyhole } from "lucide-react"
 
 import type { TemplateComponent } from "@/lib/templates"
 
@@ -62,24 +63,9 @@ const cardHoverVariants: Variants = {
   },
   hover: {
     y: -3,
-    boxShadow: "0 14px 32px rgba(15,23,42,0.12)",
+    boxShadow: "0 16px 36px rgba(15,23,42,0.13)",
     transition: {
       duration: 0.32,
-      ease: cardEase,
-    },
-  },
-}
-
-const buttonHoverVariants: Variants = {
-  rest: {
-    y: 0,
-    backgroundColor: "#1e3a8a",
-  },
-  hover: {
-    y: -1,
-    backgroundColor: "#1e40af",
-    transition: {
-      duration: 0.28,
       ease: cardEase,
     },
   },
@@ -96,7 +82,7 @@ const ACCESS_META: Record<
 > = {
   basic: {
     label: "BÁSICA",
-    badgeClass: "bg-white/80 border-neutral-200 text-neutral-500",
+    badgeClass: "bg-white/85 border-neutral-200 text-neutral-500",
     lockedLabel: "Disponible",
     description: "Básica",
   },
@@ -229,6 +215,10 @@ export default function TemplateCard({
 
   const isButtonDisabled = isLocked || isTrialBlocked
 
+  const disabledButtonLabel = isTrialBlocked
+    ? "Pruebas agotadas"
+    : accessMeta.lockedLabel
+
   const previewData: PreviewData = {
     title: "Propuesta de Servicios",
     clientName: "Cliente Demo",
@@ -254,10 +244,14 @@ export default function TemplateCard({
     notes: "Tiempo estimado de entrega: 7 a 10 días hábiles.",
   }
 
-  const PREVIEW_HEIGHT = 226
+  const PREVIEW_HEIGHT = 238
   const TEMPLATE_WIDTH = 595
   const TEMPLATE_HEIGHT = 842
-  const SCALE = PREVIEW_HEIGHT / TEMPLATE_HEIGHT
+  const PREVIEW_TOP = 12
+  const SCALE = Math.min(
+    (PREVIEW_HEIGHT - PREVIEW_TOP * 2) / TEMPLATE_HEIGHT,
+    0.255
+  )
 
   const handleSelect = () => {
     if (isTrialBlocked) {
@@ -281,6 +275,20 @@ export default function TemplateCard({
     router.push(`/cotizaciones/nueva?template=${template.id}`)
   }
 
+  const buttonStyle = isButtonDisabled
+    ? {
+        backgroundColor: "#FEF2F2",
+        borderColor: "#FECACA",
+        color: "#B91C1C",
+        opacity: 1,
+      }
+    : {
+        backgroundColor: "#1e3a8a",
+        borderColor: "#1e3a8a",
+        color: "#ffffff",
+        opacity: 1,
+      }
+
   return (
     <motion.div
       className="relative overflow-hidden rounded-2xl border border-neutral-200 bg-white"
@@ -299,18 +307,18 @@ export default function TemplateCard({
       </div>
 
       <div
-        className="relative w-full overflow-hidden bg-neutral-50"
+        className="relative w-full overflow-hidden bg-gradient-to-b from-neutral-50 to-white"
         style={{ height: `${PREVIEW_HEIGHT}px` }}
       >
         <div
+          className="absolute left-1/2 rounded-xl bg-white"
           style={{
-            position: "absolute",
-            top: 0,
-            left: "50%",
+            top: `${PREVIEW_TOP}px`,
             width: `${TEMPLATE_WIDTH}px`,
             transformOrigin: "top center",
             transform: `translateX(-50%) scale(${SCALE})`,
             pointerEvents: "none",
+            boxShadow: "0 18px 38px rgba(15, 23, 42, 0.08)",
           }}
         >
           <PreviewComponent data={previewData} />
@@ -330,18 +338,37 @@ export default function TemplateCard({
           type="button"
           onClick={handleSelect}
           disabled={isButtonDisabled}
-          variants={isButtonDisabled ? undefined : buttonHoverVariants}
-          initial={isButtonDisabled ? undefined : "rest"}
-          animate={isButtonDisabled ? undefined : "rest"}
-          whileHover={isButtonDisabled ? undefined : "hover"}
+          whileHover={isButtonDisabled ? undefined : { y: -1 }}
           whileTap={isButtonDisabled ? undefined : { scale: 0.99 }}
-          className={`w-full rounded-xl py-2 text-sm font-semibold shadow-sm transition ${
+          transition={{
+            duration: 0.28,
+            ease: cardEase,
+          }}
+          className={`inline-flex w-full items-center justify-center gap-2 rounded-xl border py-2 text-sm font-semibold shadow-sm transition ${
             isButtonDisabled
-              ? "cursor-not-allowed bg-[#1e3a8a]/70 text-white shadow-none opacity-80"
-              : "bg-[#1e3a8a] text-white"
+              ? "cursor-not-allowed shadow-none"
+              : "hover:bg-[#1e40af]"
           }`}
+          style={buttonStyle}
         >
-          {isTrialBlocked ? "Pruebas agotadas" : "Usar plantilla"}
+          {isButtonDisabled && (
+            <LockKeyhole
+              className="h-4 w-4"
+              style={{
+                color: "#B91C1C",
+                opacity: 1,
+              }}
+            />
+          )}
+
+          <span
+            style={{
+              color: isButtonDisabled ? "#B91C1C" : "#ffffff",
+              opacity: 1,
+            }}
+          >
+            {isButtonDisabled ? disabledButtonLabel : "Usar plantilla"}
+          </span>
         </motion.button>
       </div>
     </motion.div>

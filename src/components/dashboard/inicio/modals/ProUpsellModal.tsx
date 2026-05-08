@@ -6,29 +6,39 @@ import ProUpsellContent from "./pro-upsell/ProUpsellContent"
 import ProUpsellDecorations from "./pro-upsell/ProUpsellDecorations"
 import ProUpsellQuotePreview from "./pro-upsell/ProUpsellQuotePreview"
 
+export type ProUpsellVariant = "warning" | "blocked"
+
 type ProUpsellModalProps = {
   open: boolean
+  variant?: ProUpsellVariant
   onClose: () => void
   onSeen: () => void
 }
 
+const SMOOTH_EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
 export default function ProUpsellModal({
   open,
+  variant = "warning",
   onClose,
   onSeen,
 }: ProUpsellModalProps) {
   return (
     <AnimatePresence>
-      {open && (
+      {open ? (
         <motion.div
+          className="fixed inset-0 z-[120] flex items-center justify-center px-4 py-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
+          transition={{
+            duration: 0.55,
+            ease: SMOOTH_EASE,
+          }}
           style={{
-            background: "rgba(3,1,18,0.88)",
-            backdropFilter: "blur(10px)",
+            background: "rgba(15, 23, 42, 0.46)",
+            backdropFilter: "blur(12px)",
+            WebkitBackdropFilter: "blur(12px)",
           }}
           onClick={(event) => {
             if (event.target === event.currentTarget) {
@@ -37,64 +47,97 @@ export default function ProUpsellModal({
           }}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.88, y: 24 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: 16 }}
-            transition={{ type: "spring", stiffness: 300, damping: 24 }}
             role="dialog"
             aria-modal="true"
             aria-labelledby="upsell-title"
             className="relative w-full"
+            initial={{
+              opacity: 0,
+              y: 22,
+            }}
+            animate={{
+              opacity: 1,
+              y: 0,
+            }}
+            exit={{
+              opacity: 0,
+              y: 14,
+            }}
+            transition={{
+              duration: 0.62,
+              ease: SMOOTH_EASE,
+            }}
             style={{
               maxWidth: 900,
-              borderRadius: 24,
+              borderRadius: 28,
               background:
-                "linear-gradient(145deg, #0c0a20 0%, #150d38 30%, #1e1250 60%, #271870 100%)",
+                "linear-gradient(145deg, #ffffff 0%, #f8fafc 48%, #eef2fa 100%)",
+              border:
+                "1px solid color-mix(in srgb, var(--primary-light, #d1dcf5) 78%, white)",
               boxShadow:
-                "0 0 0 1px rgba(139,92,246,0.35), 0 0 120px rgba(109,40,217,0.45), 0 40px 90px rgba(0,0,0,0.85)",
-              overflow: "visible",
+                "0 28px 80px rgba(15, 23, 42, 0.22), 0 18px 44px rgba(27, 61, 122, 0.16)",
+              overflow: "hidden",
+              willChange: "opacity, transform",
             }}
           >
             <ProUpsellDecorations />
 
-            <button
+            <motion.button
               type="button"
               onClick={onClose}
               aria-label="Cerrar"
+              whileHover={{
+                backgroundColor: "var(--primary-soft, #eef2fa)",
+                color: "var(--primary, #1B3D7A)",
+              }}
+              whileTap={{ scale: 0.96 }}
+              transition={{
+                duration: 0.18,
+                ease: "easeOut",
+              }}
               style={{
                 position: "absolute",
-                top: 14,
-                left: 14,
+                top: 16,
+                right: 16,
                 zIndex: 50,
-                width: 28,
-                height: 28,
+                width: 34,
+                height: 34,
                 borderRadius: "50%",
-                background: "rgba(255,255,255,0.09)",
-                border: "1px solid rgba(255,255,255,0.16)",
-                color: "rgba(255,255,255,0.5)",
+                background: "rgba(255, 255, 255, 0.86)",
+                border:
+                  "1px solid color-mix(in srgb, var(--border, #d1d5db) 70%, transparent)",
+                color: "var(--text-muted, #64748b)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
+                boxShadow: "0 8px 18px rgba(15, 23, 42, 0.08)",
               }}
             >
-              <X size={13} />
-            </button>
+              <X size={15} />
+            </motion.button>
 
             <div
               style={{
+                position: "relative",
+                zIndex: 10,
                 display: "flex",
                 alignItems: "stretch",
-                borderRadius: 24,
+                borderRadius: 28,
                 overflow: "hidden",
               }}
             >
-              <ProUpsellContent onClose={onClose} onSeen={onSeen} />
+              <ProUpsellContent
+                variant={variant}
+                onClose={onClose}
+                onSeen={onSeen}
+              />
+
               <ProUpsellQuotePreview />
             </div>
           </motion.div>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   )
 }

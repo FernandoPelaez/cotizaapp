@@ -19,6 +19,32 @@ type TemplateCandidate = {
   name: string
 }
 
+const TEMPLATE_ALIASES: Record<string, string[]> = {
+  "premium-2": [
+    "premium-2",
+    "premium2",
+    "premium-rose",
+    "premium rose",
+    "premium-rosa",
+    "premium rosa",
+    "rose",
+    "rosa",
+  ],
+  "premium-1": [
+    "premium-1",
+    "premium1",
+    "premium",
+    "premium-dark",
+    "premium dark",
+    "premium-negro",
+    "premium negro",
+  ],
+  "clasica-1": ["clasica-1", "clasica1", "clasica", "clásica"],
+  "clasica": ["clasica", "clásica", "clasica-1", "clasica1"],
+  "moderna": ["moderna", "moderno", "modern"],
+  "minimalista": ["minimalista", "minimal", "simple"],
+}
+
 function toNumber(value: unknown) {
   const num = Number(value)
   return Number.isFinite(num) ? num : 0
@@ -54,6 +80,30 @@ function normalizeTemplateValue(value: string) {
 function getTrailingTemplateNumber(value: string) {
   const match = value.match(/(?:^|-)(\d+)$/)
   return match?.[1] ?? ""
+}
+
+function getExpandedTemplateCandidates(templateId: string, templateKey: string) {
+  const baseCandidates = [templateId, templateKey].filter(Boolean)
+
+  const expandedCandidates = baseCandidates.flatMap((candidate) => {
+    const normalizedCandidate = normalizeTemplateValue(candidate)
+    const candidateNumber = getTrailingTemplateNumber(normalizedCandidate)
+
+    const aliases = TEMPLATE_ALIASES[normalizedCandidate] ?? []
+
+    const baseWithoutNumber = candidateNumber
+      ? normalizedCandidate.replace(new RegExp(`-${candidateNumber}$`), "")
+      : ""
+
+    return [
+      candidate,
+      normalizedCandidate,
+      ...aliases,
+      baseWithoutNumber,
+    ].filter(Boolean)
+  })
+
+  return Array.from(new Set(expandedCandidates))
 }
 
 function resolveTemplateFromList(
@@ -144,7 +194,7 @@ function resolveTemplateFromList(
 }
 
 async function resolveTemplateId(templateId: string, templateKey: string) {
-  const candidates = [templateId, templateKey].filter(Boolean)
+  const candidates = getExpandedTemplateCandidates(templateId, templateKey)
 
   if (candidates.length === 0) {
     return null

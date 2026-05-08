@@ -19,31 +19,8 @@ type TemplateCandidate = {
   name: string
 }
 
-const TEMPLATE_ALIASES: Record<string, string[]> = {
-  "premium-2": [
-    "premium-2",
-    "premium2",
-    "premium-rose",
-    "premium rose",
-    "premium-rosa",
-    "premium rosa",
-    "rose",
-    "rosa",
-  ],
-  "premium-1": [
-    "premium-1",
-    "premium1",
-    "premium",
-    "premium-dark",
-    "premium dark",
-    "premium-negro",
-    "premium negro",
-  ],
-  "clasica-1": ["clasica-1", "clasica1", "clasica", "clásica"],
-  "clasica": ["clasica", "clásica", "clasica-1", "clasica1"],
-  "moderna": ["moderna", "moderno", "modern"],
-  "minimalista": ["minimalista", "minimal", "simple"],
-}
+const TEMPLATE_CATEGORIES = ["clasica", "moderna", "premium"] as const
+const TEMPLATE_LIMIT_PER_CATEGORY = 10
 
 function toNumber(value: unknown) {
   const num = Number(value)
@@ -82,28 +59,50 @@ function getTrailingTemplateNumber(value: string) {
   return match?.[1] ?? ""
 }
 
-function getExpandedTemplateCandidates(templateId: string, templateKey: string) {
-  const baseCandidates = [templateId, templateKey].filter(Boolean)
+function getKnownTemplateKey(value: string) {
+  const normalizedValue = normalizeTemplateValue(value)
 
-  const expandedCandidates = baseCandidates.flatMap((candidate) => {
-    const normalizedCandidate = normalizeTemplateValue(candidate)
-    const candidateNumber = getTrailingTemplateNumber(normalizedCandidate)
+  if (!normalizedValue) return null
 
-    const aliases = TEMPLATE_ALIASES[normalizedCandidate] ?? []
+  if (normalizedValue === "clasica") return "clasica-1"
+  if (normalizedValue === "moderna") return "moderna-1"
+  if (normalizedValue === "premium") return "premium-1"
 
-    const baseWithoutNumber = candidateNumber
-      ? normalizedCandidate.replace(new RegExp(`-${candidateNumber}$`), "")
-      : ""
+  const match = normalizedValue.match(/^(clasica|moderna|premium)-(\d+)$/)
 
-    return [
-      candidate,
-      normalizedCandidate,
-      ...aliases,
-      baseWithoutNumber,
-    ].filter(Boolean)
-  })
+  if (!match) return null
 
-  return Array.from(new Set(expandedCandidates))
+  const category = match[1]
+  const number = Number(match[2])
+
+  if (number < 1 || number > TEMPLATE_LIMIT_PER_CATEGORY) return null
+
+  return `${category}-${number}`
+}
+
+function getTemplateDisplayName(templateKey: string) {
+  const normalizedKey = normalizeTemplateValue(templateKey)
+  const [category, number = "1"] = normalizedKey.split("-")
+
+  const categoryName =
+    category === "clasica"
+      ? "Clásica"
+      : category === "moderna"
+        ? "Moderna"
+        : "Premium"
+
+  return `${categoryName} ${number}`
+}
+
+function getTemplateCategory(templateKey: string) {
+  const normalizedKey = normalizeTemplateValue(templateKey)
+  const category = normalizedKey.split("-")[0]
+
+  if (TEMPLATE_CATEGORIES.includes(category as (typeof TEMPLATE_CATEGORIES)[number])) {
+    return category
+  }
+
+  return "clasica"
 }
 
 function resolveTemplateFromList(
@@ -139,29 +138,11 @@ function resolveTemplateFromList(
 
   for (const candidate of cleanCandidates) {
     const normalizedCandidate = normalizeTemplateValue(candidate)
-
-    const embeddedMatch = templates.find((template) => {
-      const normalizedId = normalizeTemplateValue(template.id)
-      const normalizedName = normalizeTemplateValue(template.name)
-
-      return (
-        normalizedCandidate.includes(normalizedId) ||
-        normalizedId.includes(normalizedCandidate) ||
-        normalizedCandidate.includes(normalizedName) ||
-        normalizedName.includes(normalizedCandidate)
-      )
-    })
-
-    if (embeddedMatch) return embeddedMatch
-  }
-
-  for (const candidate of cleanCandidates) {
-    const normalizedCandidate = normalizeTemplateValue(candidate)
     const candidateNumber = getTrailingTemplateNumber(normalizedCandidate)
 
     if (!candidateNumber) continue
 
-    const candidateBase = normalizedCandidate.replace(
+    const candidateCategory = normalizedCandidate.replace(
       new RegExp(`-${candidateNumber}$`),
       ""
     )
@@ -175,14 +156,14 @@ function resolveTemplateFromList(
 
         if (valueNumber !== candidateNumber) return false
 
-        const valueBase = normalizedValue.replace(
+        const valueCategory = normalizedValue.replace(
           new RegExp(`-${valueNumber}$`),
           ""
         )
 
         return (
-          candidateBase.includes(valueBase) ||
-          valueBase.includes(candidateBase)
+          valueCategory.includes(candidateCategory) ||
+          candidateCategory.includes(valueCategory)
         )
       })
     })
@@ -193,8 +174,52 @@ function resolveTemplateFromList(
   return null
 }
 
+async function createFallbackTemplate(templateKey: string) {
+  const safeTemplateKey = getKnownTemplateKey(templateKey)
+
+  if (!safeTemplateKey) return null
+
+  const category = getTemplateCategory(safeTemplateKey)
+  const displayName = getTemplateDisplayName(safeTemplateKey)
+
+  const template = await prisma.template.upsert({
+    where: {
+      name: safeTemplateKey,
+    },
+    update: {
+      description: displayName,
+      category,
+      isPremium: category === "premium",
+    },
+    create: {
+      name: safeTemplateKey,
+      description: displayName,
+      category,
+      isPremium: category === "premium",
+      html: `<div data-template="${safeTemplateKey}"></div>`,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  return template.id
+}
+
 async function resolveTemplateId(templateId: string, templateKey: string) {
-  const candidates = getExpandedTemplateCandidates(templateId, templateKey)
+  const knownTemplateId = getKnownTemplateKey(templateId)
+  const knownTemplateKey = getKnownTemplateKey(templateKey)
+
+  const candidates = Array.from(
+    new Set(
+      [
+        templateId,
+        templateKey,
+        knownTemplateId,
+        knownTemplateKey,
+      ].filter(Boolean) as string[]
+    )
+  )
 
   if (candidates.length === 0) {
     return null
@@ -209,7 +234,25 @@ async function resolveTemplateId(templateId: string, templateKey: string) {
 
   const selectedTemplate = resolveTemplateFromList(templates, candidates)
 
-  return selectedTemplate?.id ?? null
+  if (selectedTemplate?.id) {
+    return selectedTemplate.id
+  }
+
+  const fallbackKey = knownTemplateKey ?? knownTemplateId
+
+  if (!fallbackKey) {
+    return null
+  }
+
+  return createFallbackTemplate(fallbackKey)
+}
+
+function parseNullableDate(value: unknown) {
+  if (!value || typeof value !== "string") return null
+
+  const date = new Date(value)
+
+  return Number.isNaN(date.getTime()) ? null : date
 }
 
 async function getUserIdFromSession() {
@@ -492,8 +535,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error: "TEMPLATE_NOT_FOUND",
-          message:
-            "La plantilla seleccionada no existe en la base de datos o no coincide con las plantillas disponibles.",
+          message: "La plantilla seleccionada no es válida.",
           receivedTemplateId: templateId || null,
           receivedTemplateKey: templateKey || null,
         },
@@ -514,7 +556,7 @@ export async function POST(req: Request) {
         discount: discountAmount,
         tax: taxPercent,
         total,
-        validUntil: validUntil ? new Date(validUntil) : null,
+        validUntil: parseNullableDate(validUntil),
         notes: notes || null,
         status: "DRAFT",
         sendChannel: "PDF",

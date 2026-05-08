@@ -208,6 +208,7 @@ model Subscription {
 
 model Template {
   id            String         @id @default(cuid())
+  key           String?        @unique
   name          String         @unique
   description   String?
   category      String?

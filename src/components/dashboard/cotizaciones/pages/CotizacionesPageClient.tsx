@@ -24,7 +24,7 @@ import ProUpsellModal from "@/components/dashboard/inicio/modals/ProUpsellModal"
 import type { Notice, Quote, QuotesResponse } from "@/types/cotizacion"
 
 const ITEMS_PER_PAGE = 4
-const FREE_WARNING_MODAL_SESSION_KEY = "cotizaciones-free-warning-v2"
+const FREE_WARNING_MODAL_SESSION_KEY = "cotizaciones-free-warning-only-3-v1"
 const FREE_WARNING_USED_QUOTES = 3
 
 type TrialPlanData = {
@@ -215,7 +215,9 @@ function FreeTrialWarningModal({
 }: FreeTrialWarningModalProps) {
   const remainingQuotes = Math.max(quotesLimit - quotesUsed, 0)
   const progressPercent =
-    quotesLimit > 0 ? Math.min(100, Math.round((quotesUsed / quotesLimit) * 100)) : 0
+    quotesLimit > 0
+      ? Math.min(100, Math.round((quotesUsed / quotesLimit) * 100))
+      : 0
 
   return (
     <AnimatePresence>
@@ -664,12 +666,12 @@ export default function CotizacionesPageClient() {
     planIsFree ? quotes.length : 0
   )
 
-  const quotesLimit =
-    planData?.trialQuotesLimit || planData?.maxQuotes || 5
+  const quotesLimit = planData?.trialQuotesLimit || planData?.maxQuotes || 5
 
   const freeWarningSessionKey = useMemo(
-    () => `${FREE_WARNING_MODAL_SESSION_KEY}-${quotesUsed}-of-${quotesLimit}`,
-    [quotesUsed, quotesLimit]
+    () =>
+      `${FREE_WARNING_MODAL_SESSION_KEY}-${FREE_WARNING_USED_QUOTES}-of-${quotesLimit}`,
+    [quotesLimit]
   )
 
   const shouldShowFreeLimitModal =
@@ -682,12 +684,16 @@ export default function CotizacionesPageClient() {
     Boolean(planData) &&
     planIsFree &&
     quotesLimit > 0 &&
-    quotesUsed >= FREE_WARNING_USED_QUOTES &&
-    quotesUsed < quotesLimit &&
+    quotesUsed === FREE_WARNING_USED_QUOTES &&
     !shouldShowFreeLimitModal
 
   useEffect(() => {
-    if (!shouldShowFreeWarningModal || typeof window === "undefined") return
+    if (!shouldShowFreeWarningModal) {
+      setShowFreeWarningModal(false)
+      return
+    }
+
+    if (typeof window === "undefined") return
 
     const alreadyShownThisSession =
       window.sessionStorage.getItem(freeWarningSessionKey) === "true"

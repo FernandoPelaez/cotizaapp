@@ -14,6 +14,7 @@ import QuoteCenteredToast from "@/components/dashboard/cotizaciones/form/QuoteCe
 import QuoteFormPreview from "@/components/dashboard/cotizaciones/form/QuoteFormPreview"
 import QuoteFormStepOne from "@/components/dashboard/cotizaciones/form/QuoteFormStepOne"
 import QuoteFormStepTwo from "@/components/dashboard/cotizaciones/form/QuoteFormStepTwo"
+import ProUpsellModal from "@/components/dashboard/inicio/modals/ProUpsellModal"
 import { cleanNumber, formatMoney } from "@/lib/cotizacion-form"
 import type {
   LimitModalState,
@@ -90,6 +91,7 @@ export default function CotizacionForm() {
     title: "",
     message: "",
   })
+  const [showBlockedUpsellModal, setShowBlockedUpsellModal] = useState(false)
 
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
@@ -131,10 +133,16 @@ export default function CotizacionForm() {
     setLimitModal({ open: false, title: "", message: "" })
   }
 
+  const closeBlockedUpsellModal = () => {
+    setShowBlockedUpsellModal(false)
+    router.push("/cotizaciones")
+    router.refresh()
+  }
+
   useEffect(() => {
     const fetchTrialStatus = async () => {
       try {
-        const res = await fetch("/api/quotes", {
+        const res = await fetch("/api/user/plan", {
           cache: "no-store",
           credentials: "include",
         })
@@ -142,18 +150,17 @@ export default function CotizacionForm() {
         if (!res.ok) return
 
         const data = await res.json()
-        const user = data?.user
 
-        const plan = resolvePlan(user?.plan?.name)
-        const quotesUsed = toSafeNumber(user?.quotesUsed, 0)
-        const trialQuotesLimit = toSafeNumber(user?.trialQuotesLimit, 5)
+        const plan = resolvePlan(data?.plan)
+        const quotesUsed = toSafeNumber(data?.quotesUsed, 0)
+        const trialQuotesLimit = toSafeNumber(data?.trialQuotesLimit, 5)
 
         setTrialStatus({
           plan,
           quotesUsed,
           trialQuotesLimit,
           trialBlocked:
-            Boolean(user?.trialBlocked) ||
+            Boolean(data?.trialBlocked) ||
             (plan === "free" &&
               trialQuotesLimit > 0 &&
               quotesUsed >= trialQuotesLimit),
@@ -197,7 +204,8 @@ export default function CotizacionForm() {
         const resolvedProfileType =
           data.user?.profileType ?? data.profileType ?? null
 
-        const profileBusinessName = data.user?.profile?.businessName?.trim() ?? ""
+        const profileBusinessName =
+          data.user?.profile?.businessName?.trim() ?? ""
         const profileLogoUrl = data.user?.profile?.logoUrl?.trim() ?? ""
 
         if (res.ok) {
@@ -350,10 +358,7 @@ export default function CotizacionForm() {
     e.preventDefault()
 
     if (isQuoteCreationBlocked) {
-      openLimitModal(
-        "Tu prueba gratuita ha finalizado",
-        "Ya alcanzaste el límite de 5 cotizaciones de prueba. Mejora tu plan para seguir creando cotizaciones."
-      )
+      setShowBlockedUpsellModal(true)
       return
     }
 
@@ -395,6 +400,7 @@ export default function CotizacionForm() {
       const res = await fetch("/api/quotes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           title,
           description,
@@ -422,11 +428,23 @@ export default function CotizacionForm() {
               "Ya usaste todas las cotizaciones disponibles en tu plan actual. Actualiza tu cuenta para seguir creando cotizaciones."
           )
         } else if (data?.error === "TRIAL_BLOCKED") {
-          openLimitModal(
-            "Tu prueba gratuita ha finalizado",
-            data?.message ||
-              "Ya alcanzaste el límite de cotizaciones de prueba. Actualiza tu plan para seguir usando la plataforma."
+          const nextQuotesUsed = toSafeNumber(
+            data?.quotesUsed,
+            trialStatus.trialQuotesLimit
           )
+          const nextTrialQuotesLimit = toSafeNumber(
+            data?.trialQuotesLimit,
+            trialStatus.trialQuotesLimit
+          )
+
+          setTrialStatus({
+            plan: "free",
+            quotesUsed: nextQuotesUsed,
+            trialQuotesLimit: nextTrialQuotesLimit,
+            trialBlocked: true,
+          })
+
+          setShowBlockedUpsellModal(true)
         } else if (data?.error === "PROFILE_INCOMPLETE") {
           showToast(
             data?.message || "Debes completar tu perfil antes de cotizar",
@@ -447,7 +465,33 @@ export default function CotizacionForm() {
         return
       }
 
+      const nextQuotesUsed = toSafeNumber(data?.quotesUsed, trialStatus.quotesUsed)
+      const nextTrialQuotesLimit = toSafeNumber(
+        data?.trialQuotesLimit,
+        trialStatus.trialQuotesLimit
+      )
+
+      const reachedTrialLimit =
+        trialStatus.plan === "free" &&
+        nextTrialQuotesLimit > 0 &&
+        (Boolean(data?.trialBlocked) || nextQuotesUsed >= nextTrialQuotesLimit)
+
+      setTrialStatus((prev) => ({
+        ...prev,
+        quotesUsed: nextQuotesUsed,
+        trialQuotesLimit: nextTrialQuotesLimit,
+        trialBlocked: reachedTrialLimit,
+      }))
+
       showToast("¡Cotización creada con éxito!", "success")
+
+      if (reachedTrialLimit) {
+        window.setTimeout(() => {
+          setShowBlockedUpsellModal(true)
+        }, 900)
+
+        return
+      }
 
       setTimeout(() => {
         router.push("/cotizaciones")
@@ -490,48 +534,36 @@ export default function CotizacionForm() {
 
   if (isQuoteCreationBlocked) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#f0f2f5] p-4 -mt-16">
+      <div className="relative min-h-[calc(100vh-124px)] bg-[#f0f2f5] p-4">
         <QuoteCenteredToast toasts={toasts} />
 
-        <div className="w-full max-w-[520px] rounded-2xl border border-red-200 bg-gradient-to-b from-red-50 to-white px-8 py-9 text-center shadow-sm">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-100 text-2xl font-black text-red-600">
-            !
+        <div className="mx-auto grid min-h-[calc(100vh-156px)] max-w-5xl grid-cols-1 items-center gap-4 opacity-45 blur-[1px] lg:grid-cols-[minmax(0,520px)_minmax(0,520px)]">
+          <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-blue-600">
+              Prueba gratuita finalizada
+            </p>
+
+            <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-neutral-900">
+              Ya usaste tus {trialStatus.trialQuotesLimit} pruebas gratis
+            </h2>
+
+            <p className="mt-3 text-sm leading-6 text-neutral-500">
+              Para seguir creando cotizaciones, mejora tu plan. Tu historial se
+              conserva aunque hayas llegado al límite.
+            </p>
           </div>
 
-          <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.18em] text-red-500">
-            Prueba gratuita finalizada
-          </p>
-
-          <h2 className="mt-2 text-2xl font-black tracking-[-0.03em] text-neutral-900">
-            Ya usaste tus 5 cotizaciones gratis
-          </h2>
-
-          <p className="mx-auto mt-3 max-w-[390px] text-sm leading-6 text-neutral-500">
-            Para seguir creando cotizaciones, mejora tu plan. Tus cotizaciones
-            anteriores siguen guardadas en el historial.
-          </p>
-
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link
-              href="/planes"
-              className="inline-flex items-center justify-center rounded-full bg-[#1B3D7A] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-blue-950/10 transition hover:-translate-y-0.5 hover:bg-[#244d96]"
-            >
-              Ver planes
-            </Link>
-
-            <Link
-              href="/cotizaciones"
-              className="inline-flex items-center justify-center rounded-full border border-neutral-200 bg-white px-5 py-3 text-sm font-bold text-neutral-700 transition hover:-translate-y-0.5 hover:bg-neutral-50"
-            >
-              Ver historial
-            </Link>
+          <div className="hidden rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm lg:block">
+            <div className="h-[420px] rounded-xl bg-gradient-to-br from-blue-50 to-white" />
           </div>
-
-          <p className="mt-5 text-[11px] leading-5 text-neutral-400">
-            Límite usado: {trialStatus.quotesUsed} de{" "}
-            {trialStatus.trialQuotesLimit} cotizaciones de prueba.
-          </p>
         </div>
+
+        <ProUpsellModal
+          open
+          variant="blocked"
+          onClose={closeBlockedUpsellModal}
+          onSeen={closeBlockedUpsellModal}
+        />
       </div>
     )
   }
@@ -543,6 +575,13 @@ export default function CotizacionForm() {
         title={limitModal.title}
         message={limitModal.message}
         onClose={closeLimitModal}
+      />
+
+      <ProUpsellModal
+        open={showBlockedUpsellModal}
+        variant="blocked"
+        onClose={closeBlockedUpsellModal}
+        onSeen={closeBlockedUpsellModal}
       />
 
       <QuoteCenteredToast toasts={toasts} />

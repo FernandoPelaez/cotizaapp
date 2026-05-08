@@ -22,6 +22,20 @@ type TemplateCandidate = {
 const TEMPLATE_CATEGORIES = ["clasica", "moderna", "premium"] as const
 const TEMPLATE_LIMIT_PER_CATEGORY = 10
 
+const QUOTE_TEMPLATE_SELECT = {
+  id: true,
+  name: true,
+  description: true,
+  category: true,
+  isPremium: true,
+  previewUrl: true,
+  html: true,
+  createdAt: true,
+  updatedAt: true,
+  businessModel: true,
+  profileType: true,
+} as const
+
 function toNumber(value: unknown) {
   const num = Number(value)
   return Number.isFinite(num) ? num : 0
@@ -98,7 +112,11 @@ function getTemplateCategory(templateKey: string) {
   const normalizedKey = normalizeTemplateValue(templateKey)
   const category = normalizedKey.split("-")[0]
 
-  if (TEMPLATE_CATEGORIES.includes(category as (typeof TEMPLATE_CATEGORIES)[number])) {
+  if (
+    TEMPLATE_CATEGORIES.includes(
+      category as (typeof TEMPLATE_CATEGORIES)[number]
+    )
+  ) {
     return category
   }
 
@@ -333,7 +351,9 @@ export async function GET() {
         where: { userId },
         include: {
           items: true,
-          template: true,
+          template: {
+            select: QUOTE_TEMPLATE_SELECT,
+          },
         },
         orderBy: { createdAt: "desc" },
       }),
@@ -568,7 +588,9 @@ export async function POST(req: Request) {
       },
       include: {
         items: true,
-        template: true,
+        template: {
+          select: QUOTE_TEMPLATE_SELECT,
+        },
       },
     })
 

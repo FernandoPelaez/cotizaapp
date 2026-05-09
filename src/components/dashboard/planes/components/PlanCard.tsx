@@ -40,14 +40,25 @@ export default function PlanCard({
   onMouseLeave,
 }: PlanCardProps) {
   const Icon = getPlanIcon(plan.icon)
+
   const isCurrentPlan = currentPlanId === plan.id
-  const isButtonDisabled = isCurrentPlan || isSubmitting
+  const hasActivePaidPlan = currentPlanId !== "free"
+  const isLockedByActivePaidPlan = hasActivePaidPlan && !isCurrentPlan
+
+  const isButtonDisabled =
+    isCurrentPlan || isSubmitting || isLockedByActivePaidPlan
 
   const buttonLabel = isCurrentPlan
     ? "Plan actual"
     : isSubmitting
-      ? "Actualizando..."
-      : "Elegir plan"
+      ? "Redirigiendo..."
+      : isLockedByActivePaidPlan
+        ? "No disponible"
+        : "Elegir plan"
+
+  const buttonTitle = isLockedByActivePaidPlan
+    ? "Ya tienes un plan pagado activo. Para cambiarlo, debe gestionarse desde Stripe."
+    : undefined
 
   const defaultShadow = plan.highlighted
     ? "0 8px 32px rgba(45,107,255,0.25)"
@@ -75,6 +86,7 @@ export default function PlanCard({
         border: plan.highlighted
           ? "2px solid var(--primary)"
           : `1px solid ${isHovered ? "var(--primary-light)" : "var(--border)"}`,
+        opacity: isLockedByActivePaidPlan ? 0.82 : 1,
       }}
     >
       {plan.badge && (
@@ -191,6 +203,7 @@ export default function PlanCard({
 
       <motion.button
         type="button"
+        title={buttonTitle}
         onClick={isButtonDisabled ? undefined : onSelectPlan}
         disabled={isButtonDisabled}
         whileHover={isButtonDisabled ? undefined : { y: -1 }}
@@ -202,17 +215,19 @@ export default function PlanCard({
         className="w-full rounded-xl px-4 py-3 text-sm font-semibold"
         style={{
           border: "none",
-          cursor: isButtonDisabled ? "default" : "pointer",
-          background: isCurrentPlan
-            ? "var(--primary-soft)"
-            : plan.highlighted
-              ? "#FFFFFF"
-              : "var(--primary)",
-          color: isCurrentPlan
-            ? "var(--text-muted)"
-            : plan.highlighted
-              ? "var(--primary)"
-              : "#FFFFFF",
+          cursor: isButtonDisabled ? "not-allowed" : "pointer",
+          background:
+            isCurrentPlan || isLockedByActivePaidPlan
+              ? "var(--primary-soft)"
+              : plan.highlighted
+                ? "#FFFFFF"
+                : "var(--primary)",
+          color:
+            isCurrentPlan || isLockedByActivePaidPlan
+              ? "var(--text-muted)"
+              : plan.highlighted
+                ? "var(--primary)"
+                : "#FFFFFF",
           opacity: isSubmitting ? 0.85 : 1,
         }}
       >

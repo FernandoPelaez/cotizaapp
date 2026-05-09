@@ -31,6 +31,7 @@ function getWebhookSecret() {
 
 function toDateFromUnix(seconds?: number | null) {
   if (!seconds) return null
+
   return new Date(seconds * 1000)
 }
 
@@ -54,23 +55,48 @@ function mapStripeStatus(status?: string | null): SubscriptionStatus {
   switch (status) {
     case "trialing":
       return SubscriptionStatus.TRIALING
+
     case "active":
       return SubscriptionStatus.ACTIVE
+
     case "past_due":
       return SubscriptionStatus.PAST_DUE
+
     case "canceled":
       return SubscriptionStatus.CANCELED
+
     case "unpaid":
       return SubscriptionStatus.UNPAID
+
     case "incomplete":
       return SubscriptionStatus.INCOMPLETE
+
     case "incomplete_expired":
       return SubscriptionStatus.INCOMPLETE_EXPIRED
+
     case "paused":
       return SubscriptionStatus.PAUSED
+
     default:
       return SubscriptionStatus.INACTIVE
   }
+}
+
+function isSubscriptionUsable(status: SubscriptionStatus) {
+  return (
+    status === SubscriptionStatus.ACTIVE ||
+    status === SubscriptionStatus.TRIALING
+  )
+}
+
+function shouldReturnToFree(status: SubscriptionStatus) {
+  return (
+    status === SubscriptionStatus.CANCELED ||
+    status === SubscriptionStatus.UNPAID ||
+    status === SubscriptionStatus.INCOMPLETE_EXPIRED ||
+    status === SubscriptionStatus.PAUSED ||
+    status === SubscriptionStatus.INACTIVE
+  )
 }
 
 function getStripeId(value: unknown) {
@@ -109,6 +135,19 @@ function getPlanSlugFromPriceId(priceId?: string | null): PlanSlug | null {
   return null
 }
 
+async function getFreePlanId() {
+  const freePlan = await prisma.plan.findUnique({
+    where: {
+      slug: "free",
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  return freePlan?.id ?? null
+}
+
 async function getPlanForSubscription({
   planId,
   planSlug,
@@ -120,8 +159,13 @@ async function getPlanForSubscription({
 }) {
   if (planId) {
     const plan = await prisma.plan.findUnique({
-      where: { id: planId },
-      select: { id: true, slug: true },
+      where: {
+        id: planId,
+      },
+      select: {
+        id: true,
+        slug: true,
+      },
     })
 
     if (plan) return plan
@@ -129,8 +173,13 @@ async function getPlanForSubscription({
 
   if (planSlug) {
     const plan = await prisma.plan.findUnique({
-      where: { slug: planSlug },
-      select: { id: true, slug: true },
+      where: {
+        slug: planSlug,
+      },
+      select: {
+        id: true,
+        slug: true,
+      },
     })
 
     if (plan) return plan
@@ -140,8 +189,13 @@ async function getPlanForSubscription({
 
   if (slugFromPrice) {
     const plan = await prisma.plan.findUnique({
-      where: { slug: slugFromPrice },
-      select: { id: true, slug: true },
+      where: {
+        slug: slugFromPrice,
+      },
+      select: {
+        id: true,
+        slug: true,
+      },
     })
 
     if (plan) return plan
@@ -149,23 +203,19 @@ async function getPlanForSubscription({
 
   if (priceId) {
     const plan = await prisma.plan.findFirst({
-      where: { stripePriceId: priceId },
-      select: { id: true, slug: true },
+      where: {
+        stripePriceId: priceId,
+      },
+      select: {
+        id: true,
+        slug: true,
+      },
     })
 
     if (plan) return plan
   }
 
   return null
-}
-
-async function getFreePlanId() {
-  const freePlan = await prisma.plan.findUnique({
-    where: { slug: "free" },
-    select: { id: true },
-  })
-
-  return freePlan?.id ?? null
 }
 
 function getSubscriptionPayload({
@@ -194,7 +244,7 @@ function getSubscriptionPayload({
     status,
     cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
     currentPeriodStart: toDateFromUnix(
-      getCurrentPeriodStart(stripeSubscription)
+      getCurrentPeriodStart(stripeSubscription),
     ),
     currentPeriodEnd: toDateFromUnix(getCurrentPeriodEnd(stripeSubscription)),
     canceledAt: toDateFromUnix(stripeSubscription.canceled_at),
@@ -202,8 +252,23 @@ function getSubscriptionPayload({
   }
 }
 
+async function setUserToFreePlan(userId: string) {
+  const freePlanId = await getFreePlanId()
+
+  await prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      planId: freePlanId,
+    },
+  })
+
+  return freePlanId
+}
+
 async function activateSubscriptionFromCheckoutSession(
-  checkoutSession: Stripe.Checkout.Session
+  checkoutSession: Stripe.Checkout.Session,
 ) {
   const userId =
     checkoutSession.metadata?.userId ?? checkoutSession.client_reference_id
@@ -225,7 +290,7 @@ async function activateSubscriptionFromCheckoutSession(
   }
 
   const stripeSubscription = (await stripe.subscriptions.retrieve(
-    stripeSubscriptionId
+    stripeSubscriptionId,
   )) as StripeSubscriptionSafe
 
   const stripePriceId = getPriceIdFromSubscription(stripeSubscription)
@@ -258,36 +323,42 @@ async function activateSubscriptionFromCheckoutSession(
     stripeSubscription,
   })
 
-  await prisma.$transaction([
-    prisma.user.update({
-      where: { id: userId },
+  await prisma.subscription.upsert({
+    where: {
+      stripeSubscriptionId,
+    },
+    create: subscriptionPayload,
+    update: {
+      planId: plan.id,
+      stripeCustomerId,
+      stripePriceId,
+      status,
+      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+      currentPeriodStart: subscriptionPayload.currentPeriodStart,
+      currentPeriodEnd: subscriptionPayload.currentPeriodEnd,
+      canceledAt: subscriptionPayload.canceledAt,
+      endedAt: subscriptionPayload.endedAt,
+    },
+  })
+
+  if (isSubscriptionUsable(status)) {
+    await prisma.user.update({
+      where: {
+        id: userId,
+      },
       data: {
         planId: plan.id,
         stripeCustomerId,
         trialBlocked: false,
       },
-    }),
+    })
+  }
 
-    prisma.subscription.upsert({
-      where: {
-        stripeSubscriptionId,
-      },
-      create: subscriptionPayload,
-      update: {
-        planId: plan.id,
-        stripeCustomerId,
-        stripePriceId,
-        status,
-        cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-        currentPeriodStart: subscriptionPayload.currentPeriodStart,
-        currentPeriodEnd: subscriptionPayload.currentPeriodEnd,
-        canceledAt: subscriptionPayload.canceledAt,
-        endedAt: subscriptionPayload.endedAt,
-      },
-    }),
-  ])
+  if (shouldReturnToFree(status)) {
+    await setUserToFreePlan(userId)
+  }
 
-  console.log("STRIPE_WEBHOOK_CHECKOUT_ACTIVATED:", {
+  console.log("STRIPE_WEBHOOK_CHECKOUT_SYNCED:", {
     userId,
     planSlug: plan.slug,
     stripeCustomerId,
@@ -309,8 +380,12 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   }
 
   const user = await prisma.user.findFirst({
-    where: { stripeCustomerId },
-    select: { id: true },
+    where: {
+      stripeCustomerId,
+    },
+    select: {
+      id: true,
+    },
   })
 
   if (!user) {
@@ -329,10 +404,6 @@ async function syncSubscription(subscription: Stripe.Subscription) {
   })
 
   const status = mapStripeStatus(stripeSubscription.status)
-
-  const shouldActivatePlan =
-    status === SubscriptionStatus.ACTIVE ||
-    status === SubscriptionStatus.TRIALING
 
   const subscriptionPayload = getSubscriptionPayload({
     userId: user.id,
@@ -362,14 +433,21 @@ async function syncSubscription(subscription: Stripe.Subscription) {
     },
   })
 
-  if (shouldActivatePlan && plan) {
+  if (isSubscriptionUsable(status) && plan) {
     await prisma.user.update({
-      where: { id: user.id },
+      where: {
+        id: user.id,
+      },
       data: {
         planId: plan.id,
         stripeCustomerId,
+        trialBlocked: false,
       },
     })
+  }
+
+  if (shouldReturnToFree(status)) {
+    await setUserToFreePlan(user.id)
   }
 
   console.log("STRIPE_WEBHOOK_SUBSCRIPTION_SYNCED:", {
@@ -393,8 +471,12 @@ async function cancelSubscription(subscription: Stripe.Subscription) {
   }
 
   const user = await prisma.user.findFirst({
-    where: { stripeCustomerId },
-    select: { id: true },
+    where: {
+      stripeCustomerId,
+    },
+    select: {
+      id: true,
+    },
   })
 
   if (!user) {
@@ -410,7 +492,9 @@ async function cancelSubscription(subscription: Stripe.Subscription) {
 
   await prisma.$transaction([
     prisma.subscription.updateMany({
-      where: { stripeSubscriptionId },
+      where: {
+        stripeSubscriptionId,
+      },
       data: {
         status: SubscriptionStatus.CANCELED,
         canceledAt: toDateFromUnix(stripeSubscription.canceled_at) ?? new Date(),
@@ -420,7 +504,9 @@ async function cancelSubscription(subscription: Stripe.Subscription) {
     }),
 
     prisma.user.update({
-      where: { id: user.id },
+      where: {
+        id: user.id,
+      },
       data: {
         planId: freePlanId,
       },
@@ -441,8 +527,12 @@ export async function POST(req: Request) {
 
   if (!signature) {
     return NextResponse.json(
-      { error: "MISSING_STRIPE_SIGNATURE" },
-      { status: 400 }
+      {
+        error: "MISSING_STRIPE_SIGNATURE",
+      },
+      {
+        status: 400,
+      },
     )
   }
 
@@ -451,13 +541,19 @@ export async function POST(req: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, getWebhookSecret())
   } catch (error) {
-    const err = error as { message?: string }
+    const err = error as {
+      message?: string
+    }
 
     console.error("STRIPE_WEBHOOK_SIGNATURE_ERROR:", err.message)
 
     return NextResponse.json(
-      { error: "INVALID_STRIPE_SIGNATURE" },
-      { status: 400 }
+      {
+        error: "INVALID_STRIPE_SIGNATURE",
+      },
+      {
+        status: 400,
+      },
     )
   }
 
@@ -488,9 +584,13 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ received: true })
+    return NextResponse.json({
+      received: true,
+    })
   } catch (error) {
-    const err = error as { message?: string }
+    const err = error as {
+      message?: string
+    }
 
     console.error("STRIPE_WEBHOOK_ERROR:", {
       type: event.type,
@@ -498,8 +598,12 @@ export async function POST(req: Request) {
     })
 
     return NextResponse.json(
-      { error: "WEBHOOK_HANDLER_FAILED" },
-      { status: 500 }
+      {
+        error: "WEBHOOK_HANDLER_FAILED",
+      },
+      {
+        status: 500,
+      },
     )
   }
 }

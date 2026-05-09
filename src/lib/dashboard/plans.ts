@@ -11,6 +11,7 @@ export type DashboardPlan = {
   icon: DashboardPlanIcon
   highlighted?: boolean
   badge?: string
+  requiresPayment: boolean
   features: string[]
 }
 
@@ -22,6 +23,7 @@ export const DASHBOARD_PLANS: DashboardPlan[] = [
     price: 0,
     period: null,
     icon: "zap",
+    requiresPayment: false,
     features: [
       "5 cotizaciones de prueba",
       "Acceso a 10 plantillas básicas",
@@ -39,6 +41,7 @@ export const DASHBOARD_PLANS: DashboardPlan[] = [
     icon: "sparkles",
     highlighted: true,
     badge: "MÁS POPULAR",
+    requiresPayment: true,
     features: [
       "Cotizaciones ilimitadas",
       "Acceso a 20 plantillas",
@@ -55,6 +58,7 @@ export const DASHBOARD_PLANS: DashboardPlan[] = [
     price: 199,
     period: "mes",
     icon: "crown",
+    requiresPayment: true,
     features: [
       "Todo lo de Pro",
       "Acceso a las 30 plantillas",
@@ -66,4 +70,8 @@ export const DASHBOARD_PLANS: DashboardPlan[] = [
 
 export function getDashboardPlanById(planId: DashboardPlanId) {
   return DASHBOARD_PLANS.find((plan) => plan.id === planId)
+}
+
+export function isPaidDashboardPlan(planId: DashboardPlanId) {
+  return getDashboardPlanById(planId)?.requiresPayment ?? false
 }

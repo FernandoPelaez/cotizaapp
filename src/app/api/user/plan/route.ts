@@ -57,7 +57,10 @@ function json(data: unknown, status = 200) {
 
 async function getUserId() {
   const session = await getServerSession(authOptions)
-  return ((session?.user as SessionUser | undefined)?.id ?? null) as string | null
+
+  return ((session?.user as SessionUser | undefined)?.id ?? null) as
+    | string
+    | null
 }
 
 function normalizePlanInput(value: unknown): PlanId | null {
@@ -88,8 +91,10 @@ function getPlanDbNames(planId: PlanId) {
   switch (planId) {
     case "pro":
       return ["Pro", "pro", "PRO"]
+
     case "premium":
       return ["Empresa", "Premium", "empresa", "premium", "EMPRESA", "PREMIUM"]
+
     case "free":
     default:
       return ["Free", "Gratis", "free", "gratis", "FREE", "GRATIS"]
@@ -137,7 +142,6 @@ function getBillingInfo(planId: PlanId, referenceDate: Date) {
   const expiresAt = addMonths(startedAt, 1)
 
   return {
-
     billingCycle: "monthly" as BillingCycle,
     planStartedAt: startedAt.toISOString(),
     planExpiresAt: expiresAt.toISOString(),
@@ -145,7 +149,10 @@ function getBillingInfo(planId: PlanId, referenceDate: Date) {
   }
 }
 
-function buildPlanResponse(user: UserPlanPayload, extra?: Record<string, unknown>) {
+function buildPlanResponse(
+  user: UserPlanPayload,
+  extra?: Record<string, unknown>,
+) {
   const currentPlanId = mapDbPlanNameToPlanId(user.plan?.name)
   const billing = getBillingInfo(currentPlanId, user.updatedAt)
 
@@ -196,6 +203,7 @@ export async function GET() {
     return json(buildPlanResponse(user))
   } catch (error) {
     console.error("GET /api/user/plan error:", error)
+
     return json({ error: "Error interno del servidor" }, 500)
   }
 }
@@ -215,6 +223,7 @@ export async function PATCH(req: Request) {
     }
 
     const payload = body as Record<string, unknown>
+
     const nextPlan = normalizePlanInput(
       payload.plan ?? payload.planId ?? payload.id ?? payload.name,
     )
@@ -223,8 +232,26 @@ export async function PATCH(req: Request) {
       return json({ error: "Plan inválido" }, 400)
     }
 
+    /*
+      IMPORTANTE:
+      Los planes pagados NO se activan desde este endpoint.
+      Pro y Empresa/Premium deben activarse únicamente después
+      de confirmar el pago con Stripe, idealmente desde un webhook.
+    */
+    if (nextPlan !== "free") {
+      return json(
+        {
+          error:
+            "Para activar Pro o Empresa debes completar el pago con Stripe.",
+          checkoutRequired: true,
+          requestedPlan: nextPlan,
+        },
+        402,
+      )
+    }
+
     const [targetPlan, user] = await Promise.all([
-      findPlanByPlanId(nextPlan),
+      findPlanByPlanId("free"),
       prisma.user.findUnique({
         where: { id: userId },
         select: {
@@ -242,9 +269,9 @@ export async function PATCH(req: Request) {
     if (!targetPlan) {
       return json(
         {
-          error: "El plan solicitado no existe en la base de datos",
-          requestedPlan: nextPlan,
-          searchedNames: getPlanDbNames(nextPlan),
+          error: "El plan gratuito no existe en la base de datos",
+          requestedPlan: "free",
+          searchedNames: getPlanDbNames("free"),
         },
         404,
       )
@@ -252,9 +279,7 @@ export async function PATCH(req: Request) {
 
     const trialQuotesLimit = user.trialQuotesLimit ?? 5
     const quotesUsed = user.quotesUsed ?? 0
-
-    const nextTrialBlocked =
-      nextPlan === "free" ? quotesUsed >= trialQuotesLimit : false
+    const nextTrialBlocked = quotesUsed >= trialQuotesLimit
 
     const updatedUser = await prisma.user.update({
       where: { id: userId },
@@ -268,15 +293,22 @@ export async function PATCH(req: Request) {
     return json(
       buildPlanResponse(updatedUser, {
         success: true,
-        message: "Plan actualizado correctamente",
+        message: "Plan gratuito actualizado correctamente",
       }),
     )
   } catch (error) {
     console.error("PATCH /api/user/plan error:", error)
+
     return json({ error: "Error interno del servidor" }, 500)
   }
 }
 
-export async function POST(req: Request) {
-  return PATCH(req)
+export async function POST() {
+  return json(
+    {
+      error:
+        "Este endpoint no activa planes pagados. Usa Stripe Checkout para Pro o Empresa.",
+    },
+    405,
+  )
 }

@@ -2,7 +2,6 @@
 
 import { AnimatePresence, motion, type Variants } from "framer-motion"
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
 
 import { DASHBOARD_PLANS, type DashboardPlanId } from "@/lib/dashboard/plans"
 
@@ -17,15 +16,10 @@ type PlanesCardsGridProps = {
   currentPlanId?: DashboardPlanId
 }
 
-type UpdatePlanResponse = {
-  success?: boolean
-  message?: string
-  plan?: DashboardPlanId
-  planName?: string
-  billingCycle?: "monthly" | null
-  planStartedAt?: string | null
-  planExpiresAt?: string | null
-  renewsAt?: string | null
+type CheckoutPlanSlug = "pro" | "empresa"
+
+type CheckoutResponse = {
+  url?: string
   error?: string
 }
 
@@ -52,23 +46,21 @@ const messageVariants: Variants = {
   },
 }
 
-function formatPlanDate(value?: string | null) {
-  if (!value) return null
+function getCheckoutPlanSlug(planId: DashboardPlanId): CheckoutPlanSlug | null {
+  if (planId === "pro") {
+    return "pro"
+  }
 
-  const date = new Date(value)
+  if (planId === "premium") {
+    return "empresa"
+  }
 
-  if (Number.isNaN(date.getTime())) return null
-
-  return new Intl.DateTimeFormat("es-MX", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(date)
+  return null
 }
 
-async function readPlanResponse(response: Response) {
+async function readCheckoutResponse(response: Response) {
   const data = (await response.json().catch(() => null)) as
-    | UpdatePlanResponse
+    | CheckoutResponse
     | null
 
   if (!data) {
@@ -78,18 +70,50 @@ async function readPlanResponse(response: Response) {
   return data
 }
 
+function getCheckoutErrorMessage(error?: string) {
+  switch (error) {
+    case "UNAUTHORIZED":
+      return "Debes iniciar sesión para elegir un plan."
+
+    case "INVALID_PLAN":
+      return "El plan seleccionado no es válido."
+
+    case "USER_NOT_FOUND":
+      return "No se encontró tu usuario. Vuelve a iniciar sesión e intenta de nuevo."
+
+    case "PLAN_NOT_FOUND":
+      return "El plan seleccionado no existe en la base de datos."
+
+    case "STRIPE_PRICE_NOT_CONFIGURED":
+      return "Falta configurar el precio de Stripe para este plan."
+
+    case "INVALID_STRIPE_PRICE_ID":
+      return "El Price ID de Stripe no es válido. Debe comenzar con price_."
+
+    case "CHECKOUT_URL_NOT_CREATED":
+      return "Stripe no pudo generar el enlace de pago."
+
+    case "INTERNAL_SERVER_ERROR":
+      return "Ocurrió un error interno al preparar el pago."
+
+    default:
+      return "No se pudo iniciar el pago con Stripe."
+  }
+}
+
 export default function PlanesCardsGrid({
   currentPlanId = "free",
 }: PlanesCardsGridProps) {
-  const router = useRouter()
-
   const [hoveredPlanId, setHoveredPlanId] = useState<DashboardPlanId | null>(
     null,
   )
+
   const [selectedPlanId, setSelectedPlanId] =
     useState<DashboardPlanId>(currentPlanId)
+
   const [submittingPlanId, setSubmittingPlanId] =
     useState<DashboardPlanId | null>(null)
+
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
@@ -100,49 +124,48 @@ export default function PlanesCardsGrid({
   async function handleSelectPlan(planId: DashboardPlanId) {
     if (planId === selectedPlanId || submittingPlanId) return
 
+    const checkoutPlan = getCheckoutPlanSlug(planId)
+
+    if (!checkoutPlan) {
+      setSuccessMessage(null)
+      setErrorMessage(
+        "El plan gratuito es tu plan base. Para cancelar o bajar de plan, debe hacerse desde la gestión de Stripe.",
+      )
+      return
+    }
+
     try {
       setSubmittingPlanId(planId)
-      setSuccessMessage(null)
+      setSuccessMessage("Preparando pago seguro con Stripe...")
       setErrorMessage(null)
 
-      const response = await fetch("/api/user/plan", {
-        method: "PATCH",
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-
         body: JSON.stringify({
-          plan: planId,
-          planId,
+          plan: checkoutPlan,
         }),
       })
 
-      const data = await readPlanResponse(response)
+      const data = await readCheckoutResponse(response)
 
       if (!response.ok) {
-        throw new Error(data.error || "No se pudo actualizar el plan")
+        throw new Error(getCheckoutErrorMessage(data.error))
       }
 
-      const nextPlanId = data.plan ?? planId
-      const renewalDate = formatPlanDate(data.renewsAt ?? data.planExpiresAt)
-
-      setSelectedPlanId(nextPlanId)
-      if (nextPlanId === "free") {
-        setSuccessMessage("Plan gratuito activado correctamente.")
-      } else if (renewalDate) {
-        setSuccessMessage(
-          `Plan ${data.planName ?? nextPlanId} activado correctamente. Se renueva el ${renewalDate}.`,
-        )
-      } else {
-        setSuccessMessage("Plan actualizado correctamente.")
+      if (!data.url) {
+        throw new Error("Stripe no devolvió una URL de pago válida.")
       }
 
-      router.refresh()
+      window.location.assign(data.url)
     } catch (error) {
+      setSuccessMessage(null)
       setErrorMessage(
         error instanceof Error
           ? error.message
-          : "Ocurrió un error al actualizar el plan",
+          : "Ocurrió un error al iniciar el pago",
       )
     } finally {
       setSubmittingPlanId(null)

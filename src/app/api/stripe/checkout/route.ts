@@ -9,6 +9,12 @@ import { isPaidPlanSlug, type PaidPlanSlug } from "@/lib/plans/plan-utils"
 export const runtime = "nodejs"
 export const dynamic = "force-dynamic"
 
+type SessionUser = {
+  id?: string | null
+  name?: string | null
+  email?: string | null
+}
+
 type CheckoutRequestBody = {
   plan?: unknown
 }
@@ -35,33 +41,36 @@ function getEnvStripePriceId(plan: PaidPlanSlug) {
   return undefined
 }
 
-function jsonError(error: string, status: number, extra?: Record<string, unknown>) {
+function jsonError(
+  error: string,
+  status: number,
+  extra?: Record<string, unknown>,
+) {
   console.error("STRIPE_CHECKOUT_ERROR:", {
     error,
     status,
     ...extra,
   })
 
-  return NextResponse.json(
-    {
-      error,
-    },
-    {
-      status,
-    }
-  )
+  return NextResponse.json({ error }, { status })
 }
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions)
-    const sessionEmail = session?.user?.email?.trim()
+    const sessionUser = session?.user as SessionUser | undefined
 
-    if (!sessionEmail) {
+    const sessionUserId = sessionUser?.id?.trim()
+    const sessionEmail = sessionUser?.email?.trim().toLowerCase()
+
+    if (!sessionUserId && !sessionEmail) {
       return jsonError("UNAUTHORIZED", 401)
     }
 
-    const body = (await req.json().catch(() => null)) as CheckoutRequestBody | null
+    const body = (await req.json().catch(() => null)) as
+      | CheckoutRequestBody
+      | null
+
     const plan = body?.plan
 
     if (!isPaidPlanSlug(plan)) {
@@ -70,11 +79,12 @@ export async function POST(req: Request) {
       })
     }
 
-    const emailNormalized = sessionEmail.toLowerCase()
-
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
-        email: emailNormalized,
+        OR: [
+          ...(sessionUserId ? [{ id: sessionUserId }] : []),
+          ...(sessionEmail ? [{ email: sessionEmail }] : []),
+        ],
       },
       select: {
         id: true,
@@ -86,11 +96,12 @@ export async function POST(req: Request) {
 
     if (!user) {
       return jsonError("USER_NOT_FOUND", 404, {
-        email: emailNormalized,
+        sessionUserId,
+        sessionEmail,
       })
     }
 
-    const dbPlan = await prisma.plan.findFirst({
+    const dbPlan = await prisma.plan.findUnique({
       where: {
         slug: plan,
       },
@@ -131,7 +142,7 @@ export async function POST(req: Request) {
 
     if (!stripeCustomerId) {
       const customer = await stripe.customers.create({
-        email: user.email ?? emailNormalized,
+        email: user.email ?? sessionEmail ?? undefined,
         name: user.name ?? undefined,
         metadata: {
           userId: String(user.id),
@@ -168,13 +179,13 @@ export async function POST(req: Request) {
       metadata: {
         userId: String(user.id),
         planId: String(dbPlan.id),
-        planSlug: String(plan),
+        planSlug: String(dbPlan.slug),
       },
       subscription_data: {
         metadata: {
           userId: String(user.id),
           planId: String(dbPlan.id),
-          planSlug: String(plan),
+          planSlug: String(dbPlan.slug),
         },
       },
     })
@@ -207,7 +218,7 @@ export async function POST(req: Request) {
       },
       {
         status: 500,
-      }
+      },
     )
   }
 }
